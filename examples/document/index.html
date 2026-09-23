@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hatex · full document</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<link rel="stylesheet" href="../../dist/hatex.css">
+<script src="../../dist/hatex.js"></script>
+<style>
+  body { max-width: 48rem; margin: 3rem auto; padding: 0 1.25rem; font-family: system-ui, sans-serif; background: #fdfaf6; }
+  html[data-theme="dark"] body { background: #191817; }
+  button { float: right; }
+</style>
+</head>
+<body>
+<button id="theme">Dark</button>
+<article id="out">Loading example.tex…</article>
+<script>
+  // A .tex file fetched and rendered on the client. Images resolve relative to
+  // this page (assets/…); TikZ pictures load from tikz/<hash>.svg.
+  fetch('example.tex')
+    .then(r => r.text())
+    .then(tex => {
+      document.title = (/^%\s*title:\s*(.+)$/m.exec(tex) || [, document.title])[1];
+      HaTeX.render('#out', tex, { tikzSvgBase: 'tikz/' });
+    });
+  document.getElementById('theme').onclick = (e) => {
+    const dark = document.documentElement.dataset.theme !== 'dark';
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    e.target.textContent = dark ? 'Light' : 'Dark';
+  };
+</script>
+</body>
+</html>

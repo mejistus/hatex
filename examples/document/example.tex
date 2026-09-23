@@ -1,0 +1,340 @@
+% ---
+% title: LaTeX 写作示例
+% date: 2026-09-20
+% tag: Example
+% excerpt: 本站 LaTeX 模式的完整示例：章节与交叉引用、公式、复杂表格、插图与子图、TikZ 绘图、伪代码、引用与参考文献等日常写作场景，可直接复制作为模板。
+% ---
+\definecolor{oursbg}{HTML}{DAEEDE}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newtheorem{hyp}{假设}
+
+\begin{abstract}
+这篇文章本身就是一份模板：每一节演示一类日常写作场景。对照同目录下的 \texttt{example.tex} 即可看到对应的 LaTeX 源码，复制需要的片段即可使用。
+页面由 hatex 在浏览器中渲染：公式交给 KaTeX，代码交给 Prism，TikZ 图优先加载预渲染的 SVG，没有时由 TikZJax 现场编译。
+\end{abstract}
+
+\section{文字与段落}\label{sec:text}
+正文直接书写，空一行即为新段落。常用格式有\textbf{粗体}、\emph{强调}、\underline{下划线}、\texttt{等宽}、\sout{删除线}和\hl{高亮}，也可以用 \textcolor{teal}{彩色文字}。
+引号写作 ``双引号'' 与 `单引号'，破折号写作 ---，数字范围写作 1--10。
+脚注用 \verb|\footnote{...}|\footnote{脚注会自动编号并汇总到文末，点击编号即可跳转。}，
+链接用 \href{https://github.com/mejistus}{\texttt{\textbackslash href}}，裸网址用 \url{https://mejistus.github.io}。
+
+\subsection{列表}
+\begin{itemize}
+  \item 无序列表用 \texttt{itemize}；
+  \item 有序列表用 \texttt{enumerate}，可以嵌套：
+  \begin{enumerate}
+    \item 第一层是数字；
+    \item 第二层自动变为字母。
+  \end{enumerate}
+\end{itemize}
+\begin{description}
+  \item[FID] Fréchet Inception Distance，越低越好。
+  \item[IS] Inception Score，越高越好。
+\end{description}
+
+\section{公式}\label{sec:math}
+行内公式写在 \verb|$...$| 中，例如 $q(x_t \mid x_0) = \mathcal{N}(\sqrt{\bar\alpha_t}\,x_0, (1-\bar\alpha_t)I)$。
+带编号的公式用 \texttt{equation}，并用 \verb|\label| 与 \verb|\eqref| 引用，如式~\eqref{eq:loss}：
+\begin{equation}\label{eq:loss}
+  \mathcal{L}_{\text{simple}} = \E_{t, x_0, \epsilon}\left[\left\|\epsilon - \epsilon_\theta(x_t, t)\right\|^2\right], \quad \epsilon \sim \mathcal{N}(0, I).
+\end{equation}
+多行对齐用 \texttt{align}，不需要编号的行加 \verb|\nonumber|：
+\begin{align}
+  x_t &= \sqrt{\bar\alpha_t}\,x_0 + \sqrt{1-\bar\alpha_t}\,\epsilon \label{eq:forward} \\
+  \bar\alpha_t &= \prod_{s=1}^{t} (1 - \beta_s) \nonumber
+\end{align}
+由式~\eqref{eq:forward} 可知，当 $t \to T$ 时 $x_t$ 趋于标准高斯分布。\verb|\newcommand| 定义的宏（如 \verb|\E|、\verb|\R|）在公式中同样可用：$x \in \R^d$。
+
+\begin{hyp}[平稳性]\label{hyp:stationary}
+前向过程加入的噪声是宽平稳的。
+\end{hyp}
+
+\begin{theorem}[收敛性]\label{thm:converge}
+在假设~\ref{hyp:stationary} 下，若 $\bar\alpha_T \to 0$，则 $q(x_T) \to \mathcal{N}(0, I)$。
+\end{theorem}
+
+\begin{proof}
+由式~\eqref{eq:forward}，$x_T$ 中 $x_0$ 的系数趋于零，而噪声项的方差趋于 $I$。
+\end{proof}
+
+\section{表格}\label{sec:table}
+\subsection{论文风格的复杂表格}
+表~\ref{tab:main} 演示了论文中最常见的结果表：
+\begin{itemize}
+  \item 第一列 \texttt{Method} 与最后一列 \texttt{Avg.} 用 \verb|\multirow{2}{*}{...}| 跨两行，上下左右居中；
+  \item 每个 benchmark 用 \verb|\multicolumn{3}{c}{...}| 横跨 Real / Fake / Avg. 三个子列，下方用 \verb|\cmidrule(lr){2-4}| 画出两端留白的细线；
+  \item 最好结果用 \verb|\textbf|，次好用 \verb|\underline|；
+  \item 方法名后用 \verb|\cite| 标注论文，引用编号带绿色线框，点击跳到参考文献；
+  \item 最后一行用 \verb|\rowcolor| 设置底纹，颜色由 \verb|\definecolor| 定义；
+  \item 表格很宽时用 \verb|\resizebox{\linewidth}{!}{...}| 包裹，网页上会自动缩放到正文宽度。
+\end{itemize}
+
+\begin{table}[htbp]
+  \centering
+  \caption{不同检测器在六个生成模型上的准确率（\%）。\textbf{粗体}为最好，\underline{下划线}为次好，数据仅作排版示意。}\label{tab:main}
+  \resizebox{\linewidth}{!}{%
+  \begin{tabular}{lccccccccccccccccccc}
+    \toprule
+    \multirow{2}{*}{Method} & \multicolumn{3}{c}{ProGAN} & \multicolumn{3}{c}{StyleGAN} & \multicolumn{3}{c}{BigGAN} & \multicolumn{3}{c}{SD v1.4} & \multicolumn{3}{c}{Midjourney} & \multicolumn{3}{c}{DALL·E 3} & \multirow{2}{*}{Avg.} \\
+    \cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10} \cmidrule(lr){11-13} \cmidrule(lr){14-16} \cmidrule(lr){17-19}
+     & Real & Fake & Avg. & Real & Fake & Avg. & Real & Fake & Avg. & Real & Fake & Avg. & Real & Fake & Avg. & Real & Fake & Avg. & \\
+    \midrule
+    CNNSpot~\cite{wang2020cnn} & 80.7 & 79.7 & 80.2 & 77.3 & 72.4 & 74.8 & 72.0 & 77.6 & 74.8 & 77.2 & 78.9 & 78.1 & 76.1 & 79.0 & 77.5 & 75.0 & 79.4 & 77.2 & 77.1 \\
+    UnivFD~\cite{ojha2023towards} & \underline{88.0} & 82.4 & 85.2 & 85.9 & 85.9 & 85.9 & 82.1 & 84.2 & 83.2 & 88.9 & 80.5 & 84.7 & \underline{88.8} & \underline{85.9} & \underline{87.3} & 89.3 & 81.4 & 85.3 & 85.3 \\
+    DIRE~\cite{wang2023dire} & 78.0 & 84.4 & 81.2 & 85.9 & 79.8 & 82.8 & 78.0 & 76.6 & 77.3 & 84.0 & 77.8 & 80.9 & 87.5 & 81.7 & 84.6 & 79.2 & 82.5 & 80.8 & 81.3 \\
+    NPR~\cite{tan2024rethinking} & \underline{88.0} & \textbf{93.1} & \textbf{90.5} & \underline{94.0} & \underline{87.7} & \underline{90.8} & \textbf{91.1} & \underline{90.1} & \underline{90.6} & \textbf{92.9} & \textbf{93.7} & \textbf{93.3} & 84.3 & 85.7 & 85.0 & \textbf{90.6} & \underline{85.0} & \underline{87.8} & \underline{89.7} \\
+    \rowcolor{oursbg}
+    Ours & \textbf{94.5} & \underline{86.2} & \underline{90.3} & \textbf{97.7} & \textbf{91.8} & \textbf{94.8} & \underline{89.3} & \textbf{93.6} & \textbf{91.4} & \underline{91.4} & \underline{87.6} & \underline{89.5} & \textbf{93.3} & \textbf{86.8} & \textbf{90.0} & \underline{90.3} & \textbf{96.3} & \textbf{93.3} & \textbf{91.5} \\
+    \bottomrule
+  \end{tabular}}
+\end{table}
+
+\subsection{带竖线的网格表}
+\begin{table}[htbp]
+  \centering
+  \caption{\texttt{\textbackslash hline} 与 \texttt{|} 列格式的传统网格表}\label{tab:grid}
+  \begin{tabular}{|l|c|r|}
+    \hline
+    左对齐 & 居中 & 右对齐 \\ \hline
+    \multicolumn{2}{|c|}{合并两列} & 3 \\ \hline
+    \cellcolor{yellow!30}单元格底纹 & b & 1024 \\ \hline
+  \end{tabular}
+\end{table}
+
+\section{插图}\label{sec:figure}
+\subsection{单张图片}
+图片路径相对于页面，本例放在 \texttt{assets/} 下；宽度用 \verb|width=0.7\linewidth| 这样的比例设置。
+如图~\ref{fig:psd} 所示，粉噪声的功率随频率按 $1/f$ 衰减。点击正文中的任何编号都会平滑跳转到对应的图、表、公式或文献，并短暂高亮。
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.5\linewidth]{assets/example-psd.png}
+  \caption{白噪声与粉噪声的功率谱密度（双对数坐标）。}\label{fig:psd}
+\end{figure}
+
+\subsection{子图}
+用 \texttt{subfigure} 环境把多张图并排放在同一个编号下，子图自动编为 (a)、(b)，引用时显示为 \ref{fig:white}、\ref{fig:pink}：
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.4\linewidth}
+    \includegraphics[width=0.4\linewidth]{assets/example-white-noise.png}
+    \caption{白噪声}\label{fig:white}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.4\linewidth}
+    \includegraphics[width=0.4\linewidth]{assets/example-pink-noise.png}
+    \caption{粉噪声}\label{fig:pink}
+  \end{subfigure}
+  \caption{两种噪声的二维样本。粉噪声（图~\ref{fig:pink}）比白噪声（图~\ref{fig:white}）具有更多低频结构。}\label{fig:noise}
+\end{figure}
+
+\subsection{并排的独立图}
+两个带 \verb|\caption| 的 \texttt{minipage} 会各自编号，如图~\ref{fig:left} 与图~\ref{fig:right}：
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.4\linewidth}
+    \centering
+    \includegraphics[width=0.4\linewidth]{assets/example-white-noise.png}
+    \caption{独立编号的左图}\label{fig:left}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.4\linewidth}
+    \centering
+    \includegraphics[width=0.4\linewidth]{assets/example-pink-noise.png}
+    \caption{独立编号的右图}\label{fig:right}
+  \end{minipage}
+\end{figure}
+
+\section{TikZ 绘图}\label{sec:tikz}
+\verb|tikzpicture| 由真正的 \TeX{} 在浏览器中编译（TikZJax）。编译好的图可以存为 \texttt{tikz/<hash>.svg}，之后读者打开时直接加载，无需等待编译。
+需要的 TikZ 库用 \verb|\usetikzlibrary| 声明；用到 \texttt{axis} 时自动加载 \texttt{pgfplots}，交换图用 \texttt{tikzcd} 环境。
+
+\usetikzlibrary{arrows.meta,positioning}
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[node distance=1.8cm, >={Stealth[length=2.2mm]}, state/.style={draw, circle, minimum size=1cm}]
+    \node[state] (x0) {$x_0$};
+    \node[state, right=of x0] (x1) {$x_1$};
+    \node[right=of x1] (dots) {$\cdots$};
+    \node[state, right=of dots] (xT) {$x_T$};
+    \draw[->] (x0) to[bend left=35] node[above] {$q(x_1 \mid x_0)$} (x1);
+    \draw[->] (x1) to[bend left=35] (dots);
+    \draw[->] (dots) to[bend left=35] (xT);
+    \draw[->, dashed, red!70!black] (xT) to[bend left=35] node[below] {$p_\theta(x_{t-1} \mid x_t)$} (dots);
+    \draw[->, dashed, red!70!black] (dots) to[bend left=35] (x1);
+    \draw[->, dashed, red!70!black] (x1) to[bend left=35] (x0);
+  \end{tikzpicture}
+  \caption{扩散模型的前向加噪（实线）与反向去噪（虚线）过程。}\label{fig:chain}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[width=8cm, height=5cm, xlabel={$t/T$}, ylabel={$\bar\alpha_t$}, domain=0:1, samples=60,
+                 legend pos=north east, legend style={draw=none, font=\small}, axis lines=left]
+      \addplot[blue!70!black, thick] {cos(deg(x*pi/2))^2};
+      \addlegendentry{cosine}
+      \addplot[red!70!black, thick, dashed] {exp(-5*x^2)};
+      \addlegendentry{linear $\beta$}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{两种噪声调度下 $\bar\alpha_t$ 随时间的变化（pgfplots）。}\label{fig:schedule}
+\end{figure}
+
+交换图同样支持，如图~\ref{fig:cd}：
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzcd}[column sep=large, row sep=large]
+    x_0 \arrow[r, "q"] \arrow[d, "E"'] & x_T \arrow[d, "E"] \\
+    z_0 \arrow[r, "q_z"'] & z_T
+  \end{tikzcd}
+  \caption{潜空间扩散的交换图（tikz-cd）。}\label{fig:cd}
+\end{figure}
+图~\ref{fig:chain}、图~\ref{fig:schedule} 与图~\ref{fig:cd} 的编号与普通图片一致，同样可以点击跳转。
+
+
+\usetikzlibrary {3d}
+\begin{tikzpicture}[z={(10:10mm)},x={(-45:5mm)}]
+  \def\wave{
+    \draw[fill,thick,fill opacity=.2]
+     (0,0) sin (1,1) cos (2,0) sin (3,-1) cos (4,0)
+           sin (5,1) cos (6,0) sin (7,-1) cos (8,0)
+           sin (9,1) cos (10,0)sin (11,-1)cos (12,0);
+    \foreach \shift in {0,4,8}
+    {
+      \begin{scope}[xshift=\shift cm,thin]
+        \draw (.5,0)  -- (0.5,0 |- 45:1cm);
+        \draw (1,0)   -- (1,1);
+        \draw (1.5,0) -- (1.5,0 |- 45:1cm);
+        \draw (2.5,0) -- (2.5,0 |- -45:1cm);
+        \draw (3,0)   -- (3,-1);
+        \draw (3.5,0) -- (3.5,0 |- -45:1cm);
+      \end{scope}
+    }
+  }
+  \begin{scope}[canvas is zy plane at x=0,fill=blue]
+    \wave
+    \node at (6,-1.5) [transform shape] {magnetic field};
+  \end{scope}
+  \begin{scope}[canvas is zx plane at y=0,fill=red]
+    \draw[help lines] (0,-2) grid (12,2);
+    \wave
+    \node at (6,1.5) [rotate=180,xscale=-1,transform shape] {electric field};
+  \end{scope}
+\end{tikzpicture}
+
+
+\subsection{神经网络架构图}
+检测器这类结构图不必外挂图片：hatex 内置了一组 \texttt{nn} 样式（\texttt{nnconv}、\texttt{nnpool}、\texttt{nnattn}、\texttt{nnout}、\texttt{nndata}、\texttt{nnflow}、\texttt{nnskip} 等），
+只要图中用到其中任意一个，它们的定义就会自动补进这张图的导言区。
+图~\ref{fig:yolo26} 画的是 YOLO26 的整体组织：主干逐级下采样得到 P3/P4/P5，颈部先自顶向下、再自底向上融合（PAN-FPN），三个尺度各接一个检测头。
+虚线框标出的是 YOLO26 相对前代的改动——检测头去掉了 DFL、直接回归边框，推理端到端因而不再需要 NMS，训练侧则换用 ProgLoss、STAL 与 MuSGD。
+图中的方块是示意性的分组，不逐一对应实现中的模块名。
+\emph{提示}：图内文字请用 ASCII——TikZJax 由 plain \TeX{} 编译，没有中文字体，写中文会被 \verb|HaTeX.lint| 报出警告。
+
+\usetikzlibrary{arrows.meta,positioning}
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[nn]
+    % ── backbone: stride 8 / 16 / 32 ──
+    \node[nndata] (in) at (0,-2.0) {Image\\640 x 640};
+    \node[nnconv, minimum width=22mm] (b3) at (0,0)   {Backbone P3\\80 x 80};
+    \node[nnconv, minimum width=22mm] (b4) at (0,2.0) {Backbone P4\\40 x 40};
+    \node[nnconv, minimum width=22mm] (b5) at (0,4.0) {Backbone P5\\20 x 20};
+    \node[nnpool, minimum width=22mm] (sppf) at (0,5.9) {SPPF};
+    \draw[nnflow] (in) -- (b3);
+    \draw[nnflow] (b3) -- (b4);
+    \draw[nnflow] (b4) -- (b5);
+    \draw[nnflow] (b5) -- (sppf);
+
+    % ── neck, top-down ──
+    \node[nnconv, minimum width=20mm] (t5) at (3.6,4.0) {Fuse};
+    \node[nnconv, minimum width=20mm] (t4) at (3.6,2.0) {Up x2\\Fuse};
+    \node[nnconv, minimum width=20mm] (t3) at (3.6,0)   {Up x2\\Fuse};
+    \draw[nnflow] (sppf) to[out=0, in=90] (t5);
+    \draw[nnflow] (t5) -- (t4);
+    \draw[nnflow] (t4) -- (t3);
+    \draw[nnflow] (b4) -- (t4);
+    \draw[nnflow] (b3) -- (t3);
+
+    % ── neck, bottom-up ──
+    \node[nnconv, minimum width=20mm] (u3) at (7.0,0)   {Fuse};
+    \node[nnconv, minimum width=20mm] (u4) at (7.0,2.0) {Down /2\\Fuse};
+    \node[nnconv, minimum width=20mm] (u5) at (7.0,4.0) {Down /2\\Fuse};
+    \draw[nnflow] (t3) -- (u3);
+    \draw[nnflow] (u3) -- (u4);
+    \draw[nnflow] (u4) -- (u5);
+    \draw[nnflow] (t4) -- (u4);
+    \draw[nnflow] (t5) -- (u5);
+
+    % ── heads ──
+    \node[nnout, minimum width=20mm] (h3) at (10.4,0)   {Head /8};
+    \node[nnout, minimum width=20mm] (h4) at (10.4,2.0) {Head /16};
+    \node[nnout, minimum width=20mm] (h5) at (10.4,4.0) {Head /32};
+    \draw[nnflow] (u3) -- (h3);
+    \draw[nnflow] (u4) -- (h4);
+    \draw[nnflow] (u5) -- (h5);
+
+    \node[nndata, minimum width=26mm] (out) at (13.8,2.0) {Boxes + classes\\end-to-end};
+    \draw[nnflow] (h3) to[out=0, in=180] (out);
+    \draw[nnflow] (h4) -- (out);
+    \draw[nnflow] (h5) to[out=0, in=180] (out);
+
+    % ── what YOLO26 changes ──
+    \node[nnlabel, anchor=west, text width=30mm] at (11.5,-1.3) {no DFL:\\direct box regression};
+    \node[nnlabel, anchor=west, text width=26mm] at (11.5,5.1) {no NMS at inference};
+    \node[nngroup, minimum width=34mm, minimum height=10mm, label={[nngrouplabel]above:training only}] (tr) at (5.3,-2.2) {ProgLoss + STAL + MuSGD};
+    \draw[nnback] (tr) to[out=0, in=270] (h3);
+  \end{tikzpicture}
+  \caption{YOLO26 的结构示意：主干（P3/P4/P5）、PAN-FPN 颈部与三尺度检测头；虚线部分为 v26 相对前代的改动。}\label{fig:yolo26}
+\end{figure}
+
+\section{算法}\label{sec:alg}
+伪代码用 \texttt{algorithm} 浮动环境加 \texttt{algorithmic} 正文，写法与 \texttt{algpseudocode} 一致：
+\verb|\Require|、\verb|\Ensure|、\verb|\State|、\verb|\If{...}|、\verb|\For{...}|、\verb|\While{...}|、
+\verb|\Repeat ... \Until{...}|、\verb|\Function{...}{...}|、\verb|\Return|、\verb|\Comment{...}| 等；
+\verb|\begin{algorithmic}[1]| 的可选参数表示逐行编号。算法与图表共用一套编号和引用，如算法~\ref{alg:ddpm}。
+
+\begin{algorithm}[H]
+  \caption{DDPM 训练（简化）}\label{alg:ddpm}
+  \begin{algorithmic}[1]
+    \Require 数据分布 $q(x_0)$，噪声调度 $\{\beta_t\}_{t=1}^{T}$
+    \Ensure 去噪网络参数 $\theta$
+    \Repeat
+      \State $x_0 \sim q(x_0)$，$\epsilon \sim \mathcal{N}(0, I)$
+      \State $t \sim \mathrm{Uniform}(\{1, \dots, T\})$ \Comment{均匀采样时间步}
+      \State $x_t \gets \sqrt{\bar\alpha_t}\,x_0 + \sqrt{1-\bar\alpha_t}\,\epsilon$
+      \If{$t > T/2$}
+        \State 使用较大的学习率
+      \Else
+        \State 使用较小的学习率
+      \EndIf
+      \State $\theta \gets \theta - \eta \nabla_\theta \|\epsilon - \epsilon_\theta(x_t, t)\|^2$
+    \Until{收敛}
+    \State \Return $\theta$
+  \end{algorithmic}
+\end{algorithm}
+
+\section{代码}\label{sec:code}
+\begin{lstlisting}[language=python]
+def q_sample(x0, t, noise):
+    # 前向加噪，对应式 (2)
+    return sqrt_ab[t] * x0 + sqrt_1m_ab[t] * noise
+\end{lstlisting}
+
+\section{引用}\label{sec:cite}
+单篇引用写作 \verb|\cite{key}|~\cite{wang2020cnn}，多篇写作 \verb|\cite{a,b}|~\cite{ojha2023towards,tan2024rethinking}。
+文献列表写在 \texttt{thebibliography} 环境中，编号按 \verb|\bibitem| 出现的顺序生成。
+交叉引用同样适用于章节、定理和子图：表格在第~\ref{sec:table} 节，插图在第~\ref{sec:figure} 节；\verb|\autoref| 会自动带上类型名，例如 \autoref{thm:converge} 与 \autoref{fig:pink}。
+
+\begin{quote}
+用 \LaTeX{} 写博客，表格终于不再难看。
+\end{quote}
+
+\begin{thebibliography}{9}
+  \bibitem{wang2020cnn} S.-Y. Wang, O. Wang, R. Zhang, A. Owens, A. A. Efros. CNN-generated images are surprisingly easy to spot\ldots\ for now. In \emph{CVPR}, 2020.
+  \bibitem{ojha2023towards} U. Ojha, Y. Li, Y. J. Lee. Towards universal fake image detectors that generalize across generative models. In \emph{CVPR}, 2023.
+  \bibitem{wang2023dire} Z. Wang, J. Bao, W. Zhou, W. Wang, H. Hu, H. Chen, H. Li. DIRE for diffusion-generated image detection. In \emph{ICCV}, 2023.
+  \bibitem{tan2024rethinking} C. Tan, Y. Zhao, S. Wei, G. Gu, P. Liu, Y. Wei. Rethinking the up-sampling operations in CNN-based generative network for generalizable deepfake detection. In \emph{CVPR}, 2024.
+\end{thebibliography}

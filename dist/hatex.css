@@ -1,0 +1,580 @@
+/*! hatex v1.0.0 — LaTeX to HTML in the browser. Built from src/ by scripts/build.mjs. */
+/* hatex — styles for the HTML that parseLatex() produces.
+ *
+ * Everything is scoped to an element with class "hatex" and coloured through
+ * the --hx-* variables below, so a page can restyle it without touching the
+ * rules. Dark mode: put data-theme="dark" on the .hatex element or any
+ * ancestor, or data-theme="auto" to follow the system setting.
+ *
+ * KaTeX's own stylesheet (katex.min.css) is still needed for the maths. Do not
+ * load a Prism theme: code tokens are coloured here from the same palette.
+ */
+
+/* ── Palette ── */
+.hatex {
+  --hx-ink: #2d2d2d;          /* headings, table text, rules */
+  --hx-muted: #8a8278;        /* body paragraphs, captions */
+  --hx-accent: #c47c5a;       /* links, section numbers, inline code */
+  --hx-accent-2: #8aaa8c;     /* link hover */
+  --hx-code-bg: #f5f0ea;      /* code blocks and inline code */
+  --hx-border: #e8e0d6;
+  --hx-surface: #ffffff;      /* copy button */
+  --hx-paper: #fdfaf6;        /* behind TikZ drawings, which are ink on paper */
+  --hx-danger: #b3261e;       /* TikZ errors */
+  --hx-cite: #3aa35b;         /* the frame around a citation number */
+  --hx-flash: rgba(58, 163, 91, 0.22); /* a clicked \ref's target lights up */
+  --hx-tok-comment: #a59c90;
+  --hx-tok-command: #b0603c;
+  --hx-tok-env: #4f7f57;
+  --hx-tok-math: #3b6591;
+  --hx-tok-regex: #6a4c93;
+  --hx-tok-punct: #9c8f80;
+  --hx-tok-verbatim: #6b645b;
+  --hx-font-heading: "Playfair Display", Georgia, serif;
+  --hx-font-sans: "Inter", system-ui, sans-serif;
+  --hx-font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  /* Set only by the dark palette. */
+  --hx-color-keep: 100%;      /* how much of an author's \textcolor survives */
+}
+
+/* Dark: author colours are lifted towards white, text on author-chosen light
+   backgrounds turns dark, and TikZ keeps a light sheet to draw on. */
+.hatex[data-theme="dark"],
+[data-theme="dark"] .hatex {
+  --hx-ink: #ece7e0;
+  --hx-muted: #a49c92;
+  --hx-accent: #d08a63;
+  --hx-accent-2: #8fae91;
+  --hx-code-bg: #23211f;
+  --hx-border: #38342f;
+  --hx-surface: #222020;
+  --hx-paper: #f4efe8;
+  --hx-danger: #e4796f;
+  --hx-tok-comment: #7c756c;
+  --hx-tok-command: #dd9a72;
+  --hx-tok-env: #8fbf95;
+  --hx-tok-math: #85b0dc;
+  --hx-tok-regex: #b49ada;
+  --hx-tok-punct: #8a8279;
+  --hx-tok-verbatim: #b9b0a5;
+  --hx-color-keep: 62%;
+  --hx-on-highlight: #1d1b19;
+  --hx-mark-bg: #e8d98a;
+  --hx-tikz-sheet: var(--hx-paper);
+  --hx-tikz-sheet-pad: 0.6rem 0.8rem;
+}
+@media (prefers-color-scheme: dark) {
+  .hatex[data-theme="auto"],
+  [data-theme="auto"] .hatex {
+    --hx-ink: #ece7e0;
+    --hx-muted: #a49c92;
+    --hx-accent: #d08a63;
+    --hx-accent-2: #8fae91;
+    --hx-code-bg: #23211f;
+    --hx-border: #38342f;
+    --hx-surface: #222020;
+    --hx-paper: #f4efe8;
+    --hx-danger: #e4796f;
+    --hx-tok-comment: #7c756c;
+    --hx-tok-command: #dd9a72;
+    --hx-tok-env: #8fbf95;
+    --hx-tok-math: #85b0dc;
+    --hx-tok-regex: #b49ada;
+    --hx-tok-punct: #8a8279;
+    --hx-tok-verbatim: #b9b0a5;
+    --hx-color-keep: 62%;
+    --hx-on-highlight: #1d1b19;
+    --hx-mark-bg: #e8d98a;
+    --hx-tikz-sheet: var(--hx-paper);
+    --hx-tikz-sheet-pad: 0.6rem 0.8rem;
+  }
+}
+
+/* ── Text ── */
+.hatex {
+  font-size: 0.95rem;
+  line-height: 1.9;
+  color: var(--hx-ink);
+  counter-reset: katexEqnNo mmlEqnNo;
+}
+.hatex h1,
+.hatex h2,
+.hatex h3,
+.hatex h4 {
+  font-family: var(--hx-font-heading);
+  color: var(--hx-ink);
+}
+.hatex h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+}
+.hatex h2 {
+  font-size: 1.4rem;
+  margin: 2rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--hx-border);
+}
+.hatex h3 {
+  font-size: 1.15rem;
+  margin: 1.5rem 0 0.8rem;
+}
+.hatex h4 {
+  font-size: 1rem;
+  margin: 1.2rem 0 0.6rem;
+}
+.hatex p {
+  margin: 0 0 1.2rem;
+  color: var(--hx-muted);
+}
+.hatex a {
+  color: var(--hx-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.hatex a:hover {
+  color: var(--hx-accent-2);
+}
+.hatex ul,
+.hatex ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+  color: var(--hx-muted);
+}
+.hatex li {
+  margin-bottom: 0.5rem;
+}
+.hatex blockquote {
+  border-left: 3px solid var(--hx-accent);
+  padding-left: 1.2rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: var(--hx-muted);
+}
+.hatex hr {
+  border: none;
+  border-top: 1px solid var(--hx-border);
+  margin: 2rem 0;
+}
+/* A colour the author chose for text on paper is often too dark to read on a
+   dark page; there it is mixed towards white. Light pages keep it as written. */
+.hatex .latex-color {
+  color: color-mix(in srgb, var(--author-color, currentColor) var(--hx-color-keep), #fff);
+}
+/* Author-chosen backgrounds (\rowcolor, \cellcolor, \colorbox, \hl) are light,
+   so their text turns dark on a dark page. */
+.hatex .latex-table [style*="background"],
+.hatex .latex-table tr[style*="background"] > *,
+.hatex .latex-colorbox,
+.hatex mark {
+  color: var(--hx-on-highlight, currentColor);
+}
+.hatex mark {
+  background: var(--hx-mark-bg, Mark);
+}
+.hatex .latex-secnum {
+  margin-right: 0.6em;
+  color: var(--hx-accent);
+  font-variant-numeric: tabular-nums;
+}
+.hatex .latex-center { text-align: center; }
+.hatex .latex-right { text-align: right; }
+.hatex .latex-paragraph { color: var(--hx-ink); }
+.hatex .latex-sc { font-variant: small-caps; }
+.hatex .latex-sf { font-family: var(--hx-font-sans); }
+.hatex .latex-fbox {
+  border: 1px solid currentColor;
+  padding: 0 0.25em;
+}
+.hatex .latex-logo {
+  font-family: "Times New Roman", Times, serif;
+  white-space: nowrap;
+}
+.hatex .latex-logo .a {
+  text-transform: uppercase;
+  font-size: 0.75em;
+  vertical-align: 0.25em;
+  margin: 0 -0.15em 0 -0.36em;
+}
+.hatex .latex-logo .e {
+  text-transform: uppercase;
+  vertical-align: -0.5ex;
+  margin: 0 -0.125em 0 -0.1667em;
+}
+.hatex .latex-abstract {
+  margin: 0 auto 2rem;
+  max-width: 38rem;
+  font-size: 0.9rem;
+}
+.hatex .latex-abstract-title {
+  text-align: center;
+  font-weight: 600;
+  color: var(--hx-ink) !important;
+  margin-bottom: 0.4rem !important;
+}
+.hatex .latex-list dt {
+  font-weight: 600;
+  color: var(--hx-ink);
+}
+.hatex .latex-list dd {
+  margin: 0 0 0.6rem 1.5rem;
+}
+.hatex .latex-custom-label { list-style: none; }
+.hatex .latex-item-label {
+  margin-left: -1.2rem;
+  margin-right: 0.4rem;
+}
+
+/* ── Code ── */
+.hatex code {
+  font-family: var(--hx-font-mono);
+  font-size: 0.85em;
+  background: var(--hx-code-bg);
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.3rem;
+  color: var(--hx-accent);
+}
+.hatex pre {
+  position: relative;
+  background: var(--hx-code-bg);
+  border: 1px solid var(--hx-border);
+  border-radius: 0.5rem;
+  padding: 1.2rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+.hatex pre code {
+  background: transparent;
+  padding: 0;
+  color: var(--hx-ink);
+}
+.hatex .token.comment, .hatex .token.prolog,
+.hatex .token.doctype, .hatex .token.cdata { color: var(--hx-tok-comment); }
+.hatex .token.punctuation { color: var(--hx-tok-punct); }
+.hatex .token.property, .hatex .token.tag, .hatex .token.boolean,
+.hatex .token.number, .hatex .token.constant, .hatex .token.symbol,
+.hatex .token.deleted { color: var(--hx-tok-math); }
+.hatex .token.selector, .hatex .token.attr-name, .hatex .token.string,
+.hatex .token.char, .hatex .token.builtin,
+.hatex .token.inserted { color: var(--hx-tok-verbatim); }
+.hatex .token.operator, .hatex .token.entity,
+.hatex .token.url, .hatex .token.variable { color: var(--hx-ink); }
+.hatex .token.atrule, .hatex .token.attr-value,
+.hatex .token.keyword { color: var(--hx-tok-env); }
+.hatex .token.function, .hatex .token.class-name { color: var(--hx-tok-command); }
+.hatex .token.regex, .hatex .token.important { color: var(--hx-tok-regex); }
+/* Added by HaTeX.enhance() to every code block. */
+.hatex .hatex-copy {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--hx-border);
+  border-radius: 0.3rem;
+  background: var(--hx-surface);
+  color: var(--hx-muted);
+  font: 500 0.7rem var(--hx-font-sans);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.hatex pre:hover .hatex-copy,
+.hatex .hatex-copy:focus {
+  opacity: 1;
+}
+.hatex .hatex-copy:hover {
+  color: var(--hx-accent);
+  border-color: var(--hx-accent);
+}
+
+/* ── Maths ── */
+.hatex .katex {
+  font-size: 1.05em;
+}
+.hatex .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+}
+/* \label in display maths leaves an empty marker in front of the equation. */
+.hatex .latex-anchor {
+  display: block;
+  height: 0;
+}
+/* The target of a clicked \ref / \cite / footnote briefly lights up. */
+@keyframes hatex-flash {
+  from { background-color: var(--hx-flash); }
+  to { background-color: transparent; }
+}
+.hatex .latex-flash {
+  animation: hatex-flash 1.6s ease-out;
+  border-radius: 0.3rem;
+}
+
+/* ── Theorems, proofs, algorithms ── */
+.hatex .latex-theorem { margin: 1.4rem 0; }
+.hatex .latex-theorem.latex-thm p {
+  font-style: italic;
+  color: var(--hx-ink);
+}
+.hatex .latex-thm-head {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--hx-ink);
+}
+.hatex .latex-proof .latex-thm-head {
+  font-weight: normal;
+  font-style: italic;
+}
+.hatex .latex-thm-note { font-weight: normal; }
+.hatex .latex-qed {
+  float: right;
+  margin-left: 1rem;
+  color: var(--hx-ink);
+}
+.hatex .latex-alg {
+  margin: 0.6rem 0;
+  padding: 0.6rem 0.2rem;
+  border-top: 1.5px solid var(--hx-ink);
+  border-bottom: 1.5px solid var(--hx-ink);
+  font-size: 0.88rem;
+  line-height: 1.75;
+  text-align: left;
+}
+.hatex .latex-alg-line {
+  display: flex;
+  gap: 0.6rem;
+  color: var(--hx-ink);
+}
+.hatex .latex-alg-num {
+  flex-shrink: 0;
+  width: 1.6em;
+  text-align: right;
+  color: var(--hx-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85em;
+}
+.hatex .latex-alg-kw { font-weight: 600; }
+.hatex .latex-alg-comment {
+  color: var(--hx-muted);
+  font-style: italic;
+}
+
+/* ── Floats: figures, tables, algorithms ── */
+.hatex .latex-float {
+  margin: 2rem 0;
+  text-align: center;
+}
+.hatex .latex-float figcaption {
+  margin: 0.7rem auto;
+  max-width: 42rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--hx-muted);
+}
+.hatex .latex-float-algorithm figcaption {
+  margin: 0 auto 0.4rem;
+  text-align: left;
+}
+.hatex .latex-cap-label {
+  font-weight: 600;
+  color: var(--hx-ink);
+}
+.hatex .latex-subfloat {
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 0.75% 0.5rem;
+  text-align: center;
+}
+.hatex .latex-subfloat figcaption { margin-top: 0.3rem; }
+.hatex .latex-subfloat .latex-img { width: 100%; }
+.hatex .latex-minipage {
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 0.75%;
+}
+.hatex .latex-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.4rem;
+}
+
+/* ── Tables ── */
+.hatex table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+}
+.hatex th,
+.hatex td {
+  border: 1px solid var(--hx-border);
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+.hatex th {
+  background: var(--hx-code-bg);
+  font-weight: 500;
+  color: var(--hx-ink);
+}
+.hatex td { color: var(--hx-muted); }
+.hatex .latex-table-wrap {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+.hatex .latex-float .latex-table-wrap { margin: 0.5rem 0; }
+/* \resizebox{\linewidth}{!}{...}: shrunk to the column width by the runtime. */
+.hatex .latex-fit { overflow-x: auto; }
+.hatex .latex-fit .latex-table-wrap { overflow: visible; }
+/* Booktabs-style tables: no grid, only the rules the source asks for. */
+.hatex table.latex-table {
+  width: auto;
+  margin: 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+.hatex .latex-table th,
+.hatex .latex-table td {
+  border: none;
+  padding: 0.45rem 1rem;
+  text-align: left;
+  vertical-align: middle;
+  color: var(--hx-ink);
+  background: transparent;
+}
+.hatex .latex-table th { font-weight: 600; }
+.hatex .latex-table .a-center { text-align: center !important; }
+.hatex .latex-table .a-right { text-align: right !important; }
+.hatex .latex-table .vl { border-left: 1px solid var(--hx-ink) !important; }
+.hatex .latex-table .vr { border-right: 1px solid var(--hx-ink) !important; }
+.hatex .latex-table tr.rule-top > * { border-top: 1px solid var(--hx-ink) !important; }
+.hatex .latex-table tr.rule-top.rule-heavy > * { border-top-width: 1.5px !important; }
+.hatex .latex-table tr.rule-top.rule-double > * { border-top: 3px double var(--hx-ink) !important; }
+.hatex .latex-table tr.rule-bottom > * { border-bottom: 1px solid var(--hx-ink) !important; }
+.hatex .latex-table tr.rule-bottom.rule-heavy > * { border-bottom-width: 1.5px !important; }
+.hatex .latex-table tr.rule-bottom.rule-double > * { border-bottom: 3px double var(--hx-ink) !important; }
+/* \cline / \cmidrule: drawn as a background line so (l)/(r) trims leave gaps. */
+.hatex .latex-table .cline {
+  background-image: linear-gradient(var(--hx-ink), var(--hx-ink)) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 0.8px !important;
+  background-position: center top !important;
+}
+.hatex .latex-table .cline.cl-l { background-size: calc(100% - 0.5em) 0.8px !important; background-position: right top !important; }
+.hatex .latex-table .cline.cl-r { background-size: calc(100% - 0.5em) 0.8px !important; background-position: left top !important; }
+.hatex .latex-table .cline.cl-l.cl-r { background-size: calc(100% - 1em) 0.8px !important; background-position: center top !important; }
+
+/* ── Citations and footnotes ── */
+/* hyperref-style: a green frame around the cited number. */
+.hatex .latex-cite { white-space: nowrap; }
+.hatex .latex-cite-link {
+  display: inline-block;
+  padding: 0 0.2em;
+  line-height: 1.25;
+  border: 1px solid var(--hx-cite);
+  border-radius: 2px;
+  color: inherit !important;
+  text-decoration: none !important;
+}
+.hatex .latex-cite-link:hover {
+  background: color-mix(in srgb, var(--hx-cite) 12%, transparent);
+}
+.hatex .latex-bib ol {
+  list-style: none;
+  padding-left: 0;
+  font-size: 0.88rem;
+}
+.hatex .latex-bib li {
+  position: relative;
+  padding-left: 2.4rem;
+}
+.hatex .latex-bib-num {
+  position: absolute;
+  left: 0;
+  color: var(--hx-ink);
+}
+.hatex .latex-fn-ref a {
+  text-decoration: none;
+  font-size: 0.75em;
+}
+.hatex .latex-footnotes {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--hx-border);
+  font-size: 0.85rem;
+}
+.hatex .latex-fn-back { text-decoration: none !important; }
+
+/* ── TikZ ── */
+.hatex .latex-tikz {
+  margin: 1.2rem 0;
+  text-align: center;
+  overflow-x: auto;
+}
+.hatex .latex-tikz svg {
+  box-sizing: border-box; /* the dark sheet's padding stays inside max-width */
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+  background: var(--hx-tikz-sheet, transparent);
+  padding: var(--hx-tikz-sheet-pad, 0);
+  border-radius: 0.4rem;
+}
+.hatex .latex-tikz-status {
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--hx-muted);
+  letter-spacing: 0.02em;
+}
+.hatex .latex-tikz-error {
+  display: inline-block;
+  max-width: 100%;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--hx-danger);
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--hx-danger) 6%, transparent);
+  color: var(--hx-danger);
+  font-family: var(--hx-font-mono);
+  font-size: 0.78rem;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+/* ── Click-to-zoom figures (HaTeX.enhance) ── */
+.hatex .hatex-zoomable { cursor: zoom-in; }
+.hatex-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(20, 18, 16, 0.86);
+  opacity: 0;
+  transition: opacity 0.2s;
+  cursor: zoom-out;
+}
+.hatex-zoom.open { opacity: 1; }
+.hatex-zoom > * {
+  max-width: 96vw;
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  border-radius: 0.4rem;
+  background: var(--hx-paper, #fdfaf6);
+  padding: 0.5rem;
+}
+/* Drawings carry a fixed pt size, so zooming scales them to the screen. */
+.hatex-zoom > svg {
+  width: min(92vw, 1100px);
+  height: auto;
+}
+.hatex-zoom > img {
+  min-width: min(60vw, 700px);
+  object-fit: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hatex .latex-flash { animation: none; }
+  .hatex-zoom,
+  .hatex .hatex-copy { transition: none; }
+}

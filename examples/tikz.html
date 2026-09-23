@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hatex · TikZ</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="../dist/hatex.css">
+<script src="../dist/hatex.js"></script>
+<style>
+  body { max-width: 50rem; margin: 3rem auto; padding: 0 1.25rem; font-family: system-ui, sans-serif; }
+  .note { font-size: 0.85rem; color: #666; }
+</style>
+</head>
+<body>
+<p class="note">
+  Pictures load from <code>tikz-svg/&lt;hash&gt;.svg</code>.
+  Open <a href="?live">?live</a> to compile them in the browser instead (TikZJax, ~6&nbsp;MB, first time only);
+  then the links at the bottom give you the SVG files to save.
+</p>
+
+<script type="text/x-latex" id="source">
+\section{A small CNN, with the built-in nn styles}
+Any \verb|nn*| style in a picture pulls in their definitions; nothing else to declare.
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}[nn]
+    \node[nndata] (img) {Image\\32 x 32};
+    \node[nnconv, right=of img] (c1) {Conv 3x3\\32};
+    \node[nnpool, right=of c1] (p1) {Max pool};
+    \node[nnconv, right=of p1] (c2) {Conv 3x3\\64};
+    \node[nnfc, right=of c2] (fc) {FC};
+    \node[nnout, right=of fc] (y) {Softmax};
+    \draw[nnflow] (img) -- (c1);
+    \draw[nnflow] (c1) -- (p1);
+    \draw[nnflow] (p1) -- (c2);
+    \draw[nnflow] (c2) -- (fc);
+    \draw[nnflow] (fc) -- (y);
+    \draw[nnskip] (c1.north) to[out=30, in=150] node[nnlabel, above] {skip} (c2.north);
+  \end{tikzpicture}
+  \caption{Layers: \texttt{nndata}, \texttt{nnconv}, \texttt{nnpool}, \texttt{nnfc}, \texttt{nnout}; arrows: \texttt{nnflow}, \texttt{nnskip}.}\label{fig:cnn}
+\end{figure}
+
+\section{Plain TikZ}
+Libraries are declared as usual; labels must be ASCII (TikZJax runs plain \TeX{}, with no CJK fonts).
+\usetikzlibrary{arrows.meta,positioning}
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}[>={Stealth[length=2mm]}, every node/.style={draw, rounded corners, minimum width=18mm, minimum height=7mm}]
+    \node (enc) {Encoder};
+    \node[right=15mm of enc] (z) {$z$};
+    \node[right=15mm of z] (dec) {Decoder};
+    \draw[->] (enc) -- node[draw=none, above] {$q_\phi$} (z);
+    \draw[->] (z) -- node[draw=none, above] {$p_\theta$} (dec);
+  \end{tikzpicture}
+  \caption{A variational autoencoder.}\label{fig:vae}
+\end{figure}
+
+\section{pgfplots}
+An \verb|axis| environment loads pgfplots by itself.
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[width=8cm, height=5cm, domain=-3:3, samples=80, axis lines=left, xlabel={$x$}]
+      \addplot[thick, blue!70!black] {exp(-x^2/2)/sqrt(2*pi)};
+      \addplot[thick, red!70!black, dashed] {exp(-(x-1)^2/0.5)/sqrt(0.5*pi)};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Two Gaussians.}\label{fig:pdf}
+\end{figure}
+
+Figures~\ref{fig:cnn}, \ref{fig:vae} and~\ref{fig:pdf} are numbered like any other figure.
+</script>
+
+<article id="out"></article>
+<p class="note" id="files"></p>
+
+<script>
+  const live = new URLSearchParams(location.search).has('live');
+  const out = HaTeX.render('#out', document.getElementById('source').textContent, {
+    tikzSvgBase: live ? null : 'tikz-svg/',
+    tikzErrors: true,
+  });
+  // Each compiled picture, as the file to save under tikz-svg/.
+  out.addEventListener('hatex:tikz', () => {
+    const files = document.getElementById('files');
+    files.textContent = 'Save as: ';
+    HaTeX.tikzSvgs(out).forEach(({ file, svg }) => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+      a.download = file;
+      a.textContent = file + ' ';
+      files.appendChild(a);
+    });
+  });
+</script>
+</body>
+</html>

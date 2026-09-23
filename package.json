@@ -1,0 +1,36 @@
+{
+  "name": "hatex",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LaTeX articles to HTML in the browser: maths, tables, figures, TikZ, theorems, algorithms, citations.",
+  "main": "dist/hatex.js",
+  "module": "dist/hatex.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/hatex.mjs",
+      "require": "./dist/hatex.js"
+    },
+    "./hatex.css": "./dist/hatex.css"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/serve.mjs",
+    "sync": "node scripts/sync.mjs",
+    "prerender": "node examples/node/prerender.mjs"
+  },
+  "peerDependencies": {
+    "katex": ">=0.16"
+  },
+  "peerDependenciesMeta": {
+    "katex": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "katex": "0.16.9"
+  }
+}

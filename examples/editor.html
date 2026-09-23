@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hatex · live editor</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<link rel="stylesheet" href="../dist/hatex.css">
+<script src="../dist/hatex.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { display: flex; flex-direction: column; font: 14px/1.5 system-ui, sans-serif; background: #fff; color: #222; }
+  html[data-theme="dark"] body { background: #191817; color: #ece7e0; }
+  header { display: flex; gap: 0.75rem; align-items: center; padding: 0.5rem 1rem; border-bottom: 1px solid #8884; flex-wrap: wrap; }
+  header b { margin-right: auto; }
+  header input { width: 16rem; }
+  main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; min-height: 0; }
+  textarea { border: 0; border-right: 1px solid #8884; padding: 1rem; resize: none; outline: none;
+             font: 13px/1.6 ui-monospace, "JetBrains Mono", monospace; background: transparent; color: inherit; tab-size: 2; }
+  #out { overflow: auto; padding: 1rem 2rem 4rem; }
+  footer { max-height: 9rem; overflow: auto; border-top: 1px solid #8884; padding: 0.4rem 1rem; font-size: 12px; }
+  footer div { cursor: pointer; }
+  footer .error { color: #c0392b; }
+  footer .warning { color: #b7791f; }
+  footer a { margin-right: 0.8rem; }
+  @media (max-width: 700px) { main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <b>hatex live editor</b>
+  <input id="doi" placeholder="DOI or arXiv id → \bibitem" aria-label="DOI or arXiv id">
+  <button id="cite">Add reference</button>
+  <button id="theme">Dark</button>
+</header>
+<main>
+  <textarea id="src" spellcheck="false" aria-label="LaTeX source"></textarea>
+  <article id="out"></article>
+</main>
+<footer id="problems"></footer>
+
+<script type="text/x-latex" id="initial">
+\section{Denoising score matching}\label{sec:dsm}
+Perturb data with Gaussian noise, $\tilde x = x + \sigma\epsilon$, and train $s_\theta$ to predict the score:
+\begin{equation}\label{eq:dsm}
+  \mathcal{L}(\theta) = \mathbb{E}_{x,\epsilon}\left\|s_\theta(\tilde x) + \frac{\epsilon}{\sigma}\right\|^2 .
+\end{equation}
+Minimising \eqref{eq:dsm} gives $s_\theta(\tilde x) \approx \nabla_{\tilde x}\log q_\sigma(\tilde x)$ \cite{vincent2011}.
+
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}[nn]
+    \node[nndata] (x) {x};
+    \node[nnact, right=of x] (n) {+ noise};
+    \node[nnconv, right=of n] (s) {U-Net\\score};
+    \node[nnloss, right=of s] (l) {L2 loss};
+    \draw[nnflow] (x) -- (n);
+    \draw[nnflow] (n) -- (s);
+    \draw[nnflow] (s) -- (l);
+    \draw[nnskip] (n.south) to[out=-30, in=-150] node[nnlabel, below] {target -eps/sigma} (l.south);
+  \end{tikzpicture}
+  \caption{Training a score network (TikZ with the built-in \texttt{nn} styles).}\label{fig:train}
+\end{figure}
+
+\begin{lstlisting}[language=python]
+def dsm_loss(s, x, sigma):
+    eps = torch.randn_like(x)
+    return ((s(x + sigma * eps) + eps / sigma) ** 2).mean()
+\end{lstlisting}
+
+Try it: break a brace, \verb|\ref| a label that doesn't exist, or write a CJK label inside the picture — the problems list below updates.
+Double-click anything on the right to jump to its source line.
+
+\begin{thebibliography}{9}
+  \bibitem{vincent2011} P. Vincent. A connection between score matching and denoising autoencoders. \emph{Neural Computation}, 2011.
+\end{thebibliography}
+</script>
+
+<script>
+  const src = document.getElementById('src');
+  const out = document.getElementById('out');
+  const problems = document.getElementById('problems');
+  src.value = document.getElementById('initial').textContent.trim() + '\n';
+
+  // Re-render shortly after typing stops. Compiled TikZ is cached by the
+  // runtime, so unchanged pictures come back instantly.
+  let timer;
+  function update() {
+    const keep = out.scrollTop;
+    HaTeX.render(out, src.value, { tikzSvgBase: null, tikzErrors: true });
+    out.scrollTop = keep;
+    showProblems();
+  }
+  src.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(update, 300); });
+
+  function showProblems() {
+    const list = HaTeX.lint(src.value);
+    const svgs = HaTeX.tikzSvgs(out);
+    problems.innerHTML = list.length || svgs.length ? '' : 'No problems.';
+    list.forEach(p => {
+      const row = document.createElement('div');
+      row.className = p.severity;
+      row.textContent = `line ${p.line}: ${p.message}`;
+      row.onclick = () => goToLine(p.line);
+      problems.appendChild(row);
+    });
+    // Save these next to your page as tikz/<hash>.svg and readers skip compiling.
+    if (svgs.length) problems.append('Compiled TikZ: ');
+    svgs.forEach(({ file, svg }) => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+      a.download = file;
+      a.textContent = file;
+      problems.appendChild(a);
+    });
+  }
+  out.addEventListener('hatex:tikz', showProblems);
+  out.addEventListener('hatex:tikz-error', (e) => {
+    const row = document.createElement('div');
+    row.className = 'error';
+    row.textContent = `TikZ ${e.detail.hash}: ${e.detail.message}`;
+    problems.prepend(row);
+  });
+
+  // Blocks carry data-line (their first source line), and empty
+  // span.latex-line markers inside them mark where each later line starts:
+  // the last one before the click is its line.
+  out.addEventListener('dblclick', (e) => {
+    let line = null;
+    for (const m of out.querySelectorAll('[data-line]')) {
+      const before = m.contains(e.target) || (m.compareDocumentPosition(e.target) & Node.DOCUMENT_POSITION_FOLLOWING);
+      if (!before) break;
+      line = Number(m.dataset.line);
+    }
+    if (line) goToLine(line);
+  });
+  function goToLine(line) {
+    const lines = src.value.split('\n');
+    const start = lines.slice(0, line - 1).join('\n').length + (line > 1 ? 1 : 0);
+    src.focus({ preventScroll: true });
+    src.setSelectionRange(start, start + lines[line - 1].length);
+    const lh = parseFloat(getComputedStyle(src).lineHeight);
+    src.scrollTop = Math.max(0, (line - 1) * lh - src.clientHeight / 3);
+  }
+
+  // DOI / arXiv → \bibitem, added to the thebibliography block.
+  document.getElementById('cite').onclick = async () => {
+    const q = document.getElementById('doi').value.trim();
+    if (!HaTeX.Bib.isLookup(q)) { alert('Enter a DOI (10.xxxx/…) or an arXiv id (2006.11239)'); return; }
+    try {
+      const [entry] = await HaTeX.Bib.lookup(q);
+      const item = '  ' + HaTeX.Bib.format(entry) + '\n';
+      const end = src.value.lastIndexOf('\\end{thebibliography}');
+      src.value = end < 0
+        ? src.value + `\n\\begin{thebibliography}{9}\n${item}\\end{thebibliography}\n`
+        : src.value.slice(0, end) + item + src.value.slice(end);
+      update();
+    } catch (err) { alert(err.message); }
+  };
+
+  document.getElementById('theme').onclick = (e) => {
+    const dark = document.documentElement.dataset.theme !== 'dark';
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    e.target.textContent = dark ? 'Light' : 'Dark';
+  };
+
+  update();
+</script>
+</body>
+</html>
