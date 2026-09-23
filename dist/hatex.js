@@ -1,4 +1,4 @@
-/*! hatex v1.0.0 — LaTeX to HTML in the browser. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.1.0 — LaTeX to HTML in the browser. Built from src/ by scripts/build.mjs. */
 (function (window) {
 // ── src/tikz-nn.js ──
 // TikZ preamble for neural-network diagrams.
@@ -1921,6 +1921,7 @@
     tikzjaxBase: 'https://cdn.jsdelivr.net/npm/@drgrice1/tikzjax@1.0.0-beta24/dist/',
     copyButtons: true,
     zoom: true,
+    animate: true,        // false: links jump without scrolling or flashing, zoom has no fade
   };
   const hasDOM = typeof document !== 'undefined';
   const optionsOf = new WeakMap(); // root element → options it was enhanced with
@@ -1959,6 +1960,7 @@
   const optsFor = (el) => optionsOf.get(rootOf(el)) || DEFAULTS;
   const reducedMotion = () => hasDOM && window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const still = (el) => reducedMotion() || optsFor(el).animate === false;
   const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
   // ── \resizebox{\linewidth}{!}{...} ──
@@ -1991,7 +1993,11 @@
       const eq = target.nextElementSibling;
       if (eq && eq.classList.contains('katex-display')) target = eq;
     }
-    target.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
+    if (still(a)) {
+      target.scrollIntoView({ block: 'center' });
+      return;
+    }
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
     target.classList.remove('latex-flash');
     void target.offsetWidth;
     target.classList.add('latex-flash');
@@ -2029,6 +2035,8 @@
   function openZoom(el) {
     const overlay = document.createElement('div');
     overlay.className = 'hatex-zoom';
+    const instant = still(el);
+    if (instant) overlay.style.transition = 'none';
     // The overlay sits outside .hatex, so it borrows the page's paper colour.
     const paper = getComputedStyle(el).getPropertyValue('--hx-paper').trim();
     if (paper) overlay.style.setProperty('--hx-paper', paper);
@@ -2041,7 +2049,7 @@
     const close = () => {
       overlay.classList.remove('open');
       document.removeEventListener('keydown', onKey);
-      setTimeout(() => overlay.remove(), reducedMotion() ? 0 : 200);
+      setTimeout(() => overlay.remove(), instant ? 0 : 200);
     };
     const onKey = (e) => { if (e.key === 'Escape') close(); };
     overlay.addEventListener('click', close);
@@ -2247,7 +2255,7 @@
   }
 
   const HaTeX = {
-    version: '1.0.0',
+    version: '1.1.0',
     use, parse, render, enhance, lint, images, tikzSvgs,
     Bib: window.Bib,
   };

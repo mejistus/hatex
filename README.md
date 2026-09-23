@@ -2,7 +2,7 @@
 
 A LaTeX front end for web pages: it turns an article written in LaTeX into HTML in the browser, including maths, booktabs tables, figures, TikZ, theorems, algorithms, citations and cross-references.
 
-It is the renderer behind [mejistus.github.io](https://mejistus.github.io), taken out of the site (v9.0.0) as a standalone package. It has no build-time dependencies. [KaTeX](https://katex.org) typesets the maths, [Prism](https://prismjs.com) highlights code (optional), and [TikZJax](https://github.com/drgrice1/tikzjax) compiles TikZ pictures (loaded only when a picture needs it).
+It is the renderer behind [mejistus.github.io](https://mejistus.github.io), taken out of the site (v9.0.0) as a standalone package. For a live demo, see [mejistus.github.io/hatex-demo](https://mejistus.github.io/hatex-demo/), a paper typeset from a single `.tex` file. It has no build-time dependencies. [KaTeX](https://katex.org) typesets the maths, [Prism](https://prismjs.com) highlights code (optional), and [TikZJax](https://github.com/drgrice1/tikzjax) compiles TikZ pictures (loaded only when a picture needs it).
 
 ```
 .tex source ──parse()──▶ HTML string ──render()/enhance()──▶ live page
@@ -80,6 +80,7 @@ Everything is on `window.HaTeX`. In Node or a bundler it is the default export.
 | `tikzjaxBase` | jsDelivr | Where `tikzjax.js` and `fonts.css` come from, if you self-host them. |
 | `copyButtons` | `true` | Adds a "copy" button to code blocks. |
 | `zoom` | `true` | Opens an image or TikZ picture in an overlay when clicked. |
+| `animate` | `true` | `false` makes in-document links jump without scrolling or flashing, and the zoom overlay appear without a fade. The reader's reduced-motion setting does the same automatically. |
 
 **Events**, which bubble from the picture's box: `hatex:tikz` (`detail: { hash, svg }`) fires when a picture compiles, and `hatex:tikz-error` (`detail: { hash, message }`) fires when it fails.
 

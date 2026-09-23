@@ -294,6 +294,17 @@
   overflow-y: hidden;
   padding: 0.5rem 0;
 }
+/* On a narrow screen a numbered equation can be wider than the column. KaTeX
+   pins the number to the column's right edge, on top of the maths; here the
+   equation's box grows to hold both, and the whole row scrolls instead. */
+@media (max-width: 720px) {
+  .hatex .katex-display > .katex > .katex-html:has(> .tag) {
+    box-sizing: border-box;
+    width: max-content;
+    min-width: 100%;
+    padding-right: 3em;
+  }
+}
 /* \label in display maths leaves an empty marker in front of the equation. */
 .hatex .latex-anchor {
   display: block;
@@ -352,6 +363,10 @@
   font-variant-numeric: tabular-nums;
   font-size: 0.85em;
 }
+/* Numbers stay in their own column while nested lines indent. */
+.hatex .latex-alg.numbered .latex-alg-line { position: relative; }
+.hatex .latex-alg.numbered .latex-alg-num { position: absolute; left: 0; }
+.hatex .latex-alg.numbered .latex-alg-line > :last-child { margin-left: 2.2em; }
 .hatex .latex-alg-kw { font-weight: 600; }
 .hatex .latex-alg-comment {
   color: var(--hx-muted);
