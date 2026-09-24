@@ -1,4 +1,4 @@
-/*! hatex v1.2.0 — LaTeX to HTML in the browser. Public domain (Unlicense). Built from src/ by scripts/build.mjs. */
+/*! hatex v1.2.1 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 (function (window) {
 // ── src/tikz-nn.js ──
 // TikZ preamble for neural-network diagrams.
@@ -2744,7 +2744,7 @@
   }
 
   const HaTeX = {
-    version: '1.2.0',
+    version: '1.2.1',
     use, parse, render, enhance, lint, images, tikzSvgs,
     Bib: window.Bib,
   };

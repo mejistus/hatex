@@ -1,4 +1,4 @@
-/*! hatex v1.2.0 — LaTeX to HTML in the browser. Public domain (Unlicense). Built from src/ by scripts/build.mjs. */
+/*! hatex v1.2.1 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 /* hatex — styles for the HTML that parseLatex() produces.
  *
  * Everything is scoped to an element with class "hatex" and coloured through

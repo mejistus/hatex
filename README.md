@@ -172,7 +172,7 @@ Add `katex.min.css` and `hatex.css` to the page. Include `hatex.js` and call `Ha
 
 ## License
 
-hatex is released into the public domain under the [Unlicense](LICENSE): use, copy, modify and sell it for any purpose, with or without credit. It is original code, not a modification of another project. KaTeX and Prism (MIT) and TikZJax (GPL-3.0-or-later) are loaded from a CDN at runtime, and none of them is bundled into `dist/`, so their licenses apply to them alone. If you bundle any of them yourself, keep its license with it.
+hatex is released under the [MIT License](LICENSE): use, copy, modify and sell it for any purpose, as long as the copyright notice travels with it. It is original code, not a modification of another project. KaTeX and Prism (MIT) and TikZJax (GPL-3.0-or-later) are loaded from a CDN at runtime, and none of them is bundled into `dist/`, so their licenses apply to them alone. If you bundle any of them yourself, keep its license with it.
 
 ## Limitations
 

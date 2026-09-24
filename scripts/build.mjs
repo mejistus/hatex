@@ -12,7 +12,7 @@ const { version } = JSON.parse(read('package.json'));
 
 // Order matters only for the runtime, which picks up window.Bib when it loads.
 const MODULES = ['src/tikz-nn.js', 'src/latex.js', 'src/extend.js', 'src/lint.js', 'src/bib.js', 'src/runtime.js'];
-const banner = `/*! hatex v${version} — LaTeX to HTML in the browser. Public domain (Unlicense). Built from src/ by scripts/build.mjs. */\n`;
+const banner = `/*! hatex v${version} — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */\n`;
 const body = MODULES.map(p => `// ── ${p} ──\n${read(p).trim()}\n`).join('\n').replace('__VERSION__', version);
 
 // The modules write to `window`; outside a browser that is globalThis.
