@@ -1,4 +1,4 @@
-/*! hatex v1.1.1 — LaTeX to HTML in the browser. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.1.2 — LaTeX to HTML in the browser. Built from src/ by scripts/build.mjs. */
 /* hatex — styles for the HTML that parseLatex() produces.
  *
  * Everything is scoped to an element with class "hatex" and coloured through
@@ -14,8 +14,8 @@
 .hatex {
   --hx-ink: #2d2d2d;          /* headings, table text, rules */
   --hx-muted: #8a8278;        /* body paragraphs, captions */
-  --hx-accent: #c47c5a;       /* links, section numbers, inline code */
-  --hx-accent-2: #8aaa8c;     /* link hover */
+  --hx-accent: #2d2d2d;       /* links, section numbers, inline code */
+  --hx-accent-2: #8a8278;     /* link hover */
   --hx-code-bg: #f5f0ea;      /* code blocks and inline code */
   --hx-border: #e8e0d6;
   --hx-surface: #ffffff;      /* copy button */
@@ -24,7 +24,7 @@
   --hx-cite: #3aa35b;         /* the frame around a citation number */
   --hx-flash: rgba(58, 163, 91, 0.22); /* a clicked \ref's target lights up */
   --hx-tok-comment: #a59c90;
-  --hx-tok-command: #b0603c;
+  --hx-tok-command: #2d2d2d;
   --hx-tok-env: #4f7f57;
   --hx-tok-math: #3b6591;
   --hx-tok-regex: #6a4c93;
@@ -43,15 +43,15 @@
 [data-theme="dark"] .hatex {
   --hx-ink: #ece7e0;
   --hx-muted: #a49c92;
-  --hx-accent: #d08a63;
-  --hx-accent-2: #8fae91;
+  --hx-accent: #ece7e0;
+  --hx-accent-2: #a49c92;
   --hx-code-bg: #23211f;
   --hx-border: #38342f;
   --hx-surface: #222020;
   --hx-paper: #f4efe8;
   --hx-danger: #e4796f;
   --hx-tok-comment: #7c756c;
-  --hx-tok-command: #dd9a72;
+  --hx-tok-command: #ece7e0;
   --hx-tok-env: #8fbf95;
   --hx-tok-math: #85b0dc;
   --hx-tok-regex: #b49ada;
@@ -68,15 +68,15 @@
   [data-theme="auto"] .hatex {
     --hx-ink: #ece7e0;
     --hx-muted: #a49c92;
-    --hx-accent: #d08a63;
-    --hx-accent-2: #8fae91;
+    --hx-accent: #ece7e0;
+    --hx-accent-2: #a49c92;
     --hx-code-bg: #23211f;
     --hx-border: #38342f;
     --hx-surface: #222020;
     --hx-paper: #f4efe8;
     --hx-danger: #e4796f;
     --hx-tok-comment: #7c756c;
-    --hx-tok-command: #dd9a72;
+    --hx-tok-command: #ece7e0;
     --hx-tok-env: #8fbf95;
     --hx-tok-math: #85b0dc;
     --hx-tok-regex: #b49ada;
