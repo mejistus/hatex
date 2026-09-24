@@ -1,4 +1,4 @@
-/*! hatex v1.1.4 — LaTeX to HTML in the browser. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.1.5 — LaTeX to HTML in the browser. Built from src/ by scripts/build.mjs. */
 (function (window) {
 // ── src/tikz-nn.js ──
 // TikZ preamble for neural-network diagrams.
@@ -2082,6 +2082,32 @@
     document.head.appendChild(js);
   }
 
+  // Put a picture on screen. TikZJax's viewBox ends exactly at the outline of
+  // the drawing, cutting off the outer half of every line along its edges,
+  // and TeX's default 0.4pt line comes out at about 0.64 CSS px here: a
+  // horizontal edge that falls between two pixel rows all but disappears.
+  // So on screen the viewBox gets 1pt of room on each side and every line
+  // is drawn 0.2pt heavier (text is stroke="none" and stays as it is).
+  // Saved SVG files are left exactly as TeX made them.
+  function showTikzSvg(svg) {
+    if (!svg || svg.hasAttribute('data-hatex-shown')) return;
+    svg.setAttribute('data-hatex-shown', '');
+    const vb = svg.viewBox && svg.viewBox.baseVal;
+    if (vb && vb.width) {
+      const pad = 1;
+      svg.setAttribute('viewBox', [vb.x - pad, vb.y - pad, vb.width + 2 * pad, vb.height + 2 * pad].join(' '));
+      ['width', 'height'].forEach(dim => {
+        const v = svg.getAttribute(dim), n = parseFloat(v);
+        if (n) svg.setAttribute(dim, (n + 2 * pad) + v.replace(/^[\d.]+/, ''));
+      });
+    }
+    svg.querySelectorAll('[stroke-width]').forEach(el => {
+      const w = parseFloat(el.getAttribute('stroke-width'));
+      if (w >= 0) el.setAttribute('stroke-width', +(w + 0.2).toFixed(4));
+    });
+    scaleTikzSvg(svg);
+  }
+
   // TeX sizes are in pt; show pictures 1.2× so their 10pt labels match the body text.
   function scaleTikzSvg(svg) {
     const w = parseFloat(svg && svg.getAttribute('width'));
@@ -2117,7 +2143,7 @@
       if (svg) {
         loadTikzFonts(opts.tikzjaxBase);
         box.innerHTML = svg;
-        scaleTikzSvg(box.querySelector('svg'));
+        showTikzSvg(box.querySelector('svg'));
         box.dataset.tikzState = 'static';
         if (opts.zoom) makeZoomable(box);
         return;
@@ -2169,12 +2195,12 @@
       delete box.dataset.tikzError;
       const label = box.querySelector('.latex-tikz-status');
       if (label) label.remove();
-      scaleTikzSvg(e.target);
+      showTikzSvg(e.target);
       if (optsFor(box).zoom) makeZoomable(box);
     }
     boxes.filter(b => b !== box).forEach(b => {
       b.innerHTML = svg;
-      scaleTikzSvg(b.querySelector('svg'));
+      showTikzSvg(b.querySelector('svg'));
       b.dataset.tikzState = 'compiled';
       if (optsFor(b).zoom) makeZoomable(b);
     });
@@ -2219,6 +2245,7 @@
     const copy = svg.cloneNode(true);
     copy.removeAttribute('style');
     copy.removeAttribute('data-zoom');
+    copy.removeAttribute('data-hatex-shown');
     copy.classList.remove('hatex-zoomable');
     if (!copy.getAttribute('class')) copy.removeAttribute('class');
     return copy.outerHTML + '\n';
@@ -2261,7 +2288,7 @@
   }
 
   const HaTeX = {
-    version: '1.1.4',
+    version: '1.1.5',
     use, parse, render, enhance, lint, images, tikzSvgs,
     Bib: window.Bib,
   };
