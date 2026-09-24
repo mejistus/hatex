@@ -66,6 +66,7 @@ Everything is on `window.HaTeX`. In Node or a bundler it is the default export.
 | `HaTeX.render(target, source, options?)` | the element | Parses `source` into `target` (an element or a selector), adds class `hatex` and calls `enhance`. |
 | `HaTeX.parse(source)` | HTML string | Pure: no DOM, works in Node. Needs KaTeX for maths (see `use`). |
 | `HaTeX.enhance(root, options?)` | `root` | For HTML already on the page (for example output pre-rendered with `parse`). Fits `\resizebox`, loads TikZ, adds copy buttons and zoom. |
+| `HaTeX.layout(root)` | | Recomputes columns, table fitting and slide scaling. It runs on window resize by itself; call it when the element changes width some other way (a sidebar closing, a pane widening). |
 | `HaTeX.lint(source, { frontMatter? })` | `[{ line, severity, message }]` | Catches unclosed environments, unbalanced braces or `$`, unknown `\ref`/`\cite`, duplicate `\label`, tabular rows with the wrong cell count, and non-ASCII TikZ labels. |
 | `HaTeX.images(source)` | `[{ path, line }]` | Lists the local image paths the source uses, so you can check that they exist. |
 | `HaTeX.tikzSvgs(root)` | `[{ hash, file, svg }]` | Lists the pictures in `root` that were compiled live, as the files to save for pre-rendering. |
@@ -92,7 +93,9 @@ Everything is on `window.HaTeX`. In Node or a bundler it is the default export.
 
 `\documentclass[twocolumn]{article}` (or `\twocolumn`) sets the document in two balanced columns once its container is at least 50rem wide, and in one column below that. `\begin{multicols}{n} … \end{multicols}` does the same for a passage, from 32rem; `\columnbreak` moves to the next column.
 
-Web pages scroll, so hatex balances each stretch between full-width items instead of filling whole pages. Section headings and the abstract span both columns, and so do `figure*` and `table*`. After layout, and again on every resize, the runtime also spans anything wider than a column: an equation whose formula and number don't fit, a wide table, a code listing or a TikZ picture. A reader therefore only ever goes down one short column and up to the next.
+Web pages scroll, so hatex balances each stretch between full-width items instead of filling whole pages. Section headings and the abstract span both columns, and so do `figure*` and `table*`. So does anything wider than a column: an equation whose formula and number don't fit, a wide table, a code listing or a TikZ picture. A reader therefore only ever goes down one short column and up to the next.
+
+The runtime lays the columns out itself rather than with CSS multi-column, which misplaces KaTeX's maths in Safari. It measures the page, lifts wide items out of their paragraphs, and shares each stretch out over side-by-side columns. A column can break between blocks, between the paragraphs or items of a theorem, proof, quote or list, and before or after a displayed equation. This happens on load and on every window resize; if the element changes width some other way, call `HaTeX.layout(root)`.
 
 ## Slides
 

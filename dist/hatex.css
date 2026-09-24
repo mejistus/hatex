@@ -1,4 +1,4 @@
-/*! hatex v1.2.1 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.2.2 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 /* hatex — styles for the HTML that parseLatex() produces.
  *
  * Everything is scoped to an element with class "hatex" and coloured through
@@ -561,34 +561,19 @@
 }
 
 /* ── Columns: \documentclass[twocolumn] and multicols ──
-   Balanced columns once the text is wide enough, one column below that.
-   Section headings and the abstract span all columns, and so does anything
-   wider than a column (marked by the runtime) or written as figure* or table*,
-   so a reader only ever goes up and down within a short stretch. */
-.hatex .hatex-cols { container-type: inline-size; }
+   The runtime cuts the flow into chunks at full-width items (headings, the
+   abstract, figure* / table*, anything wider than a column) and shares each
+   chunk out over side-by-side columns; without the runtime it is one
+   column. Plain block layout, not CSS multi-column, which Safari gets
+   wrong with KaTeX. */
 .hatex .hatex-cols-flow > :first-child { margin-top: 0; }
-@container (min-width: 32rem) {
-  .hatex .hatex-multicols > .hatex-cols-flow { column-count: var(--hx-cols, 2); column-gap: 2rem; }
-}
-@container (min-width: 50rem) {
-  .hatex .hatex-twocolumn > .hatex-cols-flow { column-count: 2; column-gap: 2.4rem; }
-}
-.hatex .hatex-cols-flow > h2,
-.hatex .hatex-cols-flow > .latex-abstract,
-.hatex .hatex-cols-flow .hatex-cols,
-.hatex .hatex-cols-flow .hatex-span,
-.hatex .hatex-cols-flow .hatex-span-auto { column-span: all; }
-.hatex .hatex-cols-flow .latex-float,
-.hatex .hatex-cols-flow .katex-display,
-.hatex .hatex-cols-flow pre,
-.hatex .hatex-cols-flow .latex-alg,
-.hatex .hatex-cols-flow .hatex-block,
-.hatex .hatex-cols-flow h3,
-.hatex .hatex-cols-flow h4 { break-inside: avoid; }
-.hatex .hatex-cols-flow h3,
-.hatex .hatex-cols-flow h4 { break-after: avoid; }
-.hatex .hatex-cols-flow p { orphans: 2; widows: 2; }
-.hatex .hatex-colbreak { break-after: column; }
+.hatex .hatex-cols-chunk { display: flex; align-items: flex-start; }
+.hatex .hatex-col { flex: 1 1 0; min-width: 0; position: relative; }
+.hatex .hatex-col > :first-child { margin-top: 0; }
+.hatex .hatex-colbreak { display: none; }
+/* A paragraph, theorem or list split around a full-width item or a column break. */
+.hatex .hatex-split-before { margin-bottom: 0 !important; }
+.hatex .hatex-split-after { margin-top: 0 !important; }
 
 /* ── Blocks and columns (beamer's block / alertblock / exampleblock, columns) ── */
 .hatex .hatex-block {

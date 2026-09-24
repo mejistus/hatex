@@ -19,7 +19,7 @@ const body = MODULES.map(p => `// ── ${p} ──\n${read(p).trim()}\n`).join
 const host = `typeof window !== 'undefined' ? window : globalThis`;
 const script = `${banner}(function (window) {\n${body}}).call(this, ${host});\n`;
 const esm = `${banner}const HaTeX = (function (window) {\n${body}return window.HaTeX;\n}).call(undefined, ${host});\n` +
-  `export default HaTeX;\nexport const { use, parse, render, enhance, lint, images, tikzSvgs, Bib } = HaTeX;\n`;
+  `export default HaTeX;\nexport const { use, parse, render, enhance, layout, lint, images, tikzSvgs, Bib } = HaTeX;\n`;
 
 mkdirSync(join(root, 'dist'), { recursive: true });
 writeFileSync(join(root, 'dist/hatex.js'), script);
