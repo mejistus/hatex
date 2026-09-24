@@ -154,6 +154,7 @@
   // code in <script type="text/x-tikz">. A pre-rendered <hash>.svg is used
   // when there is one; otherwise TikZJax (real TeX in WebAssembly) compiles it.
   const tikzMissing = new Set(); // SVG URLs known not to exist
+  const tikzFetched = new Map(); // SVG URL → its text, so a re-render puts it back without a flash
   const tikzCompiled = new Map(); // hash → SVG compiled in this session, so a re-render doesn't compile again
   const loaded = { fonts: false, script: false };
 
@@ -187,7 +188,10 @@
     try {
       const resp = await fetch(url);
       const text = resp.ok ? await resp.text() : '';
-      if (text.trim().startsWith('<svg')) return text;
+      if (text.trim().startsWith('<svg')) {
+        tikzFetched.set(url, text);
+        return text;
+      }
     } catch (_) {}
     tikzMissing.add(url);
     return null;
@@ -198,8 +202,10 @@
       box.dataset.tikzState = 'loading';
       const pending = box.querySelector('script[type="text/x-tikz"]');
       const hash = box.dataset.tikzHash;
-      const svg = tikzCompiled.get(hash) ||
-        (opts.tikzSvgBase != null ? await prerenderedTikz(opts.tikzSvgBase + hash + '.svg') : null);
+      const url = opts.tikzSvgBase != null ? opts.tikzSvgBase + hash + '.svg' : null;
+      // Pictures seen before in this session go in synchronously.
+      const svg = tikzCompiled.get(hash) || (url && tikzFetched.get(url)) ||
+        (url ? await prerenderedTikz(url) : null);
       if (!box.isConnected) return;
       if (svg) {
         loadTikzFonts(opts.tikzjaxBase);

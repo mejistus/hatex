@@ -2,7 +2,7 @@
 
 A LaTeX front end for web pages: it turns an article written in LaTeX into HTML in the browser, including maths, booktabs tables, figures, TikZ, theorems, algorithms, citations and cross-references.
 
-It is the renderer behind [mejistus.github.io](https://mejistus.github.io), taken out of the site (v9.0.0) as a standalone package. For a live demo, see [mejistus.github.io/hatex](https://mejistus.github.io/hatex/), a paper typeset from a single `.tex` file. It has no build-time dependencies. [KaTeX](https://katex.org) typesets the maths, [Prism](https://prismjs.com) highlights code (optional), and [TikZJax](https://github.com/drgrice1/tikzjax) compiles TikZ pictures (loaded only when a picture needs it).
+It is the renderer behind [mejistus.github.io](https://mejistus.github.io), taken out of the site (v9.0.0) as a standalone package. The project page with a playground is at [mejistus.github.io/hatex](https://mejistus.github.io/hatex/), and [mejistus.github.io/hatex-demo](https://mejistus.github.io/hatex-demo/) is a paper typeset from a single `.tex` file. It has no build-time dependencies. [KaTeX](https://katex.org) typesets the maths, [Prism](https://prismjs.com) highlights code (optional), and [TikZJax](https://github.com/drgrice1/tikzjax) compiles TikZ pictures (loaded only when a picture needs it).
 
 ```
 .tex source ──parse()──▶ HTML string ──render()/enhance()──▶ live page
