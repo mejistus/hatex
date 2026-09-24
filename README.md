@@ -56,6 +56,7 @@ This is the subset of LaTeX that articles and blog posts use. **Commands it does
 - **Chinese:** when the source contains CJK text, captions and labels switch to 图/表/定理/证明/参考文献, and a line break between CJK characters doesn't add a space.
 - **Layout:** `\documentclass[twocolumn]` and `multicols`; see [Two columns](#two-columns).
 - **Slides:** `\documentclass{beamer}` with frames, title page, outline, blocks and columns, plus a full-screen presenter; see [Slides](#slides).
+- **Vertical Chinese:** `guji` (a manuscript-scroll page read from right to left, with 句讀 marks) and `vertical`, plus `\jiazhu` two-line interlinear notes; see [Vertical Chinese](#vertical-chinese-古籍).
 
 ## API
 
@@ -114,6 +115,31 @@ A source with `\documentclass{beamer}` (or any `frame` environment) renders as a
 - **Overlays:** `\pause`, `<2->` on `\item`, `\only`, `\uncover` and so on show every step at once. `\alert` stands out, and `\note` is dropped.
 
 Each slide is laid out at beamer's size (960×540 for 16:9, 768×576 for 4:3) and scaled to its frame, so it looks the same at any size. A slide is never taller than the space it's shown in, so a whole slide is always on screen, and content taller than a slide is shrunk to fit. A **Present** button, or a double-click on a slide, goes full screen: arrow keys, Space or a click move through the slides, and Esc leaves.
+
+## Vertical Chinese (古籍)
+
+```latex
+\begin{guji}[20]            % 20 characters to a column (行款)
+洛陽伽藍記序
+
+\begin{flushright}          % at the foot of its column
+魏撫軍府司馬楊衒之撰
+\end{flushright}
+
+三墳五典之說，\jiazhu{孔安國尚書序：伏犧、神農、黃帝之書，謂之三墳。}九流百代之言，……
+\end{guji}
+```
+
+- **`guji`** sets its content like a manuscript scroll (卷子本). Columns read from right to left, with the given number of characters each (20 by default). There are rules between the columns (烏絲欄) and along the top and bottom. The scroll moves sideways when it is wider than the page, starting at the right.
+- **Paragraphs** start a new column. `flushright` puts a line at the foot of its column, as for an author's name.
+- **Punctuation:** inside `guji`, modern punctuation is written as usual and shown the old way. 。！？ become a small circle beside the character (句) and ，、；： a dot (讀). Quotation and title marks are dropped. The original characters stay in the text, so copying still works.
+- **`\jiazhu{…}`** is an interlinear note in two small lines inside one line of text (雙行小字夾注); the command name comes from the CTAN `jiazhu` package. Inside `guji`, a note that doesn't fit where it stands continues at the top of the next column instead of leaving a gap. `\jiazhu` also works in ordinary horizontal text.
+- **`vertical`** is the same vertical layout without rules or punctuation changes.
+- **Styling variables:**
+  - `--hx-font-guji`: a traditional-Chinese Song face by default;
+  - `--hx-guji-pitch`: the column spacing;
+  - `--hx-guji-paper` and `--hx-guji-rule`: the paper and rule colours;
+  - `--hx-judou`: the colour of the marks (set it to a red for 朱筆圈點).
 
 ## TikZ
 

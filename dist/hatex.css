@@ -1,4 +1,4 @@
-/*! hatex v1.3.1 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.4.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 /* hatex — styles for the HTML that parseLatex() produces.
  *
  * Everything is scoped to an element with class "hatex" and coloured through
@@ -585,6 +585,100 @@
 /* A paragraph, theorem or list split at a column break. */
 .hatex .hatex-split-before { margin-bottom: 0 !important; }
 .hatex .hatex-split-after { margin-top: 0 !important; }
+
+/* ── Vertical Chinese text: guji and vertical ──
+   guji is a page in the manner of a manuscript scroll (卷子本): columns
+   read from right to left, --hx-guji-chars characters to a column (行款),
+   ruled between the columns (烏絲欄) and above and below (天頭、地腳). It
+   scrolls sideways when wider than the page, starting at the right. */
+.hatex .hatex-guji-wrap,
+.hatex .hatex-vertical-wrap {
+  writing-mode: vertical-rl;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 1.5rem 0;
+}
+.hatex .hatex-guji,
+.hatex .hatex-vertical {
+  --hx-guji-chars: 20;
+  --hx-guji-pitch: 1.9em;
+  writing-mode: vertical-rl;
+  inline-size: calc(var(--hx-guji-chars) * 1em);
+  line-height: var(--hx-guji-pitch);
+  font-family: var(--hx-font-guji, "Songti TC", "Noto Serif CJK TC", "Source Han Serif TC", "Songti SC", "Noto Serif CJK SC", PMingLiU, STSong, serif);
+  font-size: 1.3rem;
+  color: var(--hx-ink);
+  text-align: start;
+}
+.hatex .hatex-guji {
+  padding-inline: 0.7em;
+  padding-block: 0 0.5em;
+  border: 3px double var(--hx-ink);
+  background: var(--hx-guji-paper, transparent)
+    linear-gradient(to left, var(--hx-guji-rule, color-mix(in srgb, var(--hx-ink) 45%, transparent)) 0 1px, transparent 1px)
+    right top / var(--hx-guji-pitch) 100% repeat-x;
+}
+.hatex .hatex-guji p,
+.hatex .hatex-vertical p {
+  margin: 0;
+  text-indent: 0;
+  text-align: start;
+  color: inherit;
+}
+.hatex .hatex-guji .latex-right,
+.hatex .hatex-guji .latex-right p,
+.hatex .hatex-vertical .latex-right,
+.hatex .hatex-vertical .latex-right p { text-align: end; }
+/* 句讀: a small circle (句) or dot (讀) beside the end of the character,
+   taking no room in the column. The punctuation itself stays for copying. */
+.hatex .hatex-ju,
+.hatex .hatex-dou {
+  display: inline-block;
+  position: relative;
+  inline-size: 0;
+  block-size: 1em;
+  vertical-align: middle;
+  color: transparent;
+  overflow: visible;
+}
+.hatex .hatex-ju::after,
+.hatex .hatex-dou::after {
+  content: "";
+  position: absolute;
+  box-sizing: border-box;
+  inset-inline-start: -0.42em;
+  inset-block-start: -0.02em;
+  color: var(--hx-judou, var(--hx-ink));
+}
+.hatex .hatex-ju::after {
+  inline-size: max(0.38em, 5px);
+  block-size: max(0.38em, 5px);
+  border: max(0.07em, 1px) solid;
+  border-radius: 50%;
+}
+.hatex .hatex-dou::after {
+  inline-size: max(0.24em, 3px);
+  block-size: max(0.24em, 3px);
+  border-radius: 50%;
+  background: currentColor;
+  inset-inline-start: -0.33em;
+  inset-block-start: 0.04em;
+}
+
+/* \jiazhu: two small lines inside one line of text, in any direction. */
+.hatex .hatex-jiazhu {
+  display: inline-block;
+  font-size: 0.5em;
+  line-height: 1.02;
+  inline-size: calc(var(--hx-jz, 4) * 1em + 0.02em);
+  vertical-align: middle;
+  white-space: normal;
+  word-break: break-all;
+  line-break: anywhere;
+  text-align: start;
+  text-indent: 0;
+}
 
 /* ── Blocks and columns (beamer's block / alertblock / exampleblock, columns) ── */
 .hatex .hatex-block {

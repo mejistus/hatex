@@ -75,10 +75,102 @@
   function layout(root) {
     if (!root || !hasDOM) return;
     requestAnimationFrame(() => {
+      layoutNotes(root);
       columnize(root);
       fitDisplays(root);
       fitBoxesNow(root);
       root.querySelectorAll('.hatex-deck').forEach(fitDeck);
+    });
+  }
+
+  // ── Interlinear notes (\jiazhu) ──
+  // A note is set in two small lines inside one line of text: its box is as
+  // long as half its characters. In vertical guji text a note that doesn't
+  // fit where it stands continues at the top of the next column, as in old
+  // books, instead of leaving a gap: it is split into pieces that each fit.
+  const isMark = (n) => n.parentElement && n.parentElement.matches('.hatex-ju, .hatex-dou');
+  function noteChars(el) {
+    let n = 0;
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    for (let t; (t = walker.nextNode());) if (!isMark(t)) n += [...t.data.replace(/\s/g, '')].length;
+    return n;
+  }
+  const sizeNote = (j) => j.style.setProperty('--hx-jz', Math.max(1, Math.ceil(noteChars(j) / 2)));
+
+  // The first `count` characters of a note move into a new piece before it.
+  function splitNote(j, count) {
+    const walker = document.createTreeWalker(j, NodeFilter.SHOW_TEXT);
+    let seen = 0, end = null;
+    for (let t; (t = walker.nextNode());) {
+      if (isMark(t)) continue;
+      const chars = [...t.data];
+      for (let i = 0, off = 0; i < chars.length; off += chars[i].length, i++) {
+        if (/\s/.test(chars[i])) continue;
+        if (++seen === count) { end = { node: t, offset: off + chars[i].length }; break; }
+      }
+      if (end) break;
+    }
+    if (!end) return null;
+    const range = document.createRange();
+    range.setStart(j, 0);
+    range.setEnd(end.node, end.offset);
+    // A mark right after the cut belongs with the first piece.
+    const next = end.node.nextSibling;
+    if (end.offset === end.node.data.length && next && next.nodeType === 1 && next.matches('.hatex-ju, .hatex-dou')) range.setEndAfter(next);
+    const piece = j.cloneNode(false);
+    piece.appendChild(range.extractContents());
+    j.before(piece);
+    sizeNote(piece);
+    sizeNote(j);
+    return piece;
+  }
+
+  function layoutNotes(root) {
+    root.querySelectorAll('.hatex-jiazhu').forEach(j => {
+      // Put back pieces from an earlier layout, then size.
+      if (j.dataset.jz) {
+        const id = j.dataset.jz;
+        let next = j.nextElementSibling;
+        while (next && next.dataset && next.dataset.jz === id) { j.append(...next.childNodes); const n2 = next.nextElementSibling; next.remove(); next = n2; }
+      }
+      sizeNote(j);
+    });
+    root.querySelectorAll('.hatex-guji').forEach(g => {
+      const cs = getComputedStyle(g);
+      const box = g.getBoundingClientRect();
+      const bottom = box.bottom - parseFloat(cs.borderBottomWidth) - parseFloat(cs.paddingBottom);
+      const top = box.top + parseFloat(cs.borderTopWidth) + parseFloat(cs.paddingTop);
+      const pitch = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.9;
+      let id = 0;
+      for (const j of [...g.querySelectorAll('.hatex-jiazhu')]) {
+        j.dataset.jz = ++id;
+        let cur = j;
+        for (let guard = 0; guard < 20; guard++) {
+          const r = cur.getBoundingClientRect();
+          const half = parseFloat(getComputedStyle(cur).fontSize);
+          // A zero-size probe marks where the text before the note ends; if
+          // that is in the previous column, the note should start there.
+          const probe = document.createElement('span');
+          cur.before(probe);
+          const pen = probe.getBoundingClientRect();
+          probe.remove();
+          const wrapped = pen.right > r.right + pitch / 2 && bottom - pen.bottom >= half;
+          const avail = wrapped ? bottom - pen.bottom : bottom - r.top;
+          if (!wrapped && r.bottom <= bottom + 1) break; // fits where it is
+          // Cut, then check the piece really landed where it should (in the
+          // gap, or down to the foot of this column); if not, cut shorter.
+          let placed = false;
+          for (let perLine = Math.floor(avail / half); perLine >= 1 && !placed; perLine--) {
+            const piece = splitNote(cur, perLine * 2);
+            if (!piece) break;
+            const pr = piece.getBoundingClientRect();
+            placed = pr.bottom <= bottom + 1 && (wrapped ? Math.abs(pr.right - pen.right) < pitch / 2 : Math.abs(pr.right - r.right) < pitch / 2);
+            if (placed) piece.dataset.jz = id;
+            else { cur.prepend(...piece.childNodes); piece.remove(); sizeNote(cur); }
+          }
+          if (!placed) break;
+        }
+      }
     });
   }
 

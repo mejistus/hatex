@@ -211,6 +211,15 @@ Every link scrolls to its target and flashes it, and the URL doesn't change.
 | `aspectratio=169` / `43` / `1610` / `1` / … or `W:H` | beamer's slide sizes; 4:3 by default |
 | `\usetheme`, `\setbeamertemplate`, … | ignored: the look comes from the page's CSS |
 
+## Vertical Chinese
+
+| You write | You get |
+|---|---|
+| `\begin{guji}[20] … \end{guji}` | A manuscript-scroll page: columns from right to left, 20 characters each, ruled; 。！？ → 句 circles, ，、；： → 讀 dots; no quotation or title marks |
+| `\begin{vertical}[20] … \end{vertical}` | Vertical text only, with punctuation kept |
+| `\jiazhu{…}` | A two-line interlinear note (雙行夾注). In `guji`, it continues into the next column when it doesn't fit |
+| `\begin{flushright} … \end{flushright}` inside them | At the foot of the column |
+
 ## Ignored on purpose
 
 These produce nothing, but their arguments are still consumed so they don't leak into the text:
