@@ -1,6 +1,6 @@
 {
   "name": "hatex",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "private": true,
   "description": "LaTeX articles to HTML in the browser: maths, tables, figures, TikZ, theorems, algorithms, citations.",
   "main": "dist/hatex.js",
