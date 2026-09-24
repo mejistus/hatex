@@ -169,6 +169,47 @@ Code is highlighted when Prism and the language's component are loaded, and show
 
 Every link scrolls to its target and flashes it, and the URL doesn't change.
 
+## Two columns
+
+```latex
+\documentclass[twocolumn]{article}   % the whole document; \twocolumn works too
+\begin{figure*} … \end{figure*}      % spans both columns (so does table*)
+\begin{multicols}{2}[Optional intro spanning the top]
+  … \columnbreak …
+\end{multicols}
+```
+
+- Columns appear once there is room: 50rem for a two-column document and 32rem for `multicols`.
+- Headings, the abstract and anything wider than a column span all columns.
+
+## Slides (beamer)
+
+```latex
+\documentclass[aspectratio=169]{beamer}
+\title{Talk}  \subtitle{…}  \author{A \and B}  \institute{…}  \date{\today}
+\begin{document}
+\begin{frame} \titlepage \end{frame}
+\begin{frame}{Outline} \tableofcontents \end{frame}
+\section{Part one}
+\begin{frame}[t]{Title}{Subtitle}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth} \begin{itemize} \item<2-> … \end{itemize} \end{column}
+    \begin{column}{0.5\textwidth} \begin{alertblock}{Careful} … \end{alertblock} \end{column}
+  \end{columns}
+\end{frame}
+\end{document}
+```
+
+| Supported | Notes |
+|---|---|
+| `frame` with `[plain]`, `[t]`, `[b]`, `{title}{subtitle}`; `\frametitle`, `\framesubtitle` | `fragile` is accepted and not needed |
+| `\titlepage` / `\maketitle`, `\frame{\titlepage}` | from `\title`, `\subtitle`, `\author`, `\institute`, `\date` |
+| `\tableofcontents` | lists the `\section`s placed between frames |
+| `block`, `alertblock`, `exampleblock`; `columns`, `column` | usable in articles too |
+| `\alert`, `\structure` | `\note` is dropped |
+| `\pause`, `<…>` overlay specs, `\only`, `\uncover`, `\visible`, `\onslide` | every step is shown at once |
+| `\usetheme`, `\setbeamertemplate`, … | ignored: the look comes from the page's CSS |
+
 ## Ignored on purpose
 
 These produce nothing, but their arguments are still consumed so they don't leak into the text:

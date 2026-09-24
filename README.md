@@ -1,8 +1,8 @@
 # hatex
 
-A LaTeX front end for web pages: it turns an article written in LaTeX into HTML in the browser, including maths, booktabs tables, figures, TikZ, theorems, algorithms, citations and cross-references.
+**hatex = html + latex.** A LaTeX front end for web pages: it turns articles and beamer slides written in LaTeX into HTML in the browser, including maths, booktabs tables, figures, TikZ, theorems, algorithms, citations, cross-references and two-column layouts.
 
-It is the renderer behind [mejistus.github.io](https://mejistus.github.io), taken out of the site (v9.0.0) as a standalone package. The project page with a playground is at [mejistus.github.io/hatex](https://mejistus.github.io/hatex/), and [mejistus.github.io/hatex-demo](https://mejistus.github.io/hatex-demo/) is a paper typeset from a single `.tex` file. It has no build-time dependencies. [KaTeX](https://katex.org) typesets the maths, [Prism](https://prismjs.com) highlights code (optional), and [TikZJax](https://github.com/drgrice1/tikzjax) compiles TikZ pictures (loaded only when a picture needs it).
+It is the renderer behind [mejistus.github.io](https://mejistus.github.io), taken out of the site (v9.0.0) as a standalone package. The project page, with a playground, is at [mejistus.github.io/hatex](https://mejistus.github.io/hatex/). The demos are at [mejistus.github.io/hatex/demo](https://mejistus.github.io/hatex/demo/): a two-column paper, a Chinese document and a slide deck, each typeset from a single `.tex` file. It has no build-time dependencies. [KaTeX](https://katex.org) typesets the maths, [Prism](https://prismjs.com) highlights code (optional), and [TikZJax](https://github.com/drgrice1/tikzjax) compiles TikZ pictures (loaded only when a picture needs it).
 
 ```
 .tex source ──parse()──▶ HTML string ──render()/enhance()──▶ live page
@@ -54,6 +54,8 @@ This is the subset of LaTeX that articles and blog posts use. **Commands it does
 - **References:** `\ref`, `\eqref`, `\autoref`, `\cref`, `\cite` (several keys at once), `thebibliography`/`\bibitem`. Clicking a reference scrolls to its target and flashes it.
 - **Text:** `\textbf`, `\emph`, `\underline`, `\texttt`, `\sout`, `\hl`, `\textcolor`, `\colorbox`, `\definecolor`, `\href`, `\url`, the size commands, accents, `---`/`--`, ``` ``quotes'' ```, `\LaTeX`.
 - **Chinese:** when the source contains CJK text, captions and labels switch to 图/表/定理/证明/参考文献, and a line break between CJK characters doesn't add a space.
+- **Layout:** `\documentclass[twocolumn]` and `multicols`; see [Two columns](#two-columns).
+- **Slides:** `\documentclass{beamer}` with frames, title page, outline, blocks and columns, plus a full-screen presenter; see [Slides](#slides).
 
 ## API
 
@@ -85,6 +87,24 @@ Everything is on `window.HaTeX`. In Node or a bundler it is the default export.
 **Events**, which bubble from the picture's box: `hatex:tikz` (`detail: { hash, svg }`) fires when a picture compiles, and `hatex:tikz-error` (`detail: { hash, message }`) fires when it fails.
 
 **Source lines:** every block in the output has `data-line` (the source line it starts on), and empty `<span class="latex-line" data-line>` markers inside it mark where each later line begins. That is all an editor needs to jump from the preview to the source; `editor.html` does it in about 10 lines.
+
+## Two columns
+
+`\documentclass[twocolumn]{article}` (or `\twocolumn`) sets the document in two balanced columns once its container is at least 50rem wide, and in one column below that. `\begin{multicols}{n} … \end{multicols}` does the same for a passage, from 32rem; `\columnbreak` moves to the next column.
+
+Web pages scroll, so hatex balances each stretch between full-width items instead of filling whole pages. Section headings and the abstract span both columns, and so do `figure*` and `table*`. After layout, and again on every resize, the runtime also spans anything wider than a column: an equation whose formula and number don't fit, a wide table, a code listing or a TikZ picture. A reader therefore only ever goes down one short column and up to the next.
+
+## Slides
+
+A source with `\documentclass{beamer}` (or any `frame` environment) renders as a deck:
+
+- **Frames:** `\begin{frame}[options]{Title}{Subtitle}` or `\frametitle`. The `plain`, `t` and `b` options work.
+- **Title page and outline:** `\titlepage` uses `\title`, `\subtitle`, `\author` (with `\and`), `\institute` and `\date`. `\tableofcontents` lists the `\section`s placed between frames.
+- **Blocks and columns:** `block`, `alertblock` and `exampleblock`; `columns` / `column{0.5\textwidth}` with the `T` option. These also work in articles.
+- **Aspect ratio:** `aspectratio=169`, `1610`, `43` (the beamer default) and the other beamer values.
+- **Overlays:** `\pause`, `<2->` on `\item`, `\only`, `\uncover` and so on show every step at once. `\alert` stands out, and `\note` is dropped.
+
+Each slide is laid out at 960px wide and scaled to fit its frame, so it looks the same at any size. Content taller than a slide is shrunk to fit. A **Present** button, or a double-click on a slide, goes full screen: arrow keys, Space or a click move through the slides, and Esc leaves.
 
 ## TikZ
 
@@ -150,6 +170,10 @@ const html = HaTeX.parse(source);       // put it inside <article class="hatex">
 
 Add `katex.min.css` and `hatex.css` to the page. Include `hatex.js` and call `HaTeX.enhance(article)` only if you want TikZ, the `\ref` scrolling or the `\resizebox` fitting. `examples/node/prerender.mjs` is a complete script.
 
+## License
+
+hatex is released into the public domain under the [Unlicense](LICENSE): use, copy, modify and sell it for any purpose, with or without credit. It is original code, not a modification of another project. KaTeX and Prism (MIT) and TikZJax (GPL-3.0-or-later) are loaded from a CDN at runtime, and none of them is bundled into `dist/`, so their licenses apply to them alone. If you bundle any of them yourself, keep its license with it.
+
 ## Limitations
 
 - **It isn't a TeX engine.** Unknown commands and environments degrade to their content instead of failing, and there is no page layout: `\vspace`, `\newpage` and floats' `[htbp]` are ignored.
@@ -163,6 +187,7 @@ Add `katex.min.css` and `hatex.css` to the page. Include `hatex.js` and call `Ha
 
 ```
 src/latex.js      the renderer: parseLatex(source) → HTML
+src/extend.js     two columns, multicols, beamer: rewrites around the renderer
 src/tikz-nn.js    the nn* TikZ styles
 src/lint.js       problems in a source
 src/bib.js        BibTeX parse / format / DOI lookup
@@ -177,5 +202,5 @@ scripts/          build.mjs · serve.mjs · sync.mjs
 |---|---|
 | `npm run build` | Builds `src/` into `dist/hatex.js` (a classic script, also usable from CommonJS), `dist/hatex.mjs` (an ES module) and `dist/hatex.css`. |
 | `npm start` | Serves the repo at <http://localhost:8000/examples/>. |
-| `npm run sync [-- path/to/mejistus.github.io]` | Copies the four renderer modules from the blog's `assets/` and rebuilds. The blog is where they're developed, and `runtime.js` and `hatex.css` belong to hatex. |
+| `npm run sync [-- path/to/mejistus.github.io]` | Copies the four renderer modules from the blog's `assets/` and rebuilds. The blog is where they're developed, while `extend.js`, `runtime.js` and `hatex.css` belong to hatex. |
 | `npm run prerender` | Renders `examples/document/example.tex` to `static.html` (after `npm install`). |

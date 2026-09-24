@@ -1,8 +1,8 @@
 {
   "name": "hatex",
-  "version": "1.1.5",
+  "version": "1.2.0",
   "private": true,
-  "description": "LaTeX articles to HTML in the browser: maths, tables, figures, TikZ, theorems, algorithms, citations.",
+  "description": "hatex = html + latex: LaTeX articles and beamer slides rendered in the browser. Maths, tables, figures, TikZ, theorems, algorithms, citations, two-column layouts.",
   "main": "dist/hatex.js",
   "module": "dist/hatex.mjs",
   "exports": {
@@ -14,7 +14,8 @@
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "LICENSE"
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -32,5 +33,6 @@
   },
   "devDependencies": {
     "katex": "0.16.9"
-  }
+  },
+  "license": "Unlicense"
 }

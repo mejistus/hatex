@@ -1,4 +1,4 @@
-/*! hatex v1.1.5 — LaTeX to HTML in the browser. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.2.0 — LaTeX to HTML in the browser. Public domain (Unlicense). Built from src/ by scripts/build.mjs. */
 (function (window) {
 // ── src/tikz-nn.js ──
 // TikZ preamble for neural-network diagrams.
@@ -1567,6 +1567,277 @@
   window.parseLatex = parseLatex;
 })();
 
+// ── src/extend.js ──
+// Document classes and environments the core renderer (latex.js) doesn't
+// know, added around it: two-column documents and multicols, and beamer
+// slide decks (frames, blocks, columns, title page).
+//
+// The source is rewritten so that each boundary becomes an unnumbered
+// heading holding a marker, \subsubsection*{@@HX…@@}. The core then renders
+// the whole document as usual, so labels, citations and equation numbers
+// stay document-wide, and the marker headings in its HTML are finally
+// turned into wrappers. Rewrites keep the line count, so data-line
+// attributes still point at the right source lines.
+//
+// window.hatexExtend = { prepare(source) → { source, info }, finish(html, info, inline) → html }
+(function () {
+  'use strict';
+
+  const mark = (kind, arg, text) => `\\subsubsection*{@@HX${kind}${arg ? ' ' + arg : ''}@@${text || ''}}`;
+  const lines = (s) => (s.match(/\n/g) || []).length;
+
+  // Comments and verbatim-like content blanked to spaces, positions kept, so
+  // searches never match inside them while edits still apply to the source.
+  function masked(src) {
+    const blank = (m) => m.replace(/[^\n]/g, ' ');
+    return src
+      .replace(/\\begin\{(verbatim\*?|lstlisting|minted)\}[\s\S]*?\\end\{\1\}/g, blank)
+      .replace(/\\(?:verb\*?|lstinline)([^a-zA-Z\s{])[\s\S]*?\1/g, blank)
+      .replace(/(^|[^\\])(%[^\n]*)/g, (m, p, c) => p + blank(c));
+  }
+
+  // {…} starting at i (after optional spaces and at most one line break).
+  function group(m, src, i) {
+    const ws = /^[ \t]*\n?[ \t]*/.exec(m.slice(i))[0];
+    let j = i + ws.length;
+    if (m[j] !== '{') return null;
+    for (let k = j, depth = 0; k < m.length; k++) {
+      const c = m[k];
+      if (c === '\\') { k++; continue; }
+      if (c === '{') depth++;
+      else if (c === '}' && --depth === 0) return { text: src.slice(j + 1, k), end: k + 1 };
+    }
+    return null;
+  }
+  // […] or <…> starting at i (after optional spaces).
+  function bracket(m, src, i, open, close) {
+    const ws = /^[ \t]*/.exec(m.slice(i))[0];
+    const j = i + ws.length;
+    if (m[j] !== open) return null;
+    for (let k = j + 1, depth = 0; k < m.length; k++) {
+      const c = m[k];
+      if (c === '{') depth++;
+      else if (c === '}') depth--;
+      else if (c === close && depth <= 0) return { text: src.slice(j + 1, k), end: k + 1 };
+    }
+    return null;
+  }
+
+  function prepare(source) {
+    let src = String(source || '').replace(/\r\n?/g, '\n');
+    // \frame{\titlepage} is the short form of a title frame.
+    src = src.replace(/\\frame\s*\{\s*\\(titlepage|maketitle)\s*\}/g, '\\begin{frame}\\$1\\end{frame}');
+    const m = masked(src);
+    const info = { twocolumn: false, beamer: false, meta: {}, sections: [], aspect: [16, 9] };
+    const edits = []; // [start, end, replacement]
+    const edit = (start, end, repl) => {
+      const orig = src.slice(start, end);
+      edits.push([start, end, repl + '\n'.repeat(Math.max(0, lines(orig) - lines(repl)))]);
+    };
+    const each = (re, fn) => { re.lastIndex = 0; for (let x; (x = re.exec(m));) fn(x); };
+
+    // ── Document class ──
+    const cls = /\\documentclass\s*(?:\[([^\]]*)\])?\s*\{([^}]*)\}/.exec(m);
+    if (cls) {
+      const opts = src.slice(cls.index, cls.index + cls[0].length).match(/\[([^\]]*)\]/);
+      const list = opts ? opts[1].split(',').map(s => s.trim()) : [];
+      info.beamer = cls[2].trim() === 'beamer';
+      info.twocolumn = !info.beamer && list.includes('twocolumn');
+      const ar = list.map(o => /^aspectratio\s*=\s*(\d+)$/.exec(o)).find(Boolean);
+      const RATIOS = { 169: [16, 9], 1610: [16, 10], 149: [14, 9], 141: [1.41, 1], 54: [5, 4], 43: [4, 3], 32: [3, 2] };
+      info.aspect = (ar && RATIOS[ar[1]]) || (info.beamer ? [4, 3] : [16, 9]);
+      edit(cls.index, cls.index + cls[0].length, '');
+    }
+    if (!info.beamer && /\\begin\{frame\}/.test(m)) info.beamer = true;
+    each(/\\(twocolumn|onecolumn)(?![a-zA-Z])(\s*\[[^\]]*\])?/g, (x) => {
+      if (x[1] === 'twocolumn') info.twocolumn = !info.beamer;
+      edit(x.index, x.index + x[0].length, '');
+    });
+
+    // ── multicols, and figure*/table* spanning both columns ──
+    each(/\\begin\{multicols\*?\}/g, (x) => {
+      const n = group(m, src, x.index + x[0].length);
+      const pre = n && bracket(m, src, n.end, '[', ']');
+      const end = pre ? pre.end : n ? n.end : x.index + x[0].length;
+      const cols = Math.min(4, Math.max(1, parseInt(n && n.text, 10) || 2));
+      edit(x.index, end, (pre ? '\\par ' + pre.text + '\\par ' : '') + mark('COLS', String(cols)));
+    });
+    each(/\\end\{multicols\*?\}/g, (x) => edit(x.index, x.index + x[0].length, mark('COLSEND')));
+    each(/\\columnbreak(?![a-zA-Z])/g, (x) => edit(x.index, x.index + x[0].length, mark('COLBREAK')));
+    each(/\\begin\{(figure|table)\*\}/g, (x) => edit(x.index, x.index, mark('SPAN') + ' '));
+    each(/\\end\{(figure|table)\*\}/g, (x) => edit(x.index + x[0].length, x.index + x[0].length, ' ' + mark('SPANEND')));
+
+    // ── Blocks and columns (beamer's, usable anywhere) ──
+    each(/\\begin\{(block|alertblock|exampleblock)\}/g, (x) => {
+      const t = group(m, src, x.index + x[0].length);
+      const kind = { block: 'plain', alertblock: 'alert', exampleblock: 'example' }[x[1]];
+      edit(x.index, t ? t.end : x.index + x[0].length, mark('BLOCK', kind, t ? t.text : ''));
+    });
+    each(/\\end\{(block|alertblock|exampleblock)\}/g, (x) => edit(x.index, x.index + x[0].length, mark('BLOCKEND')));
+    each(/\\begin\{columns\}/g, (x) => {
+      const o = bracket(m, src, x.index + x[0].length, '[', ']');
+      const top = o && /\b[tT]\b/.test(o.text);
+      edit(x.index, o ? o.end : x.index + x[0].length, mark('COLUMNS', top ? 'top' : ''));
+    });
+    each(/\\end\{columns\}/g, (x) => edit(x.index, x.index + x[0].length, mark('COLUMNSEND')));
+    each(/\\begin\{column\}/g, (x) => {
+      const o = bracket(m, src, x.index + x[0].length, '[', ']');
+      const w = group(m, src, o ? o.end : x.index + x[0].length);
+      const f = w && /^\s*([\d.]*)\s*\\(?:textwidth|linewidth|columnwidth|paperwidth)/.exec(w.text);
+      const pct = f ? Math.round(parseFloat(f[1] || '1') * 1000) / 10 : 0;
+      edit(x.index, w ? w.end : x.index + x[0].length, mark('COLUMN', pct ? String(pct) : ''));
+    });
+    each(/\\end\{column\}/g, (x) => edit(x.index, x.index + x[0].length, mark('COLUMNEND')));
+
+    if (info.beamer) prepareBeamer(src, m, info, edit, each);
+
+    edits.sort((a, b) => b[0] - a[0] || b[1] - a[1]);
+    for (const [s, e, r] of edits) src = src.slice(0, s) + r + src.slice(e);
+    // Appended, not prepended, so every line keeps its number.
+    if (info.beamer) src += '\n\\definecolor{hxalert}{HTML}{B3261E}';
+    return { source: src, info };
+  }
+
+  function prepareBeamer(src, m, info, edit, each) {
+    // Title page data; the core drops \title and friends, so they are kept here.
+    each(/\\(title|subtitle|author|institute|date)(?![a-zA-Z])/g, (x) => {
+      const short = bracket(m, src, x.index + x[0].length, '[', ']');
+      const g = group(m, src, short ? short.end : x.index + x[0].length);
+      if (!g) return;
+      info.meta[x[1]] = g.text;
+      if (short) info.meta[x[1] + 'Short'] = short.text;
+      edit(x.index, g.end, '');
+    });
+    // Sections live between frames: they feed \tableofcontents.
+    each(/\\(section|subsection)\*?(?![a-zA-Z])/g, (x) => {
+      const short = bracket(m, src, x.index + x[0].length, '[', ']');
+      const g = group(m, src, short ? short.end : x.index + x[0].length);
+      if (!g) return;
+      if (x[1] === 'section') info.sections.push(short ? short.text : g.text);
+      edit(x.index, g.end, '');
+    });
+    // Frames.
+    let n = 0;
+    each(/\\begin\{frame\}/g, (x) => {
+      let i = x.index + x[0].length;
+      const ov = bracket(m, src, i, '<', '>'); if (ov) i = ov.end;
+      const opt = bracket(m, src, i, '[', ']'); if (opt) i = opt.end;
+      const title = group(m, src, i); if (title) i = title.end;
+      const sub = title && group(m, src, i); if (sub) i = sub.end;
+      const flags = [];
+      if (opt) {
+        const o = opt.text.split(',').map(s => s.trim());
+        if (o.includes('plain')) flags.push('plain');
+        if (o.includes('t')) flags.push('top');
+        if (o.includes('b')) flags.push('bottom');
+      }
+      n++;
+      edit(x.index, i, mark('SLIDE', [n].concat(flags).join(' ')) +
+        (title ? mark('TITLE', '', title.text) : '') + (sub ? mark('SUBTITLE', '', sub.text) : ''));
+    });
+    each(/\\end\{frame\}/g, (x) => edit(x.index, x.index + x[0].length, mark('SLIDEEND')));
+    each(/\\(frametitle|framesubtitle)(?![a-zA-Z])/g, (x) => {
+      const ov = bracket(m, src, x.index + x[0].length, '<', '>');
+      const g = group(m, src, ov ? ov.end : x.index + x[0].length);
+      if (g) edit(x.index, g.end, mark(x[1] === 'frametitle' ? 'TITLE' : 'SUBTITLE', '', g.text));
+    });
+    each(/\\(titlepage|maketitle)(?![a-zA-Z])/g, (x) => edit(x.index, x.index + x[0].length, mark('TITLEPAGE')));
+    each(/\\tableofcontents(?![a-zA-Z])(\s*\[[^\]]*\])?/g, (x) => edit(x.index, x.index + x[0].length, mark('TOC')));
+    // Overlays: every step is shown at once.
+    each(/\\pause(?![a-zA-Z])(\s*\[[^\]]*\])?/g, (x) => edit(x.index, x.index + x[0].length, ''));
+    each(/(\\(?:item|only|onslide|uncover|visible|invisible|alt|temporal|alert|structure|action|textbf|textit|emph|color|textcolor|includegraphics|frametitle|framesubtitle|begin\{(?:block|alertblock|exampleblock|itemize|enumerate)\})\*?)\s*<[^<>{}\n$\\]*>/g,
+      (x) => edit(x.index + x[1].length, x.index + x[0].length, ''));
+    each(/\\onslide(?![a-zA-Z])(?!\s*[<{])/g, (x) => edit(x.index, x.index + x[0].length, ''));
+    each(/\\(note)(?![a-zA-Z])/g, (x) => {
+      const o = bracket(m, src, x.index + x[0].length, '[', ']');
+      const g = group(m, src, o ? o.end : x.index + x[0].length);
+      if (g) edit(x.index, g.end, '');
+    });
+    each(/\\alert(?![a-zA-Z])/g, (x) => edit(x.index, x.index + x[0].length, '\\textcolor{hxalert}'));
+    each(/\\structure(?![a-zA-Z])/g, (x) => edit(x.index, x.index + x[0].length, '\\textbf'));
+  }
+
+  // ── HTML ──
+  const MARK_RE = /<h4\b[^>]*>\s*(?:<span class="latex-line"[^>]*><\/span>\s*)*@@HX([A-Z]+)(?: ([^@]*))?@@\s*([\s\S]*?)<\/h4>/g;
+
+  function wrappers(html) {
+    return html.replace(MARK_RE, (all, kind, arg = '', text) => {
+      switch (kind) {
+        case 'COLS': return `<div class="hatex-cols hatex-multicols" style="--hx-cols:${+arg || 2}"><div class="hatex-cols-flow">`;
+        case 'COLSEND': return '</div></div>';
+        case 'COLBREAK': return '<div class="hatex-colbreak"></div>';
+        case 'SPAN': return '<div class="hatex-span">';
+        case 'SPANEND': return '</div>';
+        case 'BLOCK': return `<div class="hatex-block ${arg}">` + (text.trim() ? `<div class="hatex-block-title">${text}</div>` : '') + '<div class="hatex-block-body">';
+        case 'BLOCKEND': return '</div></div>';
+        case 'COLUMNS': return `<div class="hatex-columns${arg ? ' ' + arg : ''}">`;
+        case 'COLUMN': return `<div class="hatex-column"${+arg ? ` style="flex:0 1 ${+arg}%"` : ''}>`;
+        case 'COLUMNEND': case 'COLUMNSEND': return '</div>';
+        default: return all; // slide markers, handled by deck()
+      }
+    });
+  }
+
+  function finish(html, info, inline) {
+    html = wrappers(html);
+    if (info.beamer) return deck(html, info, inline);
+    if (info.twocolumn) html = `<div class="hatex-cols hatex-twocolumn"><div class="hatex-cols-flow">${html}</div></div>`;
+    return html;
+  }
+
+  function deck(html, info, inline) {
+    const [w, h] = info.aspect;
+    const W = 960, H = Math.round(W * h / w);
+    const meta = {};
+    for (const k of ['title', 'subtitle', 'author', 'institute', 'date', 'titleShort', 'authorShort']) {
+      if (info.meta[k] != null) meta[k] = inline(info.meta[k].replace(/\s*\\and(?![a-zA-Z])\s*/g, ', ').replace(/\\inst\s*\{([^}]*)\}/g, '\\textsuperscript{$1}'));
+    }
+    const parts = html.split(/<h4\b[^>]*>\s*(?:<span class="latex-line"[^>]*><\/span>\s*)*@@HXSLIDE ([^@]*)@@\s*<\/h4>/);
+    let before = parts[0], after = '';
+    const slides = [];
+    for (let i = 1; i < parts.length; i += 2) {
+      const flags = parts[i].split(' ');
+      let body = parts[i + 1] || '';
+      const end = body.search(/<h4\b[^>]*>\s*(?:<span class="latex-line"[^>]*><\/span>\s*)*@@HXSLIDEEND@@/);
+      if (end >= 0) {
+        const rest = body.slice(end).replace(/^<h4\b[^>]*>[\s\S]*?<\/h4>/, '');
+        body = body.slice(0, end);
+        if (i + 2 >= parts.length) after = rest; else if (rest.trim()) body += rest;
+      }
+      let title = '', subtitle = '', titlepage = false;
+      body = body.replace(MARK_RE, (all, kind, arg, text) => {
+        if (kind === 'TITLE') { if (!title) title = text; return ''; }
+        if (kind === 'SUBTITLE') { if (!subtitle) subtitle = text; return ''; }
+        if (kind === 'TITLEPAGE') { titlepage = true; return titlePage(meta); }
+        if (kind === 'TOC') return '<ul class="hatex-toc">' + info.sections.map(s => `<li>${inline(s)}</li>`).join('') + '</ul>';
+        return all;
+      });
+      slides.push({ flags, title, subtitle, titlepage, body });
+    }
+    const N = slides.length;
+    const foot = meta.authorShort || meta.author || '';
+    const shortTitle = meta.titleShort || meta.title || '';
+    const out = slides.map((s, k) => {
+      const cls = ['hatex-slide'].concat(s.flags.slice(1)).concat(s.titlepage ? ['titlepage'] : []).join(' ');
+      const head = s.title ? `<header class="hatex-slide-title">${s.title}${s.subtitle ? `<small>${s.subtitle}</small>` : ''}</header>` : '';
+      const plain = s.flags.includes('plain') || s.titlepage;
+      const footer = plain ? '' : `<footer class="hatex-slide-foot"><span>${foot}</span><span>${shortTitle}</span><span>${k + 1} / ${N}</span></footer>`;
+      return `<div class="hatex-slide-frame"><section class="${cls}" data-slide="${k + 1}">${head}` +
+        `<div class="hatex-slide-body"><div class="hatex-slide-content">${s.body}</div></div>${footer}</section></div>`;
+    }).join('');
+    return (before.trim() ? before : '') +
+      `<div class="hatex-deck" data-w="${W}" data-h="${H}" style="--hx-ratio:${W}/${H}">${out}</div>` + after;
+  }
+
+  function titlePage(meta) {
+    const row = (k, tag) => meta[k] ? `<${tag} class="hatex-tp-${k}">${meta[k]}</${tag}>` : '';
+    return '<div class="hatex-titlepage">' + row('title', 'h1') + row('subtitle', 'p') + row('author', 'p') +
+      row('institute', 'p') + row('date', 'p') + '</div>';
+  }
+
+  window.hatexExtend = { prepare, finish };
+})();
+
 // ── src/lint.js ──
 // Errors and warnings for a post's source, shown in the editor's Problems list.
 //
@@ -1934,7 +2205,17 @@
   }
 
   function parse(source) {
-    return window.parseLatex(source);
+    const X = window.hatexExtend;
+    if (!X) return window.parseLatex(source);
+    const { source: prepared, info } = X.prepare(source);
+    return X.finish(window.parseLatex(prepared), info, inline);
+  }
+
+  // A fragment (a title, an author line) rendered without its paragraph.
+  function inline(tex) {
+    return window.parseLatex(tex).trim()
+      .replace(/<span class="latex-line"[^>]*><\/span>/g, '')
+      .replace(/^<p\b[^>]*>([\s\S]*)<\/p>$/, '$1').trim();
   }
 
   function render(target, source, options) {
@@ -1949,7 +2230,10 @@
     root.classList.add('hatex');
     optionsOf.set(root, opts);
     if (opts.tikzErrors) root.setAttribute('data-hatex-tikz-errors', '');
-    fitBoxes(root);
+    setupDecks(root);
+    layout(root);
+    watchWidth(root);
+    if (hasDOM && document.fonts && document.fonts.ready) document.fonts.ready.then(() => layout(root));
     if (opts.copyButtons) addCopyButtons(root);
     if (opts.zoom) makeZoomable(root);
     loadTikz(root, opts);
@@ -1963,19 +2247,187 @@
   const still = (el) => reducedMotion() || optsFor(el).animate === false;
   const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
+  // ── Layout ──
+  // Everything that depends on the rendered width: which wide items span
+  // both columns, \resizebox fitting, and slide scaling. Runs again on
+  // resize, when fonts arrive and when a TikZ picture lands.
+  function layout(root) {
+    if (!root || !hasDOM) return;
+    requestAnimationFrame(() => {
+      spanWide(root);
+      fitBoxesNow(root);
+      root.querySelectorAll('.hatex-deck').forEach(fitDeck);
+    });
+  }
+
+  // The element can change width without the window resizing (a sidebar
+  // closing, a preview pane widening), so each root watches its own width.
+  const watched = new WeakSet();
+  function watchWidth(root) {
+    if (!hasDOM || !window.ResizeObserver || watched.has(root)) return;
+    watched.add(root);
+    let last = root.clientWidth;
+    new ResizeObserver(() => {
+      if (root.clientWidth === last) return;
+      last = root.clientWidth;
+      layout(root);
+    }).observe(root);
+  }
+
+  // In a multi-column layout an equation, table, listing or picture wider
+  // than its column spans all columns instead of overflowing.
+  function spanWide(root) {
+    root.querySelectorAll('.hatex-cols-flow').forEach(flow => {
+      flow.querySelectorAll('.hatex-span-auto').forEach(el => el.classList.remove('hatex-span-auto'));
+      const cs = getComputedStyle(flow);
+      const n = parseInt(cs.columnCount, 10);
+      if (!(n > 1)) return;
+      const gap = parseFloat(cs.columnGap) || 0;
+      const col = (flow.clientWidth - gap * (n - 1)) / n;
+      const wide = new Set();
+      // KaTeX centres a formula across the full width and pins its number to
+      // the right edge, so a numbered equation needs the number's width (and
+      // a gap) clear on both sides of the formula.
+      flow.querySelectorAll('.katex-display').forEach(d => {
+        const html = d.querySelector('.katex-html');
+        if (!html) return;
+        let formula = 0, tag = 0;
+        for (const part of html.children) {
+          const w = part.getBoundingClientRect().width;
+          if (part.classList.contains('tag')) tag = w; else formula += w;
+        }
+        if (formula + (tag ? 2 * (tag + 20) : 0) > d.clientWidth) wide.add(d.closest('.latex-float') || d);
+      });
+      flow.querySelectorAll('pre, .latex-table-wrap').forEach(el => {
+        if (el.scrollWidth > el.clientWidth + 4) wide.add(el.closest('.latex-float') || el);
+      });
+      flow.querySelectorAll('.latex-fit').forEach(box => {
+        const inner = box.firstElementChild;
+        if (inner && inner.scrollWidth * 0.8 > col) wide.add(box.closest('.latex-float') || box);
+      });
+      flow.querySelectorAll('.latex-tikz svg').forEach(svg => {
+        if (parseFloat(svg.style.width) > col + 1) wide.add(svg.closest('.latex-float') || svg.closest('.latex-tikz'));
+      });
+      wide.forEach(el => {
+        if (el.classList.contains('katex-display')) detachDisplay(el);
+        el.classList.add('hatex-span-auto');
+      });
+    });
+  }
+
+  // A spanning equation inside a paragraph leaves an empty fragment of that
+  // paragraph behind, which the columns then balance against the text that
+  // follows (an empty column beside it). So the equation, with its label
+  // anchor, moves out between the paragraph's two halves.
+  function detachDisplay(d) {
+    const p = d.parentElement;
+    if (!p || p.tagName !== 'P') return;
+    const anchor = d.previousElementSibling && d.previousElementSibling.classList.contains('latex-anchor') ? d.previousElementSibling : null;
+    const range = document.createRange();
+    range.setStartAfter(d);
+    range.setEndAfter(p.lastChild);
+    const rest = range.extractContents();
+    p.after(d);
+    if (anchor) d.before(anchor);
+    if (rest.textContent.trim() || (rest.querySelector && rest.querySelector('.katex, img, svg'))) {
+      const next = document.createElement('p');
+      next.appendChild(rest);
+      d.after(next);
+    }
+    if (!p.textContent.trim() && !p.querySelector('.katex, img, svg')) p.remove();
+  }
+
   // ── \resizebox{\linewidth}{!}{...} ──
   // Scale the content down to the available width (not below 55%, after
   // which it scrolls instead).
-  function fitBoxes(root) {
-    requestAnimationFrame(() => {
-      root.querySelectorAll('.latex-fit').forEach(box => {
-        const inner = box.firstElementChild;
-        if (!inner) return;
-        inner.style.zoom = '';
-        const avail = box.clientWidth, need = inner.scrollWidth;
-        if (avail > 0 && need > avail) inner.style.zoom = Math.max(0.55, avail / need).toFixed(3);
-      });
+  function fitBoxesNow(root) {
+    root.querySelectorAll('.latex-fit').forEach(box => {
+      const inner = box.firstElementChild;
+      if (!inner) return;
+      inner.style.zoom = '';
+      const avail = box.clientWidth, need = inner.scrollWidth;
+      if (avail > 0 && need > avail) inner.style.zoom = Math.max(0.55, avail / need).toFixed(3);
     });
+  }
+
+  // ── Slides ──
+  // A deck is a column of slide frames. Each slide is laid out at a fixed
+  // design size (960px wide, the deck's aspect ratio) and scaled to its
+  // frame, so it looks the same at any width; content taller than a slide
+  // is shrunk to fit. "Present" shows one slide at a time, full screen.
+  function setupDecks(root) {
+    root.querySelectorAll('.hatex-deck:not([data-ready])').forEach(deck => {
+      deck.dataset.ready = '1';
+      const W = +deck.dataset.w, H = +deck.dataset.h;
+      deck.querySelectorAll('.hatex-slide').forEach(s => { s.style.width = W + 'px'; s.style.height = H + 'px'; });
+      const frames = [...deck.querySelectorAll('.hatex-slide-frame')];
+      const bar = document.createElement('div');
+      bar.className = 'hatex-deck-bar';
+      bar.innerHTML = `<span>${frames.length} slides · double-click one to present from it</span>` +
+        '<button type="button" class="hatex-present">Present</button>';
+      deck.prepend(bar);
+      bar.querySelector('button').addEventListener('click', () => present(deck, 0));
+      frames.forEach((f, i) => f.addEventListener('dblclick', () => { if (!deck.classList.contains('hatex-presenting')) present(deck, i); }));
+      if (window.ResizeObserver) new ResizeObserver(() => fitDeck(deck)).observe(deck);
+    });
+  }
+
+  function fitDeck(deck) {
+    const W = +deck.dataset.w;
+    deck.querySelectorAll('.hatex-slide-frame').forEach(frame => {
+      if (!frame.offsetParent && !deck.classList.contains('hatex-presenting')) return;
+      const slide = frame.firstElementChild;
+      slide.style.transform = `scale(${frame.clientWidth / W})`;
+      const body = slide.querySelector('.hatex-slide-body'), content = body && body.firstElementChild;
+      if (!content) return;
+      content.style.zoom = '';
+      for (let k = 0; k < 2; k++) {
+        const room = body.clientHeight, need = content.scrollHeight * (parseFloat(content.style.zoom) || 1);
+        if (!(need > room + 1)) break;
+        content.style.zoom = Math.max(0.5, room / need * (parseFloat(content.style.zoom) || 1)).toFixed(3);
+      }
+    });
+  }
+
+  function present(deck, start) {
+    const frames = [...deck.querySelectorAll('.hatex-slide-frame')];
+    let i = Math.max(0, Math.min(frames.length - 1, start));
+    const show = () => {
+      frames.forEach((f, k) => f.classList.toggle('current', k === i));
+      fitDeck(deck);
+    };
+    const go = (d) => { i = Math.max(0, Math.min(frames.length - 1, i + d)); show(); };
+    const onKey = (e) => {
+      if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); go(1); }
+      else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); go(-1); }
+      else if (e.key === 'Home') { i = 0; show(); }
+      else if (e.key === 'End') { i = frames.length - 1; show(); }
+      else if (e.key === 'Escape') stop();
+    };
+    const onClick = (e) => {
+      if (e.target.closest('a, button')) return;
+      go(e.clientX < window.innerWidth / 3 ? -1 : 1);
+    };
+    const onFs = () => { if (!document.fullscreenElement) stop(); };
+    function stop() {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('fullscreenchange', onFs);
+      deck.removeEventListener('click', onClick);
+      deck.classList.remove('hatex-presenting');
+      frames.forEach(f => f.classList.remove('current'));
+      if (document.fullscreenElement === deck && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      requestAnimationFrame(() => { fitDeck(deck); frames[i].scrollIntoView({ block: 'center' }); });
+    }
+    deck.classList.add('hatex-presenting');
+    show();
+    document.addEventListener('keydown', onKey);
+    deck.addEventListener('click', onClick);
+    if (deck.requestFullscreen) {
+      deck.requestFullscreen().then(() => {
+        document.addEventListener('fullscreenchange', onFs);
+        fitDeck(deck);
+      }).catch(() => {});
+    }
   }
 
   // ── In-document links ──
@@ -2108,12 +2560,16 @@
     scaleTikzSvg(svg);
   }
 
-  // TeX sizes are in pt; show pictures 1.2× so their 10pt labels match the body text.
+  // TeX sizes are in pt; show pictures 1.2× so their 10pt labels match the
+  // body text (1.8× on a slide, whose text is larger).
   function scaleTikzSvg(svg) {
     const w = parseFloat(svg && svg.getAttribute('width'));
     if (!w) return;
-    svg.style.width = (w * 4 / 3 * 1.2).toFixed(1) + 'px';
+    const k = svg.closest('.hatex-slide') ? 1.8 : 1.2;
+    svg.style.width = (w * 4 / 3 * k).toFixed(1) + 'px';
     svg.style.height = 'auto';
+    // Its width can change which items span columns or how a slide fits.
+    layout(svg.closest('.hatex'));
   }
 
   async function prerenderedTikz(url) {
@@ -2282,13 +2738,13 @@
       queued = true;
       requestAnimationFrame(() => {
         queued = false;
-        document.querySelectorAll('.hatex').forEach(fitBoxes);
+        document.querySelectorAll('.hatex').forEach(layout);
       });
     });
   }
 
   const HaTeX = {
-    version: '1.1.5',
+    version: '1.2.0',
     use, parse, render, enhance, lint, images, tikzSvgs,
     Bib: window.Bib,
   };

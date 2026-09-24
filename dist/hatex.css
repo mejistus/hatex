@@ -1,4 +1,4 @@
-/*! hatex v1.1.5 — LaTeX to HTML in the browser. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.2.0 — LaTeX to HTML in the browser. Public domain (Unlicense). Built from src/ by scripts/build.mjs. */
 /* hatex — styles for the HTML that parseLatex() produces.
  *
  * Everything is scoped to an element with class "hatex" and coloured through
@@ -36,6 +36,7 @@
   --hx-font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
   /* Set only by the dark palette. */
   --hx-color-keep: 100%;      /* how much of an author's \textcolor survives */
+  --hx-slide-bg: #fff;
 }
 
 /* Dark: author colours are lifted towards white, text on author-chosen light
@@ -60,6 +61,7 @@
   --hx-tok-punct: #abb2bf;
   --hx-tok-verbatim: #98c379;
   --hx-color-keep: 62%;
+  --hx-slide-bg: #1d1c1b;
   --hx-on-highlight: #1d1b19;
   --hx-mark-bg: #e8d98a;
   --hx-tikz-filter: invert(0.9) hue-rotate(180deg);
@@ -84,6 +86,7 @@
     --hx-tok-punct: #abb2bf;
     --hx-tok-verbatim: #98c379;
     --hx-color-keep: 62%;
+  --hx-slide-bg: #1d1c1b;
     --hx-on-highlight: #1d1b19;
     --hx-mark-bg: #e8d98a;
     --hx-tikz-filter: invert(0.9) hue-rotate(180deg);
@@ -555,6 +558,179 @@
   font-size: 0.78rem;
   text-align: left;
   white-space: pre-wrap;
+}
+
+/* ── Columns: \documentclass[twocolumn] and multicols ──
+   Balanced columns once the text is wide enough, one column below that.
+   Section headings and the abstract span all columns, and so does anything
+   wider than a column (marked by the runtime) or written as figure* or table*,
+   so a reader only ever goes up and down within a short stretch. */
+.hatex .hatex-cols { container-type: inline-size; }
+.hatex .hatex-cols-flow > :first-child { margin-top: 0; }
+@container (min-width: 32rem) {
+  .hatex .hatex-multicols > .hatex-cols-flow { column-count: var(--hx-cols, 2); column-gap: 2rem; }
+}
+@container (min-width: 50rem) {
+  .hatex .hatex-twocolumn > .hatex-cols-flow { column-count: 2; column-gap: 2.4rem; }
+}
+.hatex .hatex-cols-flow > h2,
+.hatex .hatex-cols-flow > .latex-abstract,
+.hatex .hatex-cols-flow .hatex-cols,
+.hatex .hatex-cols-flow .hatex-span,
+.hatex .hatex-cols-flow .hatex-span-auto { column-span: all; }
+.hatex .hatex-cols-flow .latex-float,
+.hatex .hatex-cols-flow .katex-display,
+.hatex .hatex-cols-flow pre,
+.hatex .hatex-cols-flow .latex-alg,
+.hatex .hatex-cols-flow .hatex-block,
+.hatex .hatex-cols-flow h3,
+.hatex .hatex-cols-flow h4 { break-inside: avoid; }
+.hatex .hatex-cols-flow h3,
+.hatex .hatex-cols-flow h4 { break-after: avoid; }
+.hatex .hatex-cols-flow p { orphans: 2; widows: 2; }
+.hatex .hatex-colbreak { break-after: column; }
+
+/* ── Blocks and columns (beamer's block / alertblock / exampleblock, columns) ── */
+.hatex .hatex-block {
+  margin: 1rem 0;
+  border: 1px solid var(--hx-border);
+  border-radius: 0.4rem;
+  overflow: hidden;
+}
+.hatex .hatex-block-title {
+  padding: 0.35em 0.8em;
+  background: var(--hx-code-bg);
+  font-weight: 700;
+  color: var(--hx-ink);
+}
+.hatex .hatex-block.alert .hatex-block-title { color: var(--hx-danger); }
+.hatex .hatex-block.example .hatex-block-title { color: var(--hx-tok-env); }
+.hatex .hatex-block-body { padding: 0.5em 0.8em; }
+.hatex .hatex-block-body > :last-child { margin-bottom: 0; }
+.hatex .hatex-columns { display: flex; gap: 1.5em; align-items: center; }
+.hatex .hatex-columns.top { align-items: flex-start; }
+.hatex .hatex-column { flex: 1 1 0; min-width: 0; }
+
+/* ── Slides (beamer) ──
+   Each slide is laid out at 960px wide and scaled to its frame by the
+   runtime, so sizes below are in slide pixels. */
+.hatex .hatex-deck-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 0.8rem;
+  font-size: 0.85rem;
+  color: var(--hx-muted);
+}
+.hatex .hatex-present {
+  font: inherit;
+  padding: 0.3rem 0.9rem;
+  border: 1px solid var(--hx-ink);
+  border-radius: 0.3rem;
+  background: var(--hx-ink);
+  color: var(--hx-slide-bg);
+  cursor: pointer;
+}
+.hatex .hatex-slide-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--hx-ratio, 16 / 9);
+  overflow: hidden;
+  margin: 0 0 1.2rem;
+  border: 1px solid var(--hx-border);
+  border-radius: 0.3rem;
+  background: var(--hx-slide-bg);
+}
+.hatex .hatex-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 34px 52px 44px;
+  transform-origin: 0 0;
+  font-size: 24px;
+  line-height: 1.45;
+  color: var(--hx-ink);
+}
+.hatex .hatex-slide-title {
+  margin: 0 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--hx-border);
+  font: 700 34px/1.2 var(--hx-font-heading);
+}
+.hatex .hatex-slide-title small {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--hx-muted);
+}
+.hatex .hatex-slide-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.hatex .hatex-slide.top .hatex-slide-body { justify-content: flex-start; }
+.hatex .hatex-slide.bottom .hatex-slide-body { justify-content: flex-end; }
+.hatex .hatex-slide-foot {
+  position: absolute;
+  left: 52px;
+  right: 52px;
+  bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  font-size: 14px;
+  color: var(--hx-muted);
+}
+.hatex .hatex-slide p,
+.hatex .hatex-slide li,
+.hatex .hatex-slide td,
+.hatex .hatex-slide .latex-float figcaption { color: var(--hx-ink); }
+.hatex .hatex-slide p { margin: 0 0 0.55em; }
+.hatex .hatex-slide ul,
+.hatex .hatex-slide ol { margin: 0.2em 0 0.5em; padding-left: 1.2em; }
+.hatex .hatex-slide li { margin-bottom: 0.3em; }
+.hatex .hatex-slide .latex-float { margin: 12px 0; }
+.hatex .hatex-slide .latex-float figcaption { font-size: 18px; margin: 8px auto 0; }
+.hatex .hatex-slide table,
+.hatex .hatex-slide .latex-alg { font-size: 20px; }
+.hatex .hatex-slide pre { font-size: 17px; padding: 14px 18px; margin: 10px 0; }
+.hatex .hatex-slide code { font-size: 0.8em; }
+.hatex .hatex-slide .katex-display { margin: 0.4em 0; padding: 0.2em 0; }
+.hatex .hatex-slide .latex-footnotes { font-size: 16px; }
+.hatex .hatex-slide.titlepage .hatex-slide-body { text-align: center; }
+.hatex .hatex-titlepage h1 { margin: 0 0 12px; font: 700 46px/1.15 var(--hx-font-heading); color: var(--hx-ink); }
+.hatex .hatex-titlepage p { margin: 0 0 8px; }
+.hatex .hatex-tp-subtitle { font-size: 28px; color: var(--hx-muted); margin-bottom: 36px !important; }
+.hatex .hatex-tp-author { font-size: 26px; }
+.hatex .hatex-tp-institute,
+.hatex .hatex-tp-date { font-size: 20px; color: var(--hx-muted); }
+.hatex .hatex-toc { list-style: decimal; }
+/* Presenting: one slide, full screen, letterboxed. */
+.hatex .hatex-deck.hatex-presenting {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  cursor: none;
+}
+.hatex .hatex-presenting .hatex-deck-bar,
+.hatex .hatex-presenting .hatex-slide-frame:not(.current) { display: none; }
+.hatex .hatex-presenting .hatex-slide-frame.current {
+  width: min(100vw, calc(100vh * var(--hx-ratio)));
+  margin: 0;
+  border: 0;
+  border-radius: 0;
 }
 
 /* ── Click-to-zoom figures (HaTeX.enhance) ── */
