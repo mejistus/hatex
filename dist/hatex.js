@@ -1,4 +1,4 @@
-/*! hatex v1.1.3 — LaTeX to HTML in the browser. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.1.4 — LaTeX to HTML in the browser. Built from src/ by scripts/build.mjs. */
 (function (window) {
 // ── src/tikz-nn.js ──
 // TikZ preamble for neural-network diagrams.
@@ -2261,7 +2261,7 @@
   }
 
   const HaTeX = {
-    version: '1.1.3',
+    version: '1.1.4',
     use, parse, render, enhance, lint, images, tikzSvgs,
     Bib: window.Bib,
   };

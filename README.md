@@ -133,7 +133,7 @@ All colours are CSS variables on `.hatex`, so you can override any of them:
 }
 ```
 
-- **Dark mode:** put `data-theme="dark"` on the `.hatex` element or any ancestor, or `data-theme="auto"` to follow the system. In dark mode, author colours (`\textcolor`) are lifted so they stay readable, text on `\rowcolor`/`\hl` backgrounds turns dark, and TikZ pictures keep a light sheet to draw on.
+- **Dark mode:** put `data-theme="dark"` on the `.hatex` element or any ancestor, or `data-theme="auto"` to follow the system. In dark mode, author colours (`\textcolor`) are lifted so they stay readable, text on `\rowcolor`/`\hl` backgrounds turns dark, and TikZ pictures are inverted in lightness with their hues kept, so black ink becomes light on the dark page. If you'd rather keep them on a light sheet, set `--hx-tikz-filter: none` and `--hx-tikz-sheet` (plus `--hx-tikz-sheet-pad`).
 - **Font:** the body font is inherited from your page. Headings use `--hx-font-heading`, and code uses `--hx-font-mono`.
 - Don't load a Prism theme, because it would fight `hatex.css` over code colours.
 

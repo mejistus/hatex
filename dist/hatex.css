@@ -1,4 +1,4 @@
-/*! hatex v1.1.3 — LaTeX to HTML in the browser. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.1.4 — LaTeX to HTML in the browser. Built from src/ by scripts/build.mjs. */
 /* hatex — styles for the HTML that parseLatex() produces.
  *
  * Everything is scoped to an element with class "hatex" and coloured through
@@ -39,7 +39,8 @@
 }
 
 /* Dark: author colours are lifted towards white, text on author-chosen light
-   backgrounds turns dark, and TikZ keeps a light sheet to draw on. */
+   backgrounds turns dark, and TikZ drawings (black ink) are inverted in
+   lightness with their hues kept, so they sit on the page itself. */
 .hatex[data-theme="dark"],
 [data-theme="dark"] .hatex {
   --hx-ink: #ece7e0;
@@ -61,8 +62,7 @@
   --hx-color-keep: 62%;
   --hx-on-highlight: #1d1b19;
   --hx-mark-bg: #e8d98a;
-  --hx-tikz-sheet: var(--hx-paper);
-  --hx-tikz-sheet-pad: 0.6rem 0.8rem;
+  --hx-tikz-filter: invert(0.9) hue-rotate(180deg);
 }
 @media (prefers-color-scheme: dark) {
   .hatex[data-theme="auto"],
@@ -86,8 +86,7 @@
     --hx-color-keep: 62%;
     --hx-on-highlight: #1d1b19;
     --hx-mark-bg: #e8d98a;
-    --hx-tikz-sheet: var(--hx-paper);
-    --hx-tikz-sheet-pad: 0.6rem 0.8rem;
+    --hx-tikz-filter: invert(0.9) hue-rotate(180deg);
   }
 }
 
@@ -531,6 +530,9 @@
   max-width: 100%;
   height: auto;
   overflow: visible;
+  /* Dark mode inverts the drawing. To put it on a light sheet instead, set
+     --hx-tikz-filter: none and --hx-tikz-sheet / --hx-tikz-sheet-pad. */
+  filter: var(--hx-tikz-filter, none);
   background: var(--hx-tikz-sheet, transparent);
   padding: var(--hx-tikz-sheet-pad, 0);
   border-radius: 0.4rem;
