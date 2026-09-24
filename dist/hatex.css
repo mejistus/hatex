@@ -1,4 +1,4 @@
-/*! hatex v1.3.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.3.1 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 /* hatex — styles for the HTML that parseLatex() produces.
  *
  * Everything is scoped to an element with class "hatex" and coloured through
@@ -608,8 +608,9 @@
 .hatex .hatex-column { flex: 1 1 0; min-width: 0; }
 
 /* ── Slides (beamer) ──
-   Each slide is laid out at 960px wide and scaled to its frame by the
-   runtime, so sizes below are in slide pixels. */
+   Each slide is laid out at beamer's size (960x540 for 16:9, 768x576 for
+   4:3, …) and scaled to its frame by the runtime, so sizes below are in
+   slide pixels. */
 .hatex .hatex-deck-bar {
   display: flex;
   align-items: center;
@@ -633,7 +634,7 @@
   width: 100%;
   aspect-ratio: var(--hx-ratio, 16 / 9);
   overflow: hidden;
-  margin: 0 0 1.2rem;
+  margin: 0 auto 1.2rem;
   border: 1px solid var(--hx-border);
   border-radius: 0.3rem;
   background: var(--hx-slide-bg);
@@ -653,6 +654,8 @@
 }
 .hatex .hatex-slide-title {
   margin: 0 0 18px;
+  padding: 0;
+  border: 0;
   font: 700 34px/1.2 var(--hx-font-heading);
 }
 .hatex .hatex-slide-title small {
@@ -673,6 +676,10 @@
 .hatex .hatex-slide.top .hatex-slide-body { justify-content: flex-start; }
 .hatex .hatex-slide.bottom .hatex-slide-body { justify-content: flex-end; }
 .hatex .hatex-slide-foot {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  text-align: left;
   position: absolute;
   left: 52px;
   right: 52px;
@@ -700,8 +707,8 @@
 .hatex .hatex-slide .katex-display { margin: 0.4em 0; padding: 0.2em 0; }
 .hatex .hatex-slide .latex-footnotes { font-size: 16px; }
 .hatex .hatex-slide.titlepage .hatex-slide-body { text-align: center; }
-.hatex .hatex-titlepage h1 { margin: 0 0 12px; font: 700 46px/1.15 var(--hx-font-heading); color: var(--hx-ink); }
-.hatex .hatex-titlepage p { margin: 0 0 8px; }
+.hatex .hatex-titlepage > div { margin: 0 0 8px; }
+.hatex .hatex-titlepage .hatex-tp-title { margin: 0 0 12px; font: 700 46px/1.15 var(--hx-font-heading); color: var(--hx-ink); }
 .hatex .hatex-tp-subtitle { font-size: 28px; color: var(--hx-muted); margin-bottom: 36px !important; }
 .hatex .hatex-tp-author { font-size: 26px; }
 .hatex .hatex-tp-institute,

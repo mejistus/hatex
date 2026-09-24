@@ -110,10 +110,10 @@ A source with `\documentclass{beamer}` (or any `frame` environment) renders as a
 - **Frames:** `\begin{frame}[options]{Title}{Subtitle}` or `\frametitle`. The `plain`, `t` and `b` options work.
 - **Title page and outline:** `\titlepage` uses `\title`, `\subtitle`, `\author` (with `\and`), `\institute` and `\date`. `\tableofcontents` lists the `\section`s placed between frames.
 - **Blocks and columns:** `block`, `alertblock` and `exampleblock`; `columns` / `column{0.5\textwidth}` with the `T` option. These also work in articles.
-- **Aspect ratio:** `aspectratio=169`, `1610`, `43` (the beamer default) and the other beamer values.
+- **Aspect ratio:** all of beamer's values: `169`, `1610`, `149`, `141`, `54`, `43` (the default), `32`, `219`, `2013` and `1` (1:1). Any `W:H` works too, for example `aspectratio=1:1`. Slides use beamer's own sizes, so text keeps the same proportion to the slide in every format.
 - **Overlays:** `\pause`, `<2->` on `\item`, `\only`, `\uncover` and so on show every step at once. `\alert` stands out, and `\note` is dropped.
 
-Each slide is laid out at 960px wide and scaled to fit its frame, so it looks the same at any size. Content taller than a slide is shrunk to fit. A **Present** button, or a double-click on a slide, goes full screen: arrow keys, Space or a click move through the slides, and Esc leaves.
+Each slide is laid out at beamer's size (960×540 for 16:9, 768×576 for 4:3) and scaled to its frame, so it looks the same at any size. A slide is never taller than the space it's shown in, so a whole slide is always on screen, and content taller than a slide is shrunk to fit. A **Present** button, or a double-click on a slide, goes full screen: arrow keys, Space or a click move through the slides, and Esc leaves.
 
 ## TikZ
 

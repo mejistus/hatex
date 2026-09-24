@@ -208,6 +208,7 @@ Every link scrolls to its target and flashes it, and the URL doesn't change.
 | `block`, `alertblock`, `exampleblock`; `columns`, `column` | usable in articles too |
 | `\alert`, `\structure` | `\note` is dropped |
 | `\pause`, `<…>` overlay specs, `\only`, `\uncover`, `\visible`, `\onslide` | every step is shown at once |
+| `aspectratio=169` / `43` / `1610` / `1` / … or `W:H` | beamer's slide sizes; 4:3 by default |
 | `\usetheme`, `\setbeamertemplate`, … | ignored: the look comes from the page's CSS |
 
 ## Ignored on purpose

@@ -58,7 +58,7 @@
     // \frame{\titlepage} is the short form of a title frame.
     src = src.replace(/\\frame\s*\{\s*\\(titlepage|maketitle)\s*\}/g, '\\begin{frame}\\$1\\end{frame}');
     const m = masked(src);
-    const info = { twocolumn: false, beamer: false, meta: {}, sections: [], aspect: [16, 9] };
+    const info = { twocolumn: false, beamer: false, meta: {}, sections: [], size: [768, 576] };
     const edits = []; // [start, end, replacement]
     const edit = (start, end, repl) => {
       const orig = src.slice(start, end);
@@ -73,9 +73,16 @@
       const list = opts ? opts[1].split(',').map(s => s.trim()) : [];
       info.beamer = cls[2].trim() === 'beamer';
       info.twocolumn = !info.beamer && list.includes('twocolumn');
-      const ar = list.map(o => /^aspectratio\s*=\s*(\d+)$/.exec(o)).find(Boolean);
-      const RATIOS = { 169: [16, 9], 1610: [16, 10], 149: [14, 9], 141: [1.41, 1], 54: [5, 4], 43: [4, 3], 32: [3, 2] };
-      info.aspect = (ar && RATIOS[ar[1]]) || (info.beamer ? [4, 3] : [16, 9]);
+      // Slide sizes are beamer's own (in mm, 6px per mm), so text keeps the
+      // same proportion to the slide in every format; W:H (for example
+      // aspectratio=1:1) gives a slide about 560px tall.
+      const ar = list.map(o => /^aspectratio\s*=\s*([\d.]+)(?::([\d.]+))?$/.exec(o)).find(Boolean);
+      const SIZES = { 169: [160, 90], 1610: [160, 100], 149: [140, 90], 141: [148.5, 105], 54: [125, 100],
+        43: [128, 96], 32: [135, 90], 219: [210, 90], 2013: [200, 130], 1: [96, 96] };
+      let mm = ar && !ar[2] && SIZES[ar[1]];
+      if (ar && ar[2] && +ar[1] > 0 && +ar[2] > 0) mm = [93 * ar[1] / ar[2], 93];
+      mm = mm || SIZES[43];
+      info.size = [Math.round(mm[0] * 6), Math.round(mm[1] * 6)];
       edit(cls.index, cls.index + cls[0].length, '');
     }
     if (!info.beamer && /\\begin\{frame\}/.test(m)) info.beamer = true;
@@ -216,8 +223,7 @@
   }
 
   function deck(html, info, inline) {
-    const [w, h] = info.aspect;
-    const W = 960, H = Math.round(W * h / w);
+    const [W, H] = info.size;
     const meta = {};
     for (const k of ['title', 'subtitle', 'author', 'institute', 'date', 'titleShort', 'authorShort']) {
       if (info.meta[k] != null) meta[k] = inline(info.meta[k].replace(/\s*\\and(?![a-zA-Z])\s*/g, ', ').replace(/\\inst\s*\{([^}]*)\}/g, '\\textsuperscript{$1}'));
@@ -249,20 +255,22 @@
     const shortTitle = meta.titleShort || meta.title || '';
     const out = slides.map((s, k) => {
       const cls = ['hatex-slide'].concat(s.flags.slice(1)).concat(s.titlepage ? ['titlepage'] : []).join(' ');
-      const head = s.title ? `<header class="hatex-slide-title">${s.title}${s.subtitle ? `<small>${s.subtitle}</small>` : ''}</header>` : '';
+      // Classed divs rather than header/footer/section/h1, so a page's own
+      // element styles can't leak into the slides.
+      const head = s.title ? `<div class="hatex-slide-title" role="heading" aria-level="2">${s.title}${s.subtitle ? `<small>${s.subtitle}</small>` : ''}</div>` : '';
       const plain = s.flags.includes('plain') || s.titlepage;
-      const footer = plain ? '' : `<footer class="hatex-slide-foot"><span>${foot}</span><span>${shortTitle}</span><span>${k + 1} / ${N}</span></footer>`;
-      return `<div class="hatex-slide-frame"><section class="${cls}" data-slide="${k + 1}">${head}` +
-        `<div class="hatex-slide-body"><div class="hatex-slide-content">${s.body}</div></div>${footer}</section></div>`;
+      const footer = plain ? '' : `<div class="hatex-slide-foot"><span>${foot}</span><span>${shortTitle}</span><span>${k + 1} / ${N}</span></div>`;
+      return `<div class="hatex-slide-frame"><div class="${cls}" role="group" aria-roledescription="slide" aria-label="${k + 1} / ${N}" data-slide="${k + 1}">${head}` +
+        `<div class="hatex-slide-body"><div class="hatex-slide-content">${s.body}</div></div>${footer}</div></div>`;
     }).join('');
     return (before.trim() ? before : '') +
       `<div class="hatex-deck" data-w="${W}" data-h="${H}" style="--hx-ratio:${W}/${H}">${out}</div>` + after;
   }
 
   function titlePage(meta) {
-    const row = (k, tag) => meta[k] ? `<${tag} class="hatex-tp-${k}">${meta[k]}</${tag}>` : '';
-    return '<div class="hatex-titlepage">' + row('title', 'h1') + row('subtitle', 'p') + row('author', 'p') +
-      row('institute', 'p') + row('date', 'p') + '</div>';
+    const row = (k, attrs) => meta[k] ? `<div class="hatex-tp-${k}"${attrs || ''}>${meta[k]}</div>` : '';
+    return '<div class="hatex-titlepage">' + row('title', ' role="heading" aria-level="1"') + row('subtitle') + row('author') +
+      row('institute') + row('date') + '</div>';
   }
 
   window.hatexExtend = { prepare, finish };

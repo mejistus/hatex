@@ -254,9 +254,9 @@
 
   // ── Slides ──
   // A deck is a column of slide frames. Each slide is laid out at a fixed
-  // design size (960px wide, the deck's aspect ratio) and scaled to its
-  // frame, so it looks the same at any width; content taller than a slide
-  // is shrunk to fit. "Present" shows one slide at a time, full screen.
+  // design size (beamer's, e.g. 960x540 for 16:9, 768x576 for 4:3) and
+  // scaled to its frame, so it looks the same at any width; content taller
+  // than a slide is shrunk to fit. "Present" shows one slide at a time.
   function setupDecks(root) {
     root.querySelectorAll('.hatex-deck:not([data-ready])').forEach(deck => {
       deck.dataset.ready = '1';
@@ -274,10 +274,24 @@
     });
   }
 
+  // A slide is never taller than the space it's seen in (the scrolling pane
+  // around it, or the window), so a whole slide is always on screen.
+  function viewHeight(el) {
+    for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+      const oy = getComputedStyle(p).overflowY;
+      if ((oy === 'auto' || oy === 'scroll') && p.clientHeight > 0) return p.clientHeight;
+    }
+    return window.innerHeight;
+  }
+
   function fitDeck(deck) {
-    const W = +deck.dataset.w;
+    const W = +deck.dataset.w, H = +deck.dataset.h;
+    const presenting = deck.classList.contains('hatex-presenting');
+    const bar = deck.querySelector('.hatex-deck-bar');
+    const maxW = Math.max(240, (viewHeight(deck) - (bar ? bar.offsetHeight : 0) - 40) * W / H);
     deck.querySelectorAll('.hatex-slide-frame').forEach(frame => {
-      if (!frame.offsetParent && !deck.classList.contains('hatex-presenting')) return;
+      frame.style.maxWidth = presenting ? '' : Math.round(maxW) + 'px';
+      if (!frame.offsetParent && !presenting) return;
       const slide = frame.firstElementChild;
       slide.style.transform = `scale(${frame.clientWidth / W})`;
       const body = slide.querySelector('.hatex-slide-body'), content = body && body.firstElementChild;
