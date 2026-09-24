@@ -1,6 +1,6 @@
 {
   "name": "hatex",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "private": true,
   "description": "hatex = html + latex: LaTeX articles and beamer slides rendered in the browser. Maths, tables, figures, TikZ, theorems, algorithms, citations, two-column layouts.",
   "main": "dist/hatex.js",

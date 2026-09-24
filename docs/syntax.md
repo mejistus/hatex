@@ -180,7 +180,7 @@ Every link scrolls to its target and flashes it, and the URL doesn't change.
 ```
 
 - Columns appear once there is room: 50rem for a two-column document and 32rem for `multicols`.
-- Headings, the abstract and anything wider than a column span all columns.
+- Headings, the abstract, `figure*` and `table*` span all columns. Everything else stays in its column: wide equations are scaled down to fit, pictures shrink, and wide tables and code scroll.
 
 ## Slides (beamer)
 

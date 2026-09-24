@@ -93,9 +93,15 @@ Everything is on `window.HaTeX`. In Node or a bundler it is the default export.
 
 `\documentclass[twocolumn]{article}` (or `\twocolumn`) sets the document in two balanced columns once its container is at least 50rem wide, and in one column below that. `\begin{multicols}{n} … \end{multicols}` does the same for a passage, from 32rem; `\columnbreak` moves to the next column.
 
-Web pages scroll, so hatex balances each stretch between full-width items instead of filling whole pages. Section headings and the abstract span both columns, and so do `figure*` and `table*`. So does anything wider than a column: an equation whose formula and number don't fit, a wide table, a code listing or a TikZ picture. A reader therefore only ever goes down one short column and up to the next.
+Web pages scroll, so hatex balances each stretch between full-width items instead of filling whole pages. Section headings and the abstract span both columns, and so do `figure*` and `table*`. Everything else stays in its column, as in LaTeX:
 
-The runtime lays the columns out itself rather than with CSS multi-column, which misplaces KaTeX's maths in Safari. It measures the page, lifts wide items out of their paragraphs, and shares each stretch out over side-by-side columns. A column can break between blocks, between the paragraphs or items of a theorem, proof, quote or list, and before or after a displayed equation. This happens on load and on every window resize; if the element changes width some other way, call `HaTeX.layout(root)`.
+- a display equation too wide for its column is scaled down to fit (to 60% at most, after which it scrolls);
+- pictures shrink to the column width;
+- wide tables and code listings scroll.
+
+A reader therefore only ever goes down one short column and up to the next.
+
+The runtime lays the columns out itself rather than with CSS multi-column, which misplaces KaTeX's maths in Safari. It measures each stretch and shares it out over side-by-side columns of about equal height. A column can break between blocks, between the paragraphs or items of a theorem, proof, quote, list or bibliography, and before or after a displayed equation, but never inside a line or right after a heading. This happens on load and on every window resize; if the element changes width some other way, call `HaTeX.layout(root)`.
 
 ## Slides
 
@@ -144,20 +150,23 @@ The layer styles are `nnconv`, `nnpool`, `nnfc`, `nnact`, `nnnorm`, `nnattn`, `n
 
 ## Theming
 
-All colours are CSS variables on `.hatex`, so you can override any of them:
+The default look is plain: black on white in a LaTeX-like serif (KaTeX's Computer Modern), with no rules under headings. `\ref` and `\cite` show as plain numbers that are underlined on hover. Everything is a CSS variable on `.hatex`, so you can override any of it:
 
 ```css
 .hatex {
-  --hx-ink: #111;          /* headings, tables, rules */
-  --hx-muted: #333;        /* paragraphs, captions */
-  --hx-accent: #0b57d0;    /* links, section numbers, inline code */
-  --hx-code-bg: #f4f4f4;
-  --hx-font-heading: Georgia, serif;
+  --hx-ink: #000;               /* headings, rules, table text */
+  --hx-text: #222;              /* paragraphs, lists, captions */
+  --hx-muted: #666;             /* line numbers, comments, slide footers */
+  --hx-accent: #0b57d0;         /* links, section numbers, inline code */
+  --hx-code-bg: #f6f6f6;
+  --hx-cite: #3aa35b;           /* hyperref-style boxes around citations (transparent by default) */
+  --hx-font-body: Georgia, serif;
+  --hx-font-heading: var(--hx-font-body);
 }
 ```
 
 - **Dark mode:** put `data-theme="dark"` on the `.hatex` element or any ancestor, or `data-theme="auto"` to follow the system. In dark mode, author colours (`\textcolor`) are lifted so they stay readable, text on `\rowcolor`/`\hl` backgrounds turns dark, and TikZ pictures are inverted in lightness with their hues kept, so black ink becomes light on the dark page. If you'd rather keep them on a light sheet, set `--hx-tikz-filter: none` and `--hx-tikz-sheet` (plus `--hx-tikz-sheet-pad`).
-- **Font:** the body font is inherited from your page. Headings use `--hx-font-heading`, and code uses `--hx-font-mono`.
+- **Fonts:** the body uses `--hx-font-body`. Set it to `inherit` to use your page's font, and code uses `--hx-font-mono`.
 - Don't load a Prism theme, because it would fight `hatex.css` over code colours.
 
 ## Node and static sites

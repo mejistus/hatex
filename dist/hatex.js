@@ -1,4 +1,4 @@
-/*! hatex v1.2.2 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.3.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 (function (window) {
 // ── src/tikz-nn.js ──
 // TikZ preamble for neural-network diagrams.
@@ -2254,6 +2254,7 @@
     if (!root || !hasDOM) return;
     requestAnimationFrame(() => {
       columnize(root);
+      fitDisplays(root);
       fitBoxesNow(root);
       root.querySelectorAll('.hatex-deck').forEach(fitDeck);
     });
@@ -2263,10 +2264,11 @@
   // Two-column documents and multicols. CSS multi-column layout misplaces
   // KaTeX's inline maths in Safari, so the runtime lays the columns out
   // itself: the flow is cut into chunks at every full-width item (section
-  // headings, the abstract, figure* / table*, and anything wider than a
-  // column), and each chunk's blocks are shared out over side-by-side
-  // columns of about equal height. A reader only ever goes down one short
-  // column and up to the next. Below a minimum width it stays one column.
+  // headings, the abstract, figure* and table*), and each chunk is shared
+  // out over side-by-side columns of about equal height. Everything else
+  // stays in its column, as in LaTeX: an equation too wide for it is scaled
+  // down to fit. A reader only ever goes down one short column and up to
+  // the next. Below a minimum width it stays one column.
   function columnize(root) {
     root.querySelectorAll('.hatex-cols-flow').forEach(flow => {
       const box = flow.parentElement;
@@ -2275,35 +2277,15 @@
         chunk.querySelectorAll(':scope > .hatex-col').forEach(c => c.replaceWith(...c.childNodes));
         chunk.replaceWith(...chunk.childNodes);
       });
-      flow.querySelectorAll(':scope > .hatex-span-auto').forEach(el => el.classList.remove('hatex-span-auto'));
       const n = doc ? 2 : parseInt(getComputedStyle(box).getPropertyValue('--hx-cols'), 10) || 2;
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
       const gap = (doc ? 2.4 : 2) * rem;
       if (n < 2 || flow.clientWidth < (doc ? 50 : 32) * rem) return;
-      const col = (flow.clientWidth - gap * (n - 1)) / n;
-
-      // Measured now, while everything is laid out at full width.
-      const wide = new Set();
-      const add = (el) => { const f = el.closest('.latex-float'); wide.add(f && flow.contains(f) ? f : el); };
-      flow.querySelectorAll('.katex-display').forEach(d => { if (displayWidth(d) > col) add(d); });
-      flow.querySelectorAll('pre').forEach(pre => {
-        const code = pre.querySelector('code') || pre;
-        if (code.getBoundingClientRect().width + 40 > col) add(pre);
-      });
-      flow.querySelectorAll('.latex-table-wrap > table').forEach(t => { if (t.getBoundingClientRect().width > col) add(t.parentElement); });
-      flow.querySelectorAll('.latex-fit').forEach(f => {
-        const inner = f.firstElementChild;
-        if (inner && inner.scrollWidth * 0.8 > col) add(f);
-      });
-      flow.querySelectorAll('.latex-tikz svg').forEach(svg => {
-        if (parseFloat(svg.style.width) > col) add(svg.closest('.latex-tikz'));
-      });
-      wide.forEach(el => { const top = hoist(el, flow); if (top) top.classList.add('hatex-span-auto'); });
 
       const chunks = [];
       let chunk = null;
       [...flow.childNodes].forEach(node => {
-        if (node.nodeType === 1 && node.matches('h2, .latex-abstract, .hatex-span, .hatex-span-auto, .hatex-cols')) {
+        if (node.nodeType === 1 && node.matches('h2, .latex-abstract, .hatex-span, .hatex-cols')) {
           chunk = null;
           return;
         }
@@ -2322,7 +2304,8 @@
 
   // Share a chunk's content out over n side-by-side columns of about equal
   // height. A column can break before any block; inside a theorem, proof,
-  // quote or list before any of its paragraphs or items; and inside a
+  // quote, list, bibliography or footnotes before any of its paragraphs or
+  // items; and inside a
   // paragraph just before or after a displayed equation. The break closest
   // to an even share wins; a \columnbreak forces it, and a heading never
   // ends a column.
@@ -2337,6 +2320,7 @@
     chunk.style.gap = gap + 'px';
     chunk.append(...cols);
     cols[0].append(...nodes);
+    fitDisplays(cols[0]); // heights as they will be
     for (let c = 0; c < n - 1; c++) {
       const from = cols[c];
       const forced = from.querySelector(':scope > .hatex-colbreak');
@@ -2370,9 +2354,10 @@
     };
     const walk = (el, depth) => {
       [...el.children].forEach((k, i) => {
+        if (getComputedStyle(k).display.startsWith('inline')) return; // never inside a line
         if (i > 0 || el === col) add(k, k.offsetTop);
         if (depth > 3) return;
-        if (k.matches('div.latex-theorem, blockquote, ul, ol, li, div.latex-center')) walk(k, depth + 1);
+        if (k.matches('div.latex-theorem, blockquote, ul, ol, li, div.latex-center, div.latex-bib, div.latex-footnotes')) walk(k, depth + 1);
         else if (k.tagName === 'P') {
           k.querySelectorAll(':scope > .katex-display').forEach(d => {
             const prev = d.previousElementSibling;
@@ -2422,33 +2407,19 @@
     return formula + (tag ? 2 * (tag + 20) : 0);
   }
 
-  // Bring a wide item up to the top of the flow so it can sit between two
-  // chunks, splitting the paragraphs, theorems or quotes around it. Items
-  // inside lists or tables stay where they are (and scroll).
-  function hoist(el, flow) {
-    const prev = el.previousElementSibling;
-    const anchor = prev && prev.classList.contains('latex-anchor') ? prev : null;
-    const meaningful = (node) => node.textContent.trim() || node.querySelector('.katex, img, svg, table, pre');
-    while (el.parentElement && el.parentElement !== flow) {
-      const parent = el.parentElement;
-      if (!parent.matches('p, blockquote, div.latex-theorem, div.latex-center, div.latex-right')) return null;
-      const after = parent.cloneNode(false);
-      after.removeAttribute('id');
-      after.removeAttribute('data-line');
-      after.classList.add('hatex-split-after');
-      while (el.nextSibling) after.appendChild(el.nextSibling);
-      parent.after(el);
-      if (meaningful(after)) el.after(after);
-      if (meaningful(parent)) parent.classList.add('hatex-split-before');
-      else parent.remove();
-    }
-    if (anchor && anchor.nextElementSibling !== el) el.before(anchor);
-    return el.parentElement === flow ? el : null;
-  }
-
   // ── \resizebox{\linewidth}{!}{...} ──
   // Scale the content down to the available width (not below 55%, after
   // which it scrolls instead).
+  // In a column, a display equation too wide for it is scaled down to fit
+  // (not below 60%, after which it scrolls), rather than spanning columns.
+  function fitDisplays(root) {
+    root.querySelectorAll('.hatex-col .katex-display').forEach(d => {
+      d.style.zoom = '';
+      const need = displayWidth(d), room = d.clientWidth;
+      if (need > room) d.style.zoom = Math.max(0.6, room / need).toFixed(3);
+    });
+  }
+
   function fitBoxesNow(root) {
     root.querySelectorAll('.latex-fit').forEach(box => {
       const inner = box.firstElementChild;
@@ -2853,7 +2824,7 @@
   }
 
   const HaTeX = {
-    version: '1.2.2',
+    version: '1.3.0',
     use, parse, render, enhance, layout, lint, images, tikzSvgs,
     Bib: window.Bib,
   };

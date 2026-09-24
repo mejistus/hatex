@@ -1,4 +1,4 @@
-/*! hatex v1.2.2 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.3.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 /* hatex — styles for the HTML that parseLatex() produces.
  *
  * Everything is scoped to an element with class "hatex" and coloured through
@@ -10,19 +10,21 @@
  * load a Prism theme: code tokens are coloured here from the same palette.
  */
 
-/* ── Palette ── */
+/* ── Palette ──
+   The default look is plain: black on white in a LaTeX-like serif. */
 .hatex {
-  --hx-ink: #2d2d2d;          /* headings, table text, rules */
-  --hx-muted: #8a8278;        /* body paragraphs, captions */
-  --hx-accent: #2d2d2d;       /* links, section numbers, inline code */
-  --hx-accent-2: #8a8278;     /* link hover */
-  --hx-code-bg: #f5f0ea;      /* code blocks and inline code */
-  --hx-border: #e8e0d6;
-  --hx-surface: #ffffff;      /* copy button */
-  --hx-paper: #fdfaf6;        /* behind TikZ drawings, which are ink on paper */
+  --hx-ink: #000;             /* headings, rules, table text */
+  --hx-text: #000;            /* paragraphs, lists, captions, table cells */
+  --hx-muted: #666;           /* secondary: line numbers, comments, slide footers */
+  --hx-accent: #000;          /* links, section numbers, inline code */
+  --hx-accent-2: #555;        /* link hover */
+  --hx-code-bg: #f6f6f6;      /* code blocks and inline code */
+  --hx-border: #ccc;
+  --hx-surface: #fff;         /* copy button */
+  --hx-paper: #fff;           /* behind TikZ drawings, which are ink on paper */
   --hx-danger: #b3261e;       /* TikZ errors */
-  --hx-cite: #3aa35b;         /* the frame around a citation number */
-  --hx-flash: rgba(58, 163, 91, 0.22); /* a clicked \ref's target lights up */
+  --hx-cite: transparent;     /* frame around citation numbers, e.g. #3aa35b for hyperref's green box */
+  --hx-flash: rgba(0, 0, 0, 0.08); /* a clicked \ref's target lights up */
   /* Code tokens (Prism): One Light here, One Dark below. */
   --hx-tok-comment: #a0a1a7;
   --hx-tok-command: #4078f2;
@@ -31,8 +33,9 @@
   --hx-tok-regex: #e45649;
   --hx-tok-punct: #383a42;
   --hx-tok-verbatim: #50a14f;
-  --hx-font-heading: "Playfair Display", Georgia, serif;
-  --hx-font-sans: "Inter", system-ui, sans-serif;
+  --hx-font-body: KaTeX_Main, "Latin Modern Roman", "Times New Roman", serif;
+  --hx-font-heading: var(--hx-font-body);
+  --hx-font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
   --hx-font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
   /* Set only by the dark palette. */
   --hx-color-keep: 100%;      /* how much of an author's \textcolor survives */
@@ -44,14 +47,16 @@
    lightness with their hues kept, so they sit on the page itself. */
 .hatex[data-theme="dark"],
 [data-theme="dark"] .hatex {
-  --hx-ink: #ece7e0;
-  --hx-muted: #a49c92;
-  --hx-accent: #ece7e0;
-  --hx-accent-2: #a49c92;
-  --hx-code-bg: #23211f;
-  --hx-border: #38342f;
-  --hx-surface: #222020;
-  --hx-paper: #f4efe8;
+  --hx-ink: #eee;
+  --hx-text: #e6e6e6;
+  --hx-muted: #999;
+  --hx-accent: #eee;
+  --hx-accent-2: #bbb;
+  --hx-code-bg: #222;
+  --hx-border: #444;
+  --hx-surface: #1e1e1e;
+  --hx-paper: #fff;
+  --hx-flash: rgba(255, 255, 255, 0.12);
   --hx-danger: #e4796f;
   --hx-tok-comment: #7f848e;
   --hx-tok-command: #61afef;
@@ -61,7 +66,7 @@
   --hx-tok-punct: #abb2bf;
   --hx-tok-verbatim: #98c379;
   --hx-color-keep: 62%;
-  --hx-slide-bg: #1d1c1b;
+  --hx-slide-bg: #161616;
   --hx-on-highlight: #1d1b19;
   --hx-mark-bg: #e8d98a;
   --hx-tikz-filter: invert(0.9) hue-rotate(180deg);
@@ -69,14 +74,16 @@
 @media (prefers-color-scheme: dark) {
   .hatex[data-theme="auto"],
   [data-theme="auto"] .hatex {
-    --hx-ink: #ece7e0;
-    --hx-muted: #a49c92;
-    --hx-accent: #ece7e0;
-    --hx-accent-2: #a49c92;
-    --hx-code-bg: #23211f;
-    --hx-border: #38342f;
-    --hx-surface: #222020;
-    --hx-paper: #f4efe8;
+    --hx-ink: #eee;
+    --hx-text: #e6e6e6;
+    --hx-muted: #999;
+    --hx-accent: #eee;
+    --hx-accent-2: #bbb;
+    --hx-code-bg: #222;
+    --hx-border: #444;
+    --hx-surface: #1e1e1e;
+    --hx-paper: #fff;
+    --hx-flash: rgba(255, 255, 255, 0.12);
     --hx-danger: #e4796f;
     --hx-tok-comment: #7f848e;
     --hx-tok-command: #61afef;
@@ -86,7 +93,7 @@
     --hx-tok-punct: #abb2bf;
     --hx-tok-verbatim: #98c379;
     --hx-color-keep: 62%;
-  --hx-slide-bg: #1d1c1b;
+  --hx-slide-bg: #161616;
     --hx-on-highlight: #1d1b19;
     --hx-mark-bg: #e8d98a;
     --hx-tikz-filter: invert(0.9) hue-rotate(180deg);
@@ -95,9 +102,10 @@
 
 /* ── Text ── */
 .hatex {
-  font-size: 0.95rem;
-  line-height: 1.9;
-  color: var(--hx-ink);
+  font-family: var(--hx-font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--hx-text);
   counter-reset: katexEqnNo mmlEqnNo;
 }
 .hatex h1,
@@ -113,9 +121,7 @@
 }
 .hatex h2 {
   font-size: 1.4rem;
-  margin: 2rem 0 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--hx-border);
+  margin: 2rem 0 0.9rem;
 }
 .hatex h3 {
   font-size: 1.15rem;
@@ -126,8 +132,8 @@
   margin: 1.2rem 0 0.6rem;
 }
 .hatex p {
-  margin: 0 0 1.2rem;
-  color: var(--hx-muted);
+  margin: 0 0 1rem;
+  color: var(--hx-text);
 }
 .hatex a {
   color: var(--hx-accent);
@@ -137,11 +143,16 @@
 .hatex a:hover {
   color: var(--hx-accent-2);
 }
+/* References inside the document are plain numbers, underlined on hover. */
+.hatex a.latex-ref,
+.hatex .latex-fn-ref a { text-decoration: none; }
+.hatex a.latex-ref:hover,
+.hatex .latex-fn-ref a:hover { text-decoration: underline; }
 .hatex ul,
 .hatex ol {
   margin: 1rem 0;
   padding-left: 1.5rem;
-  color: var(--hx-muted);
+  color: var(--hx-text);
 }
 .hatex li {
   margin-bottom: 0.5rem;
@@ -151,7 +162,7 @@
   padding-left: 1.2rem;
   margin: 1.5rem 0;
   font-style: italic;
-  color: var(--hx-muted);
+  color: var(--hx-text);
 }
 .hatex hr {
   border: none;
@@ -388,7 +399,7 @@
   max-width: 42rem;
   font-size: 0.85rem;
   line-height: 1.6;
-  color: var(--hx-muted);
+  color: var(--hx-text);
 }
 .hatex .latex-float-algorithm figcaption {
   margin: 0 auto 0.4rem;
@@ -435,7 +446,7 @@
   font-weight: 500;
   color: var(--hx-ink);
 }
-.hatex td { color: var(--hx-muted); }
+.hatex td { color: var(--hx-text); }
 .hatex .latex-table-wrap {
   overflow-x: auto;
   margin: 1.5rem 0;
@@ -495,6 +506,7 @@
 }
 .hatex .latex-cite-link:hover {
   background: color-mix(in srgb, var(--hx-cite) 12%, transparent);
+  text-decoration: underline !important;
 }
 .hatex .latex-bib ol {
   list-style: none;
@@ -562,16 +574,15 @@
 
 /* ── Columns: \documentclass[twocolumn] and multicols ──
    The runtime cuts the flow into chunks at full-width items (headings, the
-   abstract, figure* / table*, anything wider than a column) and shares each
-   chunk out over side-by-side columns; without the runtime it is one
-   column. Plain block layout, not CSS multi-column, which Safari gets
+   abstract, figure* and table*) and shares each chunk out over side-by-side
+   columns; without the runtime it is one column. Plain block layout, not CSS multi-column, which Safari gets
    wrong with KaTeX. */
 .hatex .hatex-cols-flow > :first-child { margin-top: 0; }
 .hatex .hatex-cols-chunk { display: flex; align-items: flex-start; }
 .hatex .hatex-col { flex: 1 1 0; min-width: 0; position: relative; }
 .hatex .hatex-col > :first-child { margin-top: 0; }
 .hatex .hatex-colbreak { display: none; }
-/* A paragraph, theorem or list split around a full-width item or a column break. */
+/* A paragraph, theorem or list split at a column break. */
 .hatex .hatex-split-before { margin-bottom: 0 !important; }
 .hatex .hatex-split-after { margin-top: 0 !important; }
 
@@ -589,7 +600,7 @@
   color: var(--hx-ink);
 }
 .hatex .hatex-block.alert .hatex-block-title { color: var(--hx-danger); }
-.hatex .hatex-block.example .hatex-block-title { color: var(--hx-tok-env); }
+.hatex .hatex-block.example .hatex-block-title { color: var(--hx-example, #2e7d32); }
 .hatex .hatex-block-body { padding: 0.5em 0.8em; }
 .hatex .hatex-block-body > :last-child { margin-bottom: 0; }
 .hatex .hatex-columns { display: flex; gap: 1.5em; align-items: center; }
@@ -642,8 +653,6 @@
 }
 .hatex .hatex-slide-title {
   margin: 0 0 18px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--hx-border);
   font: 700 34px/1.2 var(--hx-font-heading);
 }
 .hatex .hatex-slide-title small {
