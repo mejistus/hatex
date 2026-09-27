@@ -113,7 +113,7 @@ order.forEach((page, i) => {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(page === 'index.html' ? 'hatex manual' : `${title} · hatex manual`)}</title>
 <link rel="icon" href="../favicon-32.png" sizes="32x32">
-<link rel="icon" href="../favicon.svg?v=2" type="image/svg+xml">
+<link rel="icon" href="../favicon.svg?v=3" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="stylesheet" href="docs.css">
 <script>
