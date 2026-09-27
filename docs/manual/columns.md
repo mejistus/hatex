@@ -38,7 +38,7 @@ Everything else stays in its column, as in LaTeX:
 | Display equation | Scaled down to fit, number included; it never scrolls |
 | Image, TikZ picture | Shrinks to the column width |
 | Table | Scrolls sideways, unless it is in `\resizebox`, which scales it (see [Wide tables](tables.md#wide-tables)) |
-| Code block | Scrolls sideways |
+| Code block | Long lines wrap |
 
 ### Where a column breaks
 

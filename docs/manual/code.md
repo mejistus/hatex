@@ -59,7 +59,7 @@ Every code block gets a "copy" button in its top-right corner. It appears when t
 
 ## Wide code
 
-Long lines don't wrap: a code block scrolls sideways inside itself. This is also true in [two-column layouts](columns.md) and on slides, where code has a smaller font size.
+Long lines wrap at the edge of the block instead of scrolling sideways, also in [two-column layouts](columns.md) and on slides, where code has a smaller font size. Only the display wraps: the copy button and copy-and-paste give the lines as written.
 
 ## Not supported
 
