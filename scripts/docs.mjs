@@ -111,7 +111,7 @@ order.forEach((page, i) => {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(page === 'index.html' ? 'hatex manual' : `${title} · hatex manual`)}</title>
+<title>${esc(page === 'index.html' ? 'HaTeX manual' : `${title} · HaTeX manual`)}</title>
 <link rel="icon" href="../favicon-32.png" sizes="32x32">
 <link rel="icon" href="../favicon.svg?v=3" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
@@ -143,7 +143,7 @@ ${toc ? body.replace(/<\/h1>\n/, `</h1>\n${toc}\n`) : body}    </article>
       ${prev ? `<a class="prev" href="${prev}"><small>Previous</small>${esc(navTitle(prev))}</a>` : '<span></span>'}
       ${next ? `<a class="next" href="${next}"><small>Next</small>${esc(navTitle(next))}</a>` : '<span></span>'}
     </nav>
-    <footer>hatex ${esc(version)} · MIT License · <a href="${GITHUB}/blob/main/${src}">edit this page on GitHub</a></footer>
+    <footer>HaTeX ${esc(version)} · MIT License · <a href="${GITHUB}/blob/main/${src}">edit this page on GitHub</a></footer>
   </main>
 </div>
 <script>

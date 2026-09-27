@@ -50,7 +50,7 @@ This renders as **Theorem 1 (Cauchy–Schwarz).** *For all …*, followed by *Pr
 
 ## Algorithms
 
-hatex implements the `algorithmicx` / `algpseudocode` commands:
+HaTeX implements the `algorithmicx` / `algpseudocode` commands:
 
 ```latex
 \begin{algorithm}

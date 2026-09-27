@@ -1,6 +1,6 @@
-# hatex
+# HaTeX
 
-**hatex = html + latex.** A LaTeX front end for web pages: it turns articles and beamer slides written in LaTeX into HTML in the browser, including maths, booktabs tables, figures, TikZ, theorems, algorithms, citations, cross-references and two-column layouts.
+**HaTeX = HTML + LaTeX.** A LaTeX front end for web pages: it turns articles and beamer slides written in LaTeX into HTML in the browser, including maths, booktabs tables, figures, TikZ, theorems, algorithms, citations, cross-references and two-column layouts.
 
 The project page, with a playground, is at [mejistus.github.io/hatex](https://mejistus.github.io/hatex/). The demos are at [mejistus.github.io/hatex/demo](https://mejistus.github.io/hatex/demo/): a two-column paper, a Chinese document and a slide deck, each typeset from a single `.tex` file. It has no build-time dependencies. [KaTeX](https://katex.org) typesets the maths, [Prism](https://prismjs.com) highlights code (optional), and [TikZJax](https://github.com/drgrice1/tikzjax) compiles TikZ pictures (loaded only when a picture needs it).
 
@@ -43,7 +43,7 @@ To try the examples, run `npm start` and open <http://localhost:8000/examples/>.
 
 This is the subset of LaTeX that articles and blog posts use. **Commands it doesn't know degrade to their argument text instead of failing.** Each item links to its chapter in the [manual](docs/manual/README.md), and [docs/syntax.md](docs/syntax.md) is a one-page cheat sheet.
 
-- **Structure:** `\section`/`\subsection`/`\subsubsection` (numbered; `*` for unnumbered), `\paragraph`, `abstract`, `itemize`/`enumerate`/`description` (nested), `quote`, `center`, footnotes. See [How hatex reads a document](docs/manual/documents.md).
+- **Structure:** `\section`/`\subsection`/`\subsubsection` (numbered; `*` for unnumbered), `\paragraph`, `abstract`, `itemize`/`enumerate`/`description` (nested), `quote`, `center`, footnotes. See [How HaTeX reads a document](docs/manual/documents.md).
 - **Maths:** `$…$`, `\(…\)`, `\[…\]`, `$$…$$`, and `equation`/`align`/`gather`/`multline`/… with numbering, `\label`/`\eqref` and `\nonumber`/`\notag`. `\newcommand` and `\DeclareMathOperator` work inside maths too. See [Maths](docs/manual/maths.md).
 - **Tables:** `tabular` with booktabs rules, `\hline`, `|` column rules, `\multicolumn`, `\multirow`, `\cline`/`\cmidrule(lr)`, `\rowcolor`/`\cellcolor`. `\resizebox{\linewidth}{!}{…}` scales a wide table down to fit the column. See [Tables](docs/manual/tables.md).
 - **Figures:** `\includegraphics[width=0.5\linewidth]`, `subfigure` (numbered (a), (b), …), `minipage` side by side, `\caption` and `\label`. See [Figures](docs/manual/figures.md).
@@ -59,13 +59,13 @@ This is the subset of LaTeX that articles and blog posts use. **Commands it does
 
 ## Documentation
 
-The **[hatex manual](docs/manual/README.md)** describes everything in detail:
+The **[HaTeX manual](docs/manual/README.md)** describes everything in detail:
 
 | | |
 |---|---|
-| **Using hatex** | [Getting started](docs/manual/getting-started.md) · [How hatex reads a document](docs/manual/documents.md) · [Maths](docs/manual/maths.md) · [Tables](docs/manual/tables.md) · [Figures and images](docs/manual/figures.md) · [TikZ](docs/manual/tikz.md) · [Theorems, proofs and algorithms](docs/manual/theorems.md) · [Code](docs/manual/code.md) · [References](docs/manual/references.md) · [Two columns](docs/manual/columns.md) · [Slides](docs/manual/slides.md) · [Vertical Chinese](docs/manual/vertical-chinese.md) |
-| **Integrating hatex** | [JavaScript API](docs/manual/api.md) · [Theming](docs/manual/theming.md) · [The HTML output](docs/manual/html-output.md) · [Node, bundlers and static sites](docs/manual/node.md) · [Checking sources](docs/manual/checking.md) |
-| **Reference** | [Limitations and troubleshooting](docs/manual/troubleshooting.md) · [Developing hatex](docs/manual/development.md) · [Syntax cheat sheet](docs/syntax.md) |
+| **Using HaTeX** | [Getting started](docs/manual/getting-started.md) · [How HaTeX reads a document](docs/manual/documents.md) · [Maths](docs/manual/maths.md) · [Tables](docs/manual/tables.md) · [Figures and images](docs/manual/figures.md) · [TikZ](docs/manual/tikz.md) · [Theorems, proofs and algorithms](docs/manual/theorems.md) · [Code](docs/manual/code.md) · [References](docs/manual/references.md) · [Two columns](docs/manual/columns.md) · [Slides](docs/manual/slides.md) · [Vertical Chinese](docs/manual/vertical-chinese.md) |
+| **Integrating HaTeX** | [JavaScript API](docs/manual/api.md) · [Theming](docs/manual/theming.md) · [The HTML output](docs/manual/html-output.md) · [Node, bundlers and static sites](docs/manual/node.md) · [Checking sources](docs/manual/checking.md) |
+| **Reference** | [Limitations and troubleshooting](docs/manual/troubleshooting.md) · [Developing HaTeX](docs/manual/development.md) · [Syntax cheat sheet](docs/syntax.md) |
 
 ## API at a glance
 
@@ -87,14 +87,14 @@ The options are `tikzSvgBase`, `tikzLive`, `tikzErrors`, `tikzjaxBase`, `copyBut
 
 ## License
 
-hatex is released under the [MIT License](LICENSE): use, copy, modify and sell it for any purpose, as long as the copyright notice travels with it. It is original code, not a modification of another project. KaTeX and Prism (MIT) and TikZJax (GPL-3.0-or-later) are loaded from a CDN at runtime, and none of them is bundled into `dist/`, so their licenses apply to them alone. If you bundle any of them yourself, keep its license with it.
+HaTeX is released under the [MIT License](LICENSE): use, copy, modify and sell it for any purpose, as long as the copyright notice travels with it. It is original code, not a modification of another project. KaTeX and Prism (MIT) and TikZJax (GPL-3.0-or-later) are loaded from a CDN at runtime, and none of them is bundled into `dist/`, so their licenses apply to them alone. If you bundle any of them yourself, keep its license with it.
 
-Nothing more is required. If hatex is useful to you, a ⭐ on [GitHub](https://github.com/mejistus/hatex) is the nicest way to say thanks.
+Nothing more is required. If HaTeX is useful to you, a ⭐ on [GitHub](https://github.com/mejistus/hatex) is the nicest way to say thanks.
 
 
 ## Limitations
 
-hatex is not a TeX engine: there is no page layout, the article title block is dropped, maths is whatever KaTeX supports, `\input` and `.bib` files aren't read, and the input is assumed to be trusted. [Limitations and troubleshooting](docs/manual/troubleshooting.md) has the full list and fixes for common problems.
+HaTeX is not a TeX engine: there is no page layout, the article title block is dropped, maths is whatever KaTeX supports, `\input` and `.bib` files aren't read, and the input is assumed to be trusted. [Limitations and troubleshooting](docs/manual/troubleshooting.md) has the full list and fixes for common problems.
 
 ## Development
 
@@ -106,4 +106,4 @@ hatex is not a TeX engine: there is no page layout, the article title block is d
 | `npm run docs [-- path/to/out]` | Builds the manual into HTML pages for the project site (default `../mejistus.github.io/hatex/docs`). |
 | `npm run prerender` | Renders `examples/document/example.tex` to `static.html` (after `npm install`). |
 
-[Developing hatex](docs/manual/development.md) explains the source layout, how the renderer works and how to add commands.
+[Developing HaTeX](docs/manual/development.md) explains the source layout, how the renderer works and how to add commands.

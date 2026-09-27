@@ -11,7 +11,7 @@
 
 \begin{abstract}
 这篇文章本身就是一份模板：每一节演示一类日常写作场景。对照同目录下的 \texttt{example.tex} 即可看到对应的 LaTeX 源码，复制需要的片段即可使用。
-页面由 hatex 在浏览器中渲染：公式交给 KaTeX，代码交给 Prism，TikZ 图优先加载预渲染的 SVG，没有时由 TikZJax 现场编译。
+页面由 HaTeX 在浏览器中渲染：公式交给 KaTeX，代码交给 Prism，TikZ 图优先加载预渲染的 SVG，没有时由 TikZJax 现场编译。
 \end{abstract}
 
 \section{文字与段落}\label{sec:text}
@@ -226,7 +226,7 @@
 
 
 \subsection{神经网络架构图}
-检测器这类结构图不必外挂图片：hatex 内置了一组 \texttt{nn} 样式（\texttt{nnconv}、\texttt{nnpool}、\texttt{nnattn}、\texttt{nnout}、\texttt{nndata}、\texttt{nnflow}、\texttt{nnskip} 等），
+检测器这类结构图不必外挂图片：HaTeX 内置了一组 \texttt{nn} 样式（\texttt{nnconv}、\texttt{nnpool}、\texttt{nnattn}、\texttt{nnout}、\texttt{nndata}、\texttt{nnflow}、\texttt{nnskip} 等），
 只要图中用到其中任意一个，它们的定义就会自动补进这张图的导言区。
 图~\ref{fig:yolo26} 画的是 YOLO26 的整体组织：主干逐级下采样得到 P3/P4/P5，颈部先自顶向下、再自底向上融合（PAN-FPN），三个尺度各接一个检测头。
 虚线框标出的是 YOLO26 相对前代的改动——检测头去掉了 DFL、直接回归边框，推理端到端因而不再需要 NMS，训练侧则换用 ProgLoss、STAL 与 MuSGD。

@@ -18,7 +18,7 @@
 
 Without options, an image is shown at its natural size, but never wider than its container.
 
-**Paths are relative to the page, not to the `.tex` file.** hatex doesn't know where the source came from. If the page is `/posts/a.html` and it fetches `/posts/src/a.tex`, then `\includegraphics{fig.png}` loads `/posts/fig.png`. Absolute URLs (`https://…`) and `data:` URIs work too.
+**Paths are relative to the page, not to the `.tex` file.** HaTeX doesn't know where the source came from. If the page is `/posts/a.html` and it fetches `/posts/src/a.tex`, then `\includegraphics{fig.png}` loads `/posts/fig.png`. Absolute URLs (`https://…`) and `data:` URIs work too.
 
 **Write the file extension.** `\includegraphics{plot}` requests a file called `plot`, because a browser can't try `.pdf`, `.png` and `.jpg` in turn as LaTeX does. PDF images don't display in `<img>`, so convert them to SVG or PNG.
 

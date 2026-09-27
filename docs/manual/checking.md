@@ -1,6 +1,6 @@
 # Checking sources
 
-hatex never fails on a bad source; it renders what it can. That is convenient for readers, but it means that mistakes don't announce themselves. `HaTeX.lint` finds the structural ones before they reach a page.
+HaTeX never fails on a bad source; it renders what it can. That is convenient for readers, but it means that mistakes don't announce themselves. `HaTeX.lint` finds the structural ones before they reach a page.
 
 ```js
 const problems = HaTeX.lint(source);
@@ -45,13 +45,13 @@ With `{ frontMatter: true }`, lint also checks the `% ---` block at the top of t
 | `Date "…" is not YYYY-MM-DD` | The date isn't in the form `2024-05-01` (or `2024/5/1`) |
 | `Front matter has no tag (it decides the folder)` | No `tag:` line |
 
-These checks come from the blog that hatex was taken from, where the tag decides the folder a post goes into. They are off by default.
+These checks come from the blog that HaTeX was taken from, where the tag decides the folder a post goes into. They are off by default.
 
 ## What lint doesn't check
 
 - KaTeX syntax inside maths: an unknown command in `$…$` is reported by KaTeX in red in the output, not by lint.
 - TikZ syntax other than non-ASCII text: use the `tikzErrors` option while writing ([TikZ errors](tikz.md#errors)).
-- Commands that hatex doesn't support, which degrade to their text: read the output.
+- Commands that HaTeX doesn't support, which degrade to their text: read the output.
 - Whether image files exist: use `HaTeX.images` (below).
 
 ## Images

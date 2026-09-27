@@ -20,7 +20,7 @@ The columns need room. A two-column document is laid out in two columns only whi
 
 ### What spans both columns
 
-Web pages scroll, so hatex doesn't fill pages. It cuts the document into stretches at every item that spans the full width, and balances each stretch over two columns of about equal height:
+Web pages scroll, so HaTeX doesn't fill pages. It cuts the document into stretches at every item that spans the full width, and balances each stretch over two columns of about equal height:
 
 - `\section`, `\part` and `\chapter` headings. `\subsection` and lower stay in their column;
 - the `abstract`;

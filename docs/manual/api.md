@@ -85,7 +85,7 @@ Adds the page behaviour to HTML produced by `parse`, e.g. HTML rendered at build
 
 Calling it again on the same root is safe. Decks, copy buttons, zoom handlers and pictures that are already set up are skipped.
 
-A few things work for every `.hatex` element on the page, whether it was enhanced or not, because hatex listens on `document` from the moment it loads:
+A few things work for every `.hatex` element on the page, whether it was enhanced or not, because HaTeX listens on `document` from the moment it loads:
 
 - clicks on `\ref`, `\eqref`, `\cite` and footnote links scroll to the target and flash it;
 - window resizes re-run `layout` on every `.hatex` element;
@@ -105,7 +105,7 @@ Recomputes everything that depends on the rendered width:
 - the scale of slides, and the shrinking of slides whose content is too tall;
 - the splitting of `\jiazhu` notes in `guji`.
 
-It runs on the next animation frame, not synchronously. hatex runs it by itself after `render`/`enhance`, when fonts load, on window resize and when a TikZ picture arrives. Call it yourself when the element changes width in any other way:
+It runs on the next animation frame, not synchronously. HaTeX runs it by itself after `render`/`enhance`, when fonts load, on window resize and when a TikZ picture arrives. Call it yourself when the element changes width in any other way:
 
 ```js
 sidebarToggle.addEventListener('click', () => {

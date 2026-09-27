@@ -1,4 +1,4 @@
-# Developing hatex
+# Developing HaTeX
 
 ## Layout of the repository
 
@@ -16,7 +16,7 @@ examples/         runnable examples
 scripts/          build.mjs, serve.mjs, sync.mjs, docs.mjs (+ docs.css)
 ```
 
-hatex was taken out of the blog [mejistus.github.io](https://mejistus.github.io), where the renderer is still developed. The four modules `latex.js`, `tikz-nn.js`, `lint.js` and `bib.js` come from the blog's `assets/` folder. `extend.js`, `runtime.js` and `hatex.css` belong to hatex.
+HaTeX was taken out of the blog [mejistus.github.io](https://mejistus.github.io), where the renderer is still developed. The four modules `latex.js`, `tikz-nn.js`, `lint.js` and `bib.js` come from the blog's `assets/` folder. `extend.js`, `runtime.js` and `hatex.css` belong to hatex.
 
 ## Commands
 
