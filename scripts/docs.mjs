@@ -13,6 +13,9 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const out = resolve(root, process.argv[2] || '../mejistus.github.io/hatex/docs');
 const { version } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const GITHUB = 'https://github.com/mejistus/hatex';
+// The logo (H in sans-serif bold, aTeX set like the LaTeX logo), inline so it
+// takes the text colour in light and dark.
+const WORDMARK = readFileSync(join(root, 'scripts/wordmark.svg'), 'utf8').trim();
 
 // Repository path of each source → its page.
 const pages = new Map([['docs/manual/README.md', 'index.html'], ['docs/syntax.md', 'syntax.html']]);
@@ -118,7 +121,7 @@ order.forEach((page, i) => {
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="../">hatex</a>
+  <a class="brand" href="../">${WORDMARK}</a>
   <span class="sep">/</span>
   <a href="index.html">manual</a>
   <span class="ver">${esc(version)}</span>

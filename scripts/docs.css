@@ -45,7 +45,8 @@ a { color: inherit; }
   font-size: 0.95rem;
 }
 .top a { text-decoration: none; }
-.top .brand { font: 700 1.05rem var(--mono); }
+.top .brand { display: inline-flex; align-self: center; color: var(--ink); }
+.top .brand .wordmark { height: 1.35rem; width: auto; fill: currentColor; display: block; }
 .top .sep { color: var(--grey); }
 .top .ver { color: var(--grey); font-size: 0.8rem; }
 .theme {
