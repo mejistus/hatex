@@ -57,21 +57,6 @@ This is the subset of LaTeX that articles and blog posts use. **Commands it does
 - **Slides:** `\documentclass{beamer}` with frames, title page, outline, blocks and columns, every aspect ratio, and a full-screen presenter. See [Slides](docs/manual/slides.md).
 - **Vertical Chinese:** `guji` (a manuscript-scroll page read from right to left, with 句讀 marks), `vertical`, and `\jiazhu` two-line interlinear notes. See [Vertical Chinese](docs/manual/vertical-chinese.md).
 
-## How it compares
-
-hatex doesn't replace KaTeX: it uses it. KaTeX (or MathJax) typesets formulas; hatex handles the document around them (sections, numbering, floats, theorems, references, TikZ, slides) and hands every formula to KaTeX.
-
-| Project | What it converts | Where it runs | Maths | TikZ | Beamer slides |
-|---|---|---|---|---|---|
-| **hatex** | Articles and beamer decks, the subset papers and posts use | In the browser or Node; one script, no build step, no TeX installation | Typeset by KaTeX | Real TeX in the browser (TikZJax, WebAssembly), or pre-rendered SVGs | Yes, as web slides with a Present mode |
-| [KaTeX](https://katex.org), [MathJax](https://www.mathjax.org) | Formulas only | Browser or Node | They are the maths engine | No | No |
-| [LaTeX.js](https://latex.js.org) | Whole documents (article, book, report), aiming at TeX-like typesetting | Browser or Node | KaTeX | No | No |
-| [Pandoc](https://pandoc.org) | Between many formats, LaTeX among them | Command line, before publishing | MathJax, KaTeX or MathML in the output | Not drawn without extra filters and a TeX installation | Writes slides, but doesn't read beamer source as slides |
-| [LaTeXML](https://math.nist.gov/~BMiller/LaTeXML/) | Whole documents with broad package coverage (behind arXiv's HTML papers) | Command line (Perl), before publishing | MathML | Partial | Not a focus |
-| [TeX4ht / make4ht](https://tug.org/tex4ht/) | Whatever TeX compiles, since it runs TeX itself | Command line, with a TeX distribution | MathML or MathJax | Yes, as SVG images | Not a focus |
-
-In short: hatex is for putting your own LaTeX on the web as it is, with nothing to install or build, and it has features of its own, such as balanced two-column layouts and vertical Chinese (`guji`, `\jiazhu`). For a paper that relies on many packages, LaTeXML or TeX4ht, which cover far more of LaTeX, is the better tool. The comparison reflects each project's documentation in 2026.
-
 ## Documentation
 
 The **[hatex manual](docs/manual/README.md)** describes everything in detail:
