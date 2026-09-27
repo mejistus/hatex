@@ -1,4 +1,4 @@
-/*! hatex v1.5.1 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.6.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 /* hatex — styles for the HTML that parseLatex() produces.
  *
  * Everything is scoped to an element with class "hatex" and coloured through
@@ -253,13 +253,23 @@
   border: 1px solid var(--hx-border);
   border-radius: 0.5rem;
   padding: 1.2rem;
-  overflow-x: auto;
+  /* Long lines wrap instead of scrolling, as on a printed page. Only the
+     display wraps: copying the block gives the lines as written. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   margin: 1.5rem 0;
 }
 .hatex pre code {
   background: transparent;
   padding: 0;
   color: var(--hx-ink);
+}
+/* One block per line (HaTeX.enhance): a wrapped part hangs under the line's
+   own indentation, two characters further in. */
+.hatex pre .hatex-code-line {
+  display: block;
+  padding-left: calc((var(--hx-indent) + 2) * 1ch);
+  text-indent: calc((var(--hx-indent) + 2) * -1ch);
 }
 .hatex .token.comment, .hatex .token.prolog,
 .hatex .token.doctype, .hatex .token.cdata { color: var(--hx-tok-comment); }

@@ -1,4 +1,4 @@
-/*! hatex v1.5.1 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.6.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 const HaTeX = (function (window) {
 // ── src/tikz-nn.js ──
 // TikZ preamble for neural-network diagrams.
@@ -2303,6 +2303,7 @@ const HaTeX = (function (window) {
     setupDecks(root);
     layout(root);
     if (hasDOM && document.fonts && document.fonts.ready) document.fonts.ready.then(() => layout(root));
+    wrapCodeLines(root);
     if (opts.copyButtons) addCopyButtons(root);
     if (opts.zoom) makeZoomable(root);
     loadTikz(root, opts);
@@ -2714,6 +2715,41 @@ const HaTeX = (function (window) {
   }
 
   // ── Code blocks ──
+  // ── Code lines ──
+  // Long code lines wrap (see hatex.css). So that a wrapped part isn't taken
+  // for a line of its own, each line becomes a block with a hanging indent:
+  // its continuation sits under the line's own indentation, one step in.
+  // The newline stays at the end of each line, so copying is unchanged.
+  // Prism's spans can run across lines (a long string or comment); they are
+  // closed at the end of each line and opened again on the next.
+  function wrapCodeLines(root) {
+    root.querySelectorAll('pre > code:not([data-hatex-lines])').forEach(code => {
+      code.setAttribute('data-hatex-lines', '');
+      const parts = code.innerHTML.match(/<[^>]*>|[^<]+/g) || [];
+      const lines = [];
+      let open = [], line = '';
+      const finish = () => { lines.push(line + '</span>'.repeat(open.length)); line = open.join(''); };
+      for (const part of parts) {
+        if (part[0] === '<') {
+          if (part[1] === '/') open.pop(); else if (!part.endsWith('/>')) open.push(part);
+          line += part;
+          continue;
+        }
+        const pieces = part.split('\n');
+        pieces.forEach((piece, k) => {
+          if (k > 0) { line += '\n'; finish(); }
+          line += piece;
+        });
+      }
+      if (line.replace(/<[^>]*>/g, '')) finish();
+      code.innerHTML = lines.map(html => {
+        const lead = /^[ \t]*/.exec(html.replace(/<[^>]*>/g, ''))[0];
+        const indent = [...lead].reduce((n, c) => n + (c === '\t' ? 8 - n % 8 : 1), 0);
+        return `<span class="hatex-code-line" style="--hx-indent:${indent}">${html}</span>`;
+      }).join('');
+    });
+  }
+
   function addCopyButtons(root) {
     root.querySelectorAll('pre').forEach(pre => {
       if (pre.querySelector('.hatex-copy')) return;
@@ -3002,7 +3038,7 @@ const HaTeX = (function (window) {
   }
 
   const HaTeX = {
-    version: '1.5.1',
+    version: '1.6.0',
     use, parse, render, enhance, layout, lint, images, tikzSvgs,
     Bib: window.Bib,
   };

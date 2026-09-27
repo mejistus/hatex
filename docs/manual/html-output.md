@@ -110,6 +110,7 @@ Before it is enhanced, the box holds `<script type="text/x-tikz">` with the code
 | Code block | `<pre class="language-x"><code class="language-x">`, with Prism's `<span class="token …">` inside |
 | Inline code | `<code>` |
 | Copy button (runtime) | `<button class="hatex-copy">` inside the `<pre>` |
+| Code line (runtime) | `<span class="hatex-code-line" style="--hx-indent:N">` around each line of a code block, newline included; `N` is the line's indentation in characters, and a wrapped part hangs `N + 2` characters in |
 
 ## References
 
