@@ -41,204 +41,66 @@ To try the examples, run `npm start` and open <http://localhost:8000/examples/>.
 
 ## What it renders
 
-This is the subset of LaTeX that articles and blog posts use. **Commands it doesn't know degrade to their argument text instead of failing.** [docs/syntax.md](docs/syntax.md) has the full list, with the things it deliberately ignores.
+This is the subset of LaTeX that articles and blog posts use. **Commands it doesn't know degrade to their argument text instead of failing.** Each item links to its chapter in the [manual](docs/manual/README.md), and [docs/syntax.md](docs/syntax.md) is a one-page cheat sheet.
 
-- **Structure:** `\section`/`\subsection`/`\subsubsection` (numbered; `*` for unnumbered), `\paragraph`, `abstract`, `itemize`/`enumerate`/`description` (nested), `quote`, `center`, footnotes.
-- **Maths:** `$…$`, `\(…\)`, `\[…\]`, `$$…$$`, and `equation`/`align`/`gather`/`multline`/… with numbering, `\label`/`\eqref` and `\nonumber`/`\notag`. `\newcommand` and `\DeclareMathOperator` work inside maths too.
-- **Tables:** `tabular` with booktabs rules, `\hline`, `|` column rules, `\multicolumn`, `\multirow`, `\cline`/`\cmidrule(lr)`, `\rowcolor`/`\cellcolor`. `\resizebox{\linewidth}{!}{…}` scales a wide table down to fit the column.
-- **Figures:** `\includegraphics[width=0.5\linewidth]`, `subfigure` (numbered (a), (b), …), `minipage` side by side, `\caption` and `\label`.
-- **TikZ:** `tikzpicture`, `tikzcd`, pgfplots `axis`; see [TikZ](#tikz).
-- **Theorems:** `theorem`/`lemma`/`definition`/… and `proof` with ∎. `\newtheorem{hyp}{Hypothesis}` adds your own.
-- **Algorithms:** `algorithm` + `algorithmic` (algpseudocode: `\State`, `\If`, `\For`, `\While`, `\Repeat`/`\Until`, `\Function`, `\Comment`, …).
-- **Code:** `lstlisting[language=…]`, `minted{…}`, `verbatim`, `\verb|…|`, `\lstinline`.
-- **References:** `\ref`, `\eqref`, `\autoref`, `\cref`, `\cite` (several keys at once), `thebibliography`/`\bibitem`. Clicking a reference scrolls to its target and flashes it.
+- **Structure:** `\section`/`\subsection`/`\subsubsection` (numbered; `*` for unnumbered), `\paragraph`, `abstract`, `itemize`/`enumerate`/`description` (nested), `quote`, `center`, footnotes. See [How hatex reads a document](docs/manual/documents.md).
+- **Maths:** `$…$`, `\(…\)`, `\[…\]`, `$$…$$`, and `equation`/`align`/`gather`/`multline`/… with numbering, `\label`/`\eqref` and `\nonumber`/`\notag`. `\newcommand` and `\DeclareMathOperator` work inside maths too. See [Maths](docs/manual/maths.md).
+- **Tables:** `tabular` with booktabs rules, `\hline`, `|` column rules, `\multicolumn`, `\multirow`, `\cline`/`\cmidrule(lr)`, `\rowcolor`/`\cellcolor`. `\resizebox{\linewidth}{!}{…}` scales a wide table down to fit the column. See [Tables](docs/manual/tables.md).
+- **Figures:** `\includegraphics[width=0.5\linewidth]`, `subfigure` (numbered (a), (b), …), `minipage` side by side, `\caption` and `\label`. See [Figures](docs/manual/figures.md).
+- **TikZ:** `tikzpicture`, `tikzcd` and pgfplots `axis`, compiled by real TeX in the browser or loaded as pre-rendered SVGs, plus built-in styles for neural-network diagrams. See [TikZ](docs/manual/tikz.md).
+- **Theorems and algorithms:** `theorem`/`lemma`/`definition`/… and `proof` with ∎, `\newtheorem`, and `algorithm` + `algorithmic` (algpseudocode). See [Theorems, proofs and algorithms](docs/manual/theorems.md).
+- **Code:** `lstlisting[language=…]`, `minted{…}`, `verbatim`, `\verb|…|`, `\lstinline`, highlighted by Prism. See [Code](docs/manual/code.md).
+- **References:** `\ref`, `\eqref`, `\autoref`, `\cref`, `\cite` (several keys at once), `thebibliography`/`\bibitem`. Clicking a reference scrolls to its target and flashes it. See [References](docs/manual/references.md).
 - **Text:** `\textbf`, `\emph`, `\underline`, `\texttt`, `\sout`, `\hl`, `\textcolor`, `\colorbox`, `\definecolor`, `\href`, `\url`, the size commands, accents, `---`/`--`, ``` ``quotes'' ```, `\LaTeX`.
 - **Chinese:** when the source contains CJK text, captions and labels switch to 图/表/定理/证明/参考文献, and a line break between CJK characters doesn't add a space.
-- **Layout:** `\documentclass[twocolumn]` and `multicols`; see [Two columns](#two-columns).
-- **Slides:** `\documentclass{beamer}` with frames, title page, outline, blocks and columns, plus a full-screen presenter; see [Slides](#slides).
-- **Vertical Chinese:** `guji` (a manuscript-scroll page read from right to left, with 句讀 marks) and `vertical`, plus `\jiazhu` two-line interlinear notes; see [Vertical Chinese](#vertical-chinese-古籍).
+- **Layout:** `\documentclass[twocolumn]` and `multicols`, balanced by the runtime. See [Two columns](docs/manual/columns.md).
+- **Slides:** `\documentclass{beamer}` with frames, title page, outline, blocks and columns, every aspect ratio, and a full-screen presenter. See [Slides](docs/manual/slides.md).
+- **Vertical Chinese:** `guji` (a manuscript-scroll page read from right to left, with 句讀 marks), `vertical`, and `\jiazhu` two-line interlinear notes. See [Vertical Chinese](docs/manual/vertical-chinese.md).
 
-## API
+## Documentation
 
-Everything is on `window.HaTeX`. In Node or a bundler it is the default export.
+The **[hatex manual](docs/manual/README.md)** describes everything in detail:
 
-| Call | Returns | What it does |
-|---|---|---|
-| `HaTeX.render(target, source, options?)` | the element | Parses `source` into `target` (an element or a selector), adds class `hatex` and calls `enhance`. |
-| `HaTeX.parse(source)` | HTML string | Pure: no DOM, works in Node. Needs KaTeX for maths (see `use`). |
-| `HaTeX.enhance(root, options?)` | `root` | For HTML already on the page (for example output pre-rendered with `parse`). Fits `\resizebox`, loads TikZ, adds copy buttons and zoom. |
-| `HaTeX.layout(root)` | | Recomputes columns, table fitting and slide scaling. It runs on window resize by itself; call it when the element changes width some other way (a sidebar closing, a pane widening). |
-| `HaTeX.lint(source, { frontMatter? })` | `[{ line, severity, message }]` | Catches unclosed environments, unbalanced braces or `$`, unknown `\ref`/`\cite`, duplicate `\label`, tabular rows with the wrong cell count, and non-ASCII TikZ labels. |
-| `HaTeX.images(source)` | `[{ path, line }]` | Lists the local image paths the source uses, so you can check that they exist. |
-| `HaTeX.tikzSvgs(root)` | `[{ hash, file, svg }]` | Lists the pictures in `root` that were compiled live, as the files to save for pre-rendering. |
-| `HaTeX.use({ katex, Prism })` | `HaTeX` | Supplies KaTeX and Prism when they aren't globals (Node, bundlers). |
-| `HaTeX.Bib` | | Works with BibTeX: `parse(text)`, `format(entry)` → `\bibitem…`, `lookup(doiOrArxiv)` (fetched through doi.org), `isLookup(text)`. |
+| | |
+|---|---|
+| **Using hatex** | [Getting started](docs/manual/getting-started.md) · [How hatex reads a document](docs/manual/documents.md) · [Maths](docs/manual/maths.md) · [Tables](docs/manual/tables.md) · [Figures and images](docs/manual/figures.md) · [TikZ](docs/manual/tikz.md) · [Theorems, proofs and algorithms](docs/manual/theorems.md) · [Code](docs/manual/code.md) · [References](docs/manual/references.md) · [Two columns](docs/manual/columns.md) · [Slides](docs/manual/slides.md) · [Vertical Chinese](docs/manual/vertical-chinese.md) |
+| **Integrating hatex** | [JavaScript API](docs/manual/api.md) · [Theming](docs/manual/theming.md) · [The HTML output](docs/manual/html-output.md) · [Node, bundlers and static sites](docs/manual/node.md) · [Checking sources](docs/manual/checking.md) |
+| **Reference** | [Limitations and troubleshooting](docs/manual/troubleshooting.md) · [Developing hatex](docs/manual/development.md) · [Syntax cheat sheet](docs/syntax.md) |
 
-**Options** for `render` and `enhance`:
+## API at a glance
 
-| Option | Default | |
-|---|---|---|
-| `tikzSvgBase` | `'tikz/'` | Where pre-rendered pictures are, as `<base><hash>.svg`. `null` skips the lookup. |
-| `tikzLive` | `true` | Compiles pictures that have no SVG in the browser with TikZJax. |
-| `tikzErrors` | `false` | Shows a TeX error in place of a failed picture. It works by listening to the console, so it's best kept for editors. |
-| `tikzjaxBase` | jsDelivr | Where `tikzjax.js` and `fonts.css` come from, if you self-host them. |
-| `copyButtons` | `true` | Adds a "copy" button to code blocks. |
-| `zoom` | `true` | Opens an image or TikZ picture in an overlay when clicked. |
-| `animate` | `true` | `false` makes in-document links jump without scrolling or flashing, and the zoom overlay appear without a fade. The reader's reduced-motion setting does the same automatically. |
+Everything is on `window.HaTeX`. In Node or a bundler it is the default export. The [API chapter](docs/manual/api.md) has the details, the options and the events.
 
-**Events**, which bubble from the picture's box: `hatex:tikz` (`detail: { hash, svg }`) fires when a picture compiles, and `hatex:tikz-error` (`detail: { hash, message }`) fires when it fails.
+| Call | What it does |
+|---|---|
+| `HaTeX.render(target, source, options?)` | Parses `source` into `target` (an element or a selector) and enhances it. |
+| `HaTeX.parse(source)` | LaTeX → HTML string. Pure: no DOM, works in Node. |
+| `HaTeX.enhance(root, options?)` | Page behaviour for HTML already on the page: columns, TikZ, `\resizebox` fitting, slides, copy buttons, zoom. |
+| `HaTeX.layout(root)` | Redoes the width-dependent layout when the element changes width without a window resize. |
+| `HaTeX.lint(source, { frontMatter? })` | Lists structural problems: unclosed environments, unbalanced braces or `$`, unknown `\ref`/`\cite`, duplicate labels, wrong cell counts, non-ASCII TikZ text. |
+| `HaTeX.images(source)` | Lists the local image paths the source uses. |
+| `HaTeX.tikzSvgs(root)` | Lists the TikZ pictures compiled in this session, as files to save for pre-rendering. |
+| `HaTeX.use({ katex, Prism })` | Supplies KaTeX and Prism when they aren't globals. |
+| `HaTeX.Bib` | BibTeX `parse`, `format` → `\bibitem`, and `lookup(doiOrArxiv)`. |
 
-**Source lines:** every block in the output has `data-line` (the source line it starts on), and empty `<span class="latex-line" data-line>` markers inside it mark where each later line begins. That is all an editor needs to jump from the preview to the source; `editor.html` does it in about 10 lines.
-
-## Two columns
-
-`\documentclass[twocolumn]{article}` (or `\twocolumn`) sets the document in two balanced columns once its container is at least 50rem wide, and in one column below that. `\begin{multicols}{n} … \end{multicols}` does the same for a passage, from 32rem; `\columnbreak` moves to the next column.
-
-Web pages scroll, so hatex balances each stretch between full-width items instead of filling whole pages. Section headings and the abstract span both columns, and so do `figure*` and `table*`. Everything else stays in its column, as in LaTeX:
-
-- a display equation too wide for its column is scaled down to fit (to 60% at most, after which it scrolls);
-- pictures shrink to the column width;
-- wide tables and code listings scroll.
-
-A reader therefore only ever goes down one short column and up to the next.
-
-The runtime lays the columns out itself rather than with CSS multi-column, which misplaces KaTeX's maths in Safari. It measures each stretch and shares it out over side-by-side columns of about equal height. A column can break between blocks, between the paragraphs or items of a theorem, proof, quote, list or bibliography, and before or after a displayed equation, but never inside a line or right after a heading. This happens on load and on every window resize; if the element changes width some other way, call `HaTeX.layout(root)`.
-
-## Slides
-
-A source with `\documentclass{beamer}` (or any `frame` environment) renders as a deck:
-
-- **Frames:** `\begin{frame}[options]{Title}{Subtitle}` or `\frametitle`. The `plain`, `t` and `b` options work.
-- **Title page and outline:** `\titlepage` uses `\title`, `\subtitle`, `\author` (with `\and`), `\institute` and `\date`. `\tableofcontents` lists the `\section`s placed between frames.
-- **Blocks and columns:** `block`, `alertblock` and `exampleblock`; `columns` / `column{0.5\textwidth}` with the `T` option. These also work in articles.
-- **Aspect ratio:** all of beamer's values: `169`, `1610`, `149`, `141`, `54`, `43` (the default), `32`, `219`, `2013` and `1` (1:1). Any `W:H` works too, for example `aspectratio=1:1`. Slides use beamer's own sizes, so text keeps the same proportion to the slide in every format.
-- **Overlays:** `\pause`, `<2->` on `\item`, `\only`, `\uncover` and so on show every step at once. `\alert` stands out, and `\note` is dropped.
-
-Each slide is laid out at beamer's size (960×540 for 16:9, 768×576 for 4:3) and scaled to its frame, so it looks the same at any size. A slide is never taller than the space it's shown in, so a whole slide is always on screen, and content taller than a slide is shrunk to fit. A **Present** button, or a double-click on a slide, goes full screen: arrow keys, Space or a click move through the slides, and Esc leaves.
-
-## Vertical Chinese (古籍)
-
-```latex
-\begin{guji}[20]            % 20 characters to a column (行款)
-洛陽伽藍記序
-
-\begin{flushright}          % at the foot of its column
-魏撫軍府司馬楊衒之撰
-\end{flushright}
-
-三墳五典之說，\jiazhu{孔安國尚書序：伏犧、神農、黃帝之書，謂之三墳。}九流百代之言，……
-\end{guji}
-```
-
-- **`guji`** sets its content like a manuscript scroll (卷子本). Columns read from right to left, with the given number of characters each (20 by default). There are rules between the columns (烏絲欄) and along the top and bottom. The scroll moves sideways when it is wider than the page, starting at the right.
-- **Paragraphs** start a new column. `flushright` puts a line at the foot of its column, as for an author's name.
-- **Punctuation:** inside `guji`, modern punctuation is written as usual and shown the old way. 。！？ become a small circle beside the character (句) and ，、；： a dot (讀). Quotation and title marks are dropped. The original characters stay in the text, so copying still works.
-- **`\jiazhu{…}`** is an interlinear note in two small lines inside one line of text (雙行小字夾注); the command name comes from the CTAN `jiazhu` package. Inside `guji`, a note that doesn't fit where it stands continues at the top of the next column instead of leaving a gap. `\jiazhu` also works in ordinary horizontal text.
-- **`vertical`** is the same vertical layout without rules or punctuation changes.
-- **Styling variables:**
-  - `--hx-font-guji`: a traditional-Chinese Song face by default;
-  - `--hx-guji-pitch`: the column spacing;
-  - `--hx-guji-paper` and `--hx-guji-rule`: the paper and rule colours;
-  - `--hx-judou`: the colour of the marks (set it to a red for 朱筆圈點).
-
-## TikZ
-
-Each picture renders to `<div class="latex-tikz" data-tikz-hash="…">`. The hash is FNV-1a of the picture's code and options, so it changes only when the picture does. The runtime then does the first of these that works:
-
-1. It uses a picture already compiled in this session, so re-rendering in an editor never compiles the same picture twice.
-2. It loads `<tikzSvgBase><hash>.svg`.
-3. It compiles the picture live with TikZJax. This is real TeX in WebAssembly: about 6 MB on first use and 1–10 s per picture.
-
-**Pre-render for readers.** Compile once, save the SVGs, and readers never wait:
-
-1. Open the page with `tikzSvgBase: null`, or open `examples/tikz.html?live`, and let the pictures compile.
-2. Save each `{ file, svg }` from `HaTeX.tikzSvgs(root)` into your `tikz/` folder. `editor.html` and `tikz.html` show them as download links.
-3. Deploy. From then on `tikz/<hash>.svg` is fetched instead of compiled.
-
-**Rules:**
-- **Labels inside a picture must be ASCII.** TikZJax runs plain TeX, which has no CJK fonts. `HaTeX.lint` warns you about it.
-- Maths in labels (`$x_t$`) works.
-- `\usetikzlibrary{…}` anywhere in the document applies to the pictures after it. The libraries a picture obviously needs (`positioning`, `arrows.meta`, `calc`, …), pgfplots (for `axis`) and tikz-cd are added automatically.
-- `\definecolor` and `\newcommand` from the document are available inside pictures.
-- **Neural-network diagrams:** use any `nn*` style and the definitions are added for you.
-
-```latex
-\begin{tikzpicture}[nn]
-  \node[nndata] (x) {Image};
-  \node[nnconv, right=of x] (c) {Conv 3x3\\64};
-  \node[nnpool, right=of c] (p) {Max pool};
-  \draw[nnflow] (x) -- (c);
-  \draw[nnflow] (c) -- (p);
-\end{tikzpicture}
-```
-
-The layer styles are `nnconv`, `nnpool`, `nnfc`, `nnact`, `nnnorm`, `nnattn`, `nnembed`, `nnout`, `nndata`, `nnloss` and `nnsum`. Encoders and decoders are the trapezia `nnenc` (narrowing along the flow) and `nndec` (widening), and `nnfeat` draws a feature vector as a column of cells (`nnfeat=7` for seven; five by default). The arrows are `nnflow`, `nnskip` and `nnback`. For grouping and labels there are `nngroup`, `nngrouplabel`, `nnbrace` and `nnlabel`, and the pic `nnfeatmap={w=…, h=…, d=…, fill=…, label=…}` draws a 3-D feature map. They are defined in [`src/tikz-nn.js`](src/tikz-nn.js).
-
-## Theming
-
-The default look is plain: black on white in a LaTeX-like serif (KaTeX's Computer Modern), with no rules under headings. `\ref` and `\cite` show as plain numbers that are underlined on hover. Everything is a CSS variable on `.hatex`, so you can override any of it:
-
-```css
-.hatex {
-  --hx-ink: #000;               /* headings, rules, table text */
-  --hx-text: #222;              /* paragraphs, lists, captions */
-  --hx-muted: #666;             /* line numbers, comments, slide footers */
-  --hx-accent: #0b57d0;         /* links, section numbers, inline code */
-  --hx-code-bg: #f6f6f6;
-  --hx-cite: #3aa35b;           /* hyperref-style boxes around citations (transparent by default) */
-  --hx-font-body: Georgia, serif;
-  --hx-font-heading: var(--hx-font-body);
-}
-```
-
-- **Dark mode:** put `data-theme="dark"` on the `.hatex` element or any ancestor, or `data-theme="auto"` to follow the system. In dark mode, author colours (`\textcolor`) are lifted so they stay readable, text on `\rowcolor`/`\hl` backgrounds turns dark, and TikZ pictures are inverted in lightness with their hues kept, so black ink becomes light on the dark page. If you'd rather keep them on a light sheet, set `--hx-tikz-filter: none` and `--hx-tikz-sheet` (plus `--hx-tikz-sheet-pad`).
-- **Fonts:** the body uses `--hx-font-body`. Set it to `inherit` to use your page's font, and code uses `--hx-font-mono`.
-- Don't load a Prism theme, because it would fight `hatex.css` over code colours.
-
-## Node and static sites
-
-`parse` needs no DOM, so you can render at build time and ship plain HTML:
-
-```js
-import katex from 'katex';
-import HaTeX from 'hatex';              // dist/hatex.mjs
-HaTeX.use({ katex });
-const html = HaTeX.parse(source);       // put it inside <article class="hatex">…</article>
-```
-
-Add `katex.min.css` and `hatex.css` to the page. Include `hatex.js` and call `HaTeX.enhance(article)` only if you want TikZ, the `\ref` scrolling or the `\resizebox` fitting. `examples/node/prerender.mjs` is a complete script.
+The options are `tikzSvgBase`, `tikzLive`, `tikzErrors`, `tikzjaxBase`, `copyButtons`, `zoom` and `animate`, and they are described in [Options](docs/manual/api.md#options). Styling is done with `--hx-*` CSS variables and `data-theme="dark"` or `"auto"`; see [Theming](docs/manual/theming.md).
 
 ## License
 
 hatex is released under the [MIT License](LICENSE): use, copy, modify and sell it for any purpose, as long as the copyright notice travels with it. It is original code, not a modification of another project. KaTeX and Prism (MIT) and TikZJax (GPL-3.0-or-later) are loaded from a CDN at runtime, and none of them is bundled into `dist/`, so their licenses apply to them alone. If you bundle any of them yourself, keep its license with it.
 
+
 ## Limitations
 
-- **It isn't a TeX engine.** Unknown commands and environments degrade to their content instead of failing, and there is no page layout: `\vspace`, `\newpage` and floats' `[htbp]` are ignored.
-- **The title block is dropped.** `\title`, `\author`, `\date` and `\maketitle` produce nothing, so put the title block in your HTML.
-- **Maths is whatever KaTeX supports.** Packages like `siunitx` aren't available (`\SI{3}{m}` becomes `3m`).
-- **One file per document.** `\input` and `\include` are ignored, and so are `\bibliography{…}` files: write `thebibliography` (the editor example's DOI import does it for you).
-- **`enumerate` labels aren't configurable.** The levels go 1., a., i. whatever you ask for, and `\appendix` sections keep numbers instead of switching to letters.
-- **Trusted input only.** `\href` is limited to safe URL schemes, but the output is meant for your own writing. If you render other people's sources, sanitise the HTML first (and allow `<script type="text/x-tikz">` if you want TikZ).
+hatex is not a TeX engine: there is no page layout, the article title block is dropped, maths is whatever KaTeX supports, `\input` and `.bib` files aren't read, and the input is assumed to be trusted. [Limitations and troubleshooting](docs/manual/troubleshooting.md) has the full list and fixes for common problems.
 
-## Project layout
-
-```
-src/latex.js      the renderer: parseLatex(source) → HTML
-src/extend.js     two columns, multicols, beamer: rewrites around the renderer
-src/tikz-nn.js    the nn* TikZ styles
-src/lint.js       problems in a source
-src/bib.js        BibTeX parse / format / DOI lookup
-src/runtime.js    HaTeX API and page behaviour (TikZ, links, fitting, zoom, copy)
-src/hatex.css     styles for the output
-dist/             built files; commit them after `npm run build`
-examples/         see above
-scripts/          build.mjs · serve.mjs · sync.mjs
-```
+## Development
 
 | Command | |
 |---|---|
 | `npm run build` | Builds `src/` into `dist/hatex.js` (a classic script, also usable from CommonJS), `dist/hatex.mjs` (an ES module) and `dist/hatex.css`. |
 | `npm start` | Serves the repo at <http://localhost:8000/examples/>. |
-| `npm run sync [-- path/to/mejistus.github.io]` | Copies the four renderer modules from the blog's `assets/` and rebuilds. The blog is where they're developed, while `extend.js`, `runtime.js` and `hatex.css` belong to hatex. |
+| `npm run sync [-- path/to/mejistus.github.io]` | Copies the four renderer modules from the blog's `assets/` and rebuilds. |
 | `npm run prerender` | Renders `examples/document/example.tex` to `static.html` (after `npm install`). |
+
+[Developing hatex](docs/manual/development.md) explains the source layout, how the renderer works and how to add commands.

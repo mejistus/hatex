@@ -2,7 +2,7 @@
 
 What hatex understands, grouped by what you're writing. For a working document that uses all of it, see [`examples/document/example.tex`](../examples/document/example.tex).
 
-Anything not listed here is either ignored (layout commands, see the end of this page) or replaced by its argument text.
+Anything not listed here is either ignored (layout commands, see the end of this page) or replaced by its argument text. The [manual](manual/README.md) explains each feature in detail.
 
 ## Document
 
@@ -117,7 +117,7 @@ Whatever KaTeX supports works, including `cases`, `pmatrix`, `\boldsymbol` and `
 - `\tikzset`, `\pgfplotsset`, `\definecolor` and `\newcommand` from the document are passed into the picture.
 - Common libraries are detected from the code, and any others you declare with `\usetikzlibrary`.
 - **Labels must be ASCII.** Maths inside `$…$` is fine.
-- The `nn*` styles for architecture diagrams are listed in the [README](../README.md#tikz).
+- The `nn*` styles for architecture diagrams are listed in the manual's [TikZ chapter](manual/tikz.md#neural-network-diagrams).
 
 ## Theorems and proofs
 
