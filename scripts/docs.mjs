@@ -109,6 +109,7 @@ order.forEach((page, i) => {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(page === 'index.html' ? 'hatex manual' : `${title} · hatex manual`)}</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="docs.css">
 <script>
   // The light / dark choice shared with the project page; none means the system's.
