@@ -110,6 +110,7 @@ There is no automated test suite. Before committing:
 3. Update the README, `docs/syntax.md` and this manual for anything a user can see.
 4. Commit `src/`, `dist/` and the docs together, with a message in the form `hatex 1.4.0: vertical Chinese in the manner of old books`, and a body listing the changes.
 5. Publish on the project site: copy `dist/` to the site's `hatex/lib/`, and run `npm run docs` to rebuild the manual pages in its `hatex/docs/`.
+6. Copy `dist/hatex.js` and `dist/hatex.css` to `lib/` in [hatex-demo](https://github.com/mejistus/hatex-demo) too, which keeps its own copy, and point the site's `hatex/demo` submodule at the new commit.
 
 ---
 Previous: [Limitations and troubleshooting](troubleshooting.md) · [Contents](README.md)
