@@ -110,6 +110,10 @@ order.forEach((page, i) => {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(page === 'index.html' ? 'hatex manual' : `${title} · hatex manual`)}</title>
 <link rel="stylesheet" href="docs.css">
+<script>
+  // The light / dark choice shared with the project page; none means the system's.
+  try { const t = localStorage.getItem('hatex-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.color = t; } catch (_) {}
+</script>
 </head>
 <body>
 <header class="top">
@@ -117,6 +121,7 @@ order.forEach((page, i) => {
   <span class="sep">/</span>
   <a href="index.html">manual</a>
   <span class="ver">${esc(version)}</span>
+  <span class="theme" role="group" aria-label="Colour theme"><button type="button" data-set="auto" title="Follow the system setting">Auto</button><button type="button" data-set="light">Light</button><button type="button" data-set="dark">Dark</button></span>
   <button class="menu" type="button" aria-expanded="false" aria-controls="side">Chapters</button>
 </header>
 <div class="layout">
@@ -136,6 +141,15 @@ ${toc ? body.replace(/<\/h1>\n/, `</h1>\n${toc}\n`) : body}    </article>
   </main>
 </div>
 <script>
+  const html = document.documentElement;
+  const showTheme = () => document.querySelectorAll('.theme button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.set === (html.dataset.color || 'auto'))));
+  document.querySelectorAll('.theme button').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.set === 'auto') delete html.dataset.color; else html.dataset.color = b.dataset.set;
+    try { if (b.dataset.set === 'auto') localStorage.removeItem('hatex-theme'); else localStorage.setItem('hatex-theme', b.dataset.set); } catch (_) {}
+    showTheme();
+  }));
+  showTheme();
   document.querySelector('.menu').addEventListener('click', (e) => {
     const open = document.body.classList.toggle('side-open');
     e.currentTarget.setAttribute('aria-expanded', open);

@@ -2,17 +2,35 @@
    project page: black on white, system sans-serif, monospaced code. */
 :root {
   color-scheme: light;
+  --bg: #fff;
   --ink: #111;
   --grey: #555;
   --line: #ddd;
   --soft: #f6f6f6;
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --tok-comment: #8a8278; --tok-punct: #6b645b; --tok-number: #9a5b2e;
+  --tok-string: #3d7a4e; --tok-keyword: #7a3e8a; --tok-function: #1f5f9e; --tok-regex: #b3261e;
+}
+/* Dark: follows the system unless the switch (data-color on <html>) says otherwise. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-color="light"]) {
+    color-scheme: dark;
+    --bg: #191817; --ink: #e8e6e3; --grey: #a8a39c; --line: #3a3835; --soft: #242220;
+    --tok-comment: #9a948c; --tok-punct: #b5afa7; --tok-number: #e0a36f;
+    --tok-string: #8cc79b; --tok-keyword: #c9a2d6; --tok-function: #8ab8e6; --tok-regex: #f2b8b5;
+  }
+}
+:root[data-color="dark"] {
+  color-scheme: dark;
+  --bg: #191817; --ink: #e8e6e3; --grey: #a8a39c; --line: #3a3835; --soft: #242220;
+  --tok-comment: #9a948c; --tok-punct: #b5afa7; --tok-number: #e0a36f;
+  --tok-string: #8cc79b; --tok-keyword: #c9a2d6; --tok-function: #8ab8e6; --tok-regex: #f2b8b5;
 }
 * { box-sizing: border-box; }
 html { scroll-padding-top: 4rem; }
 body {
   margin: 0;
-  background: #fff;
+  background: var(--bg);
   color: var(--ink);
   font: 16px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -22,7 +40,7 @@ a { color: inherit; }
   position: sticky; top: 0; z-index: 2;
   display: flex; align-items: baseline; gap: 0.5rem;
   padding: 0.7rem 1.25rem;
-  background: #fff;
+  background: var(--bg);
   border-bottom: 1px solid var(--line);
   font-size: 0.95rem;
 }
@@ -30,9 +48,17 @@ a { color: inherit; }
 .top .brand { font: 700 1.05rem var(--mono); }
 .top .sep { color: var(--grey); }
 .top .ver { color: var(--grey); font-size: 0.8rem; }
+.theme {
+  margin-left: auto;
+  display: inline-flex; border: 1px solid var(--line); border-radius: 0.35rem; overflow: hidden;
+  font-size: 0.78rem;
+}
+.theme button { font: inherit; color: var(--grey); background: transparent; border: 0; padding: 0.15rem 0.5rem; cursor: pointer; }
+.theme button + button { border-left: 1px solid var(--line); }
+.theme button[aria-pressed="true"] { color: var(--ink); background: var(--soft); font-weight: 600; }
 .top .menu {
-  display: none; margin-left: auto;
-  font: inherit; font-size: 0.85rem; background: #fff; color: var(--ink);
+  display: none; margin-left: 0.5rem;
+  font: inherit; font-size: 0.85rem; background: var(--bg); color: var(--ink);
   border: 1px solid var(--ink); border-radius: 0.3rem; padding: 0.2rem 0.6rem;
 }
 
@@ -104,13 +130,13 @@ th, td { text-align: left; vertical-align: top; padding: 0.45rem 0.8rem 0.45rem 
 th { font-weight: 600; border-bottom-color: var(--ink); }
 
 /* Prism, in the tones of hatex's own code blocks. */
-.token.comment, .token.prolog, .token.doctype, .token.cdata { color: #8a8278; font-style: italic; }
-.token.punctuation { color: #6b645b; }
-.token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { color: #9a5b2e; }
-.token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted { color: #3d7a4e; }
-.token.atrule, .token.attr-value, .token.keyword { color: #7a3e8a; }
-.token.function, .token.class-name { color: #1f5f9e; }
-.token.regex, .token.important { color: #b3261e; }
+.token.comment, .token.prolog, .token.doctype, .token.cdata { color: var(--tok-comment); font-style: italic; }
+.token.punctuation { color: var(--tok-punct); }
+.token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { color: var(--tok-number); }
+.token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted { color: var(--tok-string); }
+.token.atrule, .token.attr-value, .token.keyword { color: var(--tok-keyword); }
+.token.function, .token.class-name { color: var(--tok-function); }
+.token.regex, .token.important { color: var(--tok-regex); }
 
 .pager {
   display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
@@ -127,7 +153,7 @@ footer { margin-top: 2rem; font-size: 0.85rem; color: var(--grey); }
   .layout { display: block; }
   .side {
     display: none; position: fixed; top: 2.9rem; left: 0; right: 0; bottom: 0;
-    max-height: none; z-index: 1; background: #fff; border-top: 1px solid var(--line);
+    max-height: none; z-index: 1; background: var(--bg); border-top: 1px solid var(--line);
   }
   body.side-open .side { display: block; }
   .toc ul { columns: 1; }
