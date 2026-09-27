@@ -65,7 +65,7 @@ A formula that KaTeX can't parse is shown with KaTeX's own error rendering (the 
 
 ## Maths in two columns
 
-In a [two-column layout](columns.md), a display equation that is too wide for its column is scaled down to fit, to 60% at the smallest. Below that it scrolls sideways. A numbered equation needs room for its number on both sides of the formula, because KaTeX centres the formula across the full width, and the fitting takes that into account.
+A display equation that is too wide for its line, in a [two-column layout](columns.md) or on a narrow screen, is scaled down until it fits. It never scrolls sideways, as a typeset page has no scrollbars. A numbered equation needs room for its number on both sides of the formula, because KaTeX centres the formula across the full width, and the fitting takes that into account.
 
 ## Accessibility and speed
 

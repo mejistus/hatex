@@ -103,6 +103,7 @@ hatex is not a TeX engine: there is no page layout, the article title block is d
 | `npm run build` | Builds `src/` into `dist/hatex.js` (a classic script, also usable from CommonJS), `dist/hatex.mjs` (an ES module) and `dist/hatex.css`. |
 | `npm start` | Serves the repo at <http://localhost:8000/examples/>. |
 | `npm run sync [-- path/to/mejistus.github.io]` | Copies the four renderer modules from the blog's `assets/` and rebuilds. |
+| `npm run docs [-- path/to/out]` | Builds the manual into HTML pages for the project site (default `../mejistus.github.io/hatex/docs`). |
 | `npm run prerender` | Renders `examples/document/example.tex` to `static.html` (after `npm install`). |
 
 [Developing hatex](docs/manual/development.md) explains the source layout, how the renderer works and how to add commands.
