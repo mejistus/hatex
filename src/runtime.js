@@ -324,13 +324,15 @@
   // ── \resizebox{\linewidth}{!}{...} ──
   // Scale the content down to the available width (not below 55%, after
   // which it scrolls instead).
-  // In a column, a display equation too wide for it is scaled down to fit
-  // (not below 60%, after which it scrolls), rather than spanning columns.
+  // A display equation too wide for its line (a column, or the page on a
+  // narrow screen) is scaled down until it fits, number included. It never
+  // scrolls: a typeset page has no scrollbars.
   function fitDisplays(root) {
-    root.querySelectorAll('.hatex-col .katex-display').forEach(d => {
+    root.querySelectorAll('.katex-display').forEach(d => {
       d.style.zoom = '';
-      const need = displayWidth(d), room = d.clientWidth;
-      if (need > room) d.style.zoom = Math.max(0.6, room / need).toFixed(3);
+      // Both on screen, so a scaled slide or column measures alike.
+      const need = displayWidth(d), room = d.getBoundingClientRect().width;
+      if (need > room && room > 0) d.style.zoom = (Math.floor(room / need * 1000) / 1000).toString();
     });
   }
 

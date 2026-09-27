@@ -1,0 +1,135 @@
+/* Styles of the manual pages built by scripts/docs.mjs, in the look of the
+   project page: black on white, system sans-serif, monospaced code. */
+:root {
+  color-scheme: light;
+  --ink: #111;
+  --grey: #555;
+  --line: #ddd;
+  --soft: #f6f6f6;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 4rem; }
+body {
+  margin: 0;
+  background: #fff;
+  color: var(--ink);
+  font: 16px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+a { color: inherit; }
+
+.top {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: baseline; gap: 0.5rem;
+  padding: 0.7rem 1.25rem;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.95rem;
+}
+.top a { text-decoration: none; }
+.top .brand { font: 700 1.05rem var(--mono); }
+.top .sep { color: var(--grey); }
+.top .ver { color: var(--grey); font-size: 0.8rem; }
+.top .menu {
+  display: none; margin-left: auto;
+  font: inherit; font-size: 0.85rem; background: #fff; color: var(--ink);
+  border: 1px solid var(--ink); border-radius: 0.3rem; padding: 0.2rem 0.6rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  max-width: 72rem;
+  margin: 0 auto;
+}
+.side {
+  position: sticky; top: 3.1rem;
+  align-self: start;
+  max-height: calc(100vh - 3.1rem);
+  overflow-y: auto;
+  padding: 1.5rem 1rem 2rem 1.25rem;
+  font-size: 0.9rem;
+}
+.side ul { list-style: none; margin: 0; padding: 0; }
+.side li { margin: 0; }
+.side a { display: block; padding: 0.25rem 0.5rem; border-radius: 0.25rem; text-decoration: none; color: var(--grey); }
+.side a:hover { color: var(--ink); background: var(--soft); }
+.side li.here a { color: var(--ink); font-weight: 600; background: var(--soft); }
+
+main { min-width: 0; padding: 1.5rem 1.25rem 3rem; max-width: 50rem; }
+
+.toc { font-size: 0.88rem; border-left: 2px solid var(--line); padding: 0.1rem 0 0.1rem 0.9rem; margin: 0.4rem 0 1.6rem; }
+.toc b { display: block; margin-bottom: 0.2rem; }
+.toc ul { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 1.5rem; }
+.toc li { margin: 0 0 0.15rem; break-inside: avoid; }
+.toc a { text-decoration: none; color: var(--grey); }
+.toc a:hover { color: var(--ink); text-decoration: underline; }
+
+article h1 { font-size: 2rem; line-height: 1.15; letter-spacing: -0.02em; margin: 0.4rem 0 1rem; }
+article h2 { font-size: 1.35rem; margin: 2.6rem 0 0.7rem; }
+article h3 { font-size: 1.08rem; margin: 1.8rem 0 0.4rem; }
+article h4 { font-size: 1rem; margin: 1.4rem 0 0.3rem; }
+article :is(h1, h2, h3, h4) { position: relative; }
+.anchor {
+  position: absolute; left: -1.1em; width: 1.1em;
+  color: var(--grey); text-decoration: none; font-weight: 400; opacity: 0;
+}
+article :is(h1, h2, h3, h4):hover .anchor { opacity: 1; }
+article p { margin: 0 0 0.9rem; }
+article ul, article ol { padding-left: 1.3rem; margin: 0 0 1rem; }
+article li { margin-bottom: 0.3rem; }
+article blockquote { margin: 0 0 1rem; padding: 0.1rem 0 0.1rem 1rem; border-left: 3px solid var(--line); color: var(--grey); }
+article hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
+article img { max-width: 100%; }
+
+code { font-family: var(--mono); font-size: 0.88em; }
+:not(pre) > code { background: var(--soft); padding: 0.05rem 0.3rem; border-radius: 0.2rem; overflow-wrap: anywhere; }
+pre {
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  line-height: 1.55;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 0.3rem;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+  margin: 0 0 1rem;
+  tab-size: 2;
+}
+pre code { font-size: inherit; }
+
+.table { overflow-x: auto; margin: 0 0 1rem; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; vertical-align: top; padding: 0.45rem 0.8rem 0.45rem 0; border-bottom: 1px solid var(--line); }
+th { font-weight: 600; border-bottom-color: var(--ink); }
+
+/* Prism, in the tones of hatex's own code blocks. */
+.token.comment, .token.prolog, .token.doctype, .token.cdata { color: #8a8278; font-style: italic; }
+.token.punctuation { color: #6b645b; }
+.token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { color: #9a5b2e; }
+.token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted { color: #3d7a4e; }
+.token.atrule, .token.attr-value, .token.keyword { color: #7a3e8a; }
+.token.function, .token.class-name { color: #1f5f9e; }
+.token.regex, .token.important { color: #b3261e; }
+
+.pager {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  margin: 3rem 0 0; padding-top: 1.2rem; border-top: 1px solid var(--line);
+}
+.pager a { text-decoration: none; padding: 0.6rem 0.8rem; border: 1px solid var(--line); border-radius: 0.3rem; }
+.pager a:hover { border-color: var(--ink); }
+.pager small { display: block; color: var(--grey); font-size: 0.78rem; }
+.pager .next { text-align: right; }
+footer { margin-top: 2rem; font-size: 0.85rem; color: var(--grey); }
+
+@media (max-width: 860px) {
+  .top .menu { display: inline-block; }
+  .layout { display: block; }
+  .side {
+    display: none; position: fixed; top: 2.9rem; left: 0; right: 0; bottom: 0;
+    max-height: none; z-index: 1; background: #fff; border-top: 1px solid var(--line);
+  }
+  body.side-open .side { display: block; }
+  .toc ul { columns: 1; }
+  .anchor { display: none; }
+}

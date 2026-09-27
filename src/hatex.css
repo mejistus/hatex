@@ -305,20 +305,10 @@
   font-size: 1.05em;
 }
 .hatex .katex-display {
-  overflow-x: auto;
-  overflow-y: hidden;
+  /* Never a scrollbar: the runtime scales an equation too wide for its line
+     down to fit (see fitDisplays), as a typeset page would. */
+  overflow: visible;
   padding: 0.5rem 0;
-}
-/* On a narrow screen a numbered equation can be wider than the column. KaTeX
-   pins the number to the column's right edge, on top of the maths; here the
-   equation's box grows to hold both, and the whole row scrolls instead. */
-@media (max-width: 720px) {
-  .hatex .katex-display > .katex > .katex-html:has(> .tag) {
-    box-sizing: border-box;
-    width: max-content;
-    min-width: 100%;
-    padding-right: 3em;
-  }
 }
 /* \label in display maths leaves an empty marker in front of the equation. */
 .hatex .latex-anchor {

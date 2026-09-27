@@ -13,7 +13,7 @@ src/hatex.css     styles for the output
 dist/             built files, committed
 docs/             syntax.md (cheat sheet) and this manual
 examples/         runnable examples
-scripts/          build.mjs, serve.mjs, sync.mjs
+scripts/          build.mjs, serve.mjs, sync.mjs, docs.mjs (+ docs.css)
 ```
 
 hatex was taken out of the blog [mejistus.github.io](https://mejistus.github.io), where the renderer is still developed. The four modules `latex.js`, `tikz-nn.js`, `lint.js` and `bib.js` come from the blog's `assets/` folder. `extend.js`, `runtime.js` and `hatex.css` belong to hatex.
@@ -25,6 +25,7 @@ hatex was taken out of the blog [mejistus.github.io](https://mejistus.github.io)
 | `npm run build` | Builds `dist/` from `src/` |
 | `npm start` | Serves the repository at <http://localhost:8000/examples/> (`node scripts/serve.mjs [port]`) |
 | `npm run sync [-- path/to/mejistus.github.io]` | Copies the four renderer modules from the blog's `assets/` (default `../mejistus.github.io`) and rebuilds |
+| `npm run docs [-- path/to/out]` | Builds this manual into HTML pages (default `../mejistus.github.io/hatex/docs`) |
 | `npm install && npm run prerender` | Renders `examples/document/example.tex` to `examples/document/static.html` |
 
 The build has no dependencies. `npm install` only installs KaTeX, for the prerender example.
@@ -108,6 +109,7 @@ There is no automated test suite. Before committing:
 2. `npm run build`.
 3. Update the README, `docs/syntax.md` and this manual for anything a user can see.
 4. Commit `src/`, `dist/` and the docs together, with a message in the form `hatex 1.4.0: vertical Chinese in the manner of old books`, and a body listing the changes.
+5. Publish on the project site: copy `dist/` to the site's `hatex/lib/`, and run `npm run docs` to rebuild the manual pages in its `hatex/docs/`.
 
 ---
 Previous: [Limitations and troubleshooting](troubleshooting.md) · [Contents](README.md)
