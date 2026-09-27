@@ -8,9 +8,9 @@
 | `dist/hatex.css` | Yes | Styles for the output: typography, tables, theorems, columns, slides, code tokens and dark mode. |
 | `dist/hatex.js` | Yes | The renderer and the page runtime. Defines `window.HaTeX`. |
 | `prism.min.js` + language components | No | Highlights code blocks. Without it, code is shown as plain text. |
-| TikZJax | Loaded by hatex itself | Compiles TikZ pictures. It is fetched from jsDelivr the first time a picture has no pre-rendered SVG; see [TikZ](tikz.md). |
+| TikZJax | Loaded by HaTeX itself | Compiles TikZ pictures. It is fetched from jsDelivr the first time a picture has no pre-rendered SVG; see [TikZ](tikz.md). |
 
-hatex has no build-time dependencies and bundles none of the libraries above. KaTeX 0.16 or later is supported.
+HaTeX has no build-time dependencies and bundles none of the libraries above. KaTeX 0.16 or later is supported.
 
 ## A first page
 
@@ -42,7 +42,7 @@ hatex has no build-time dependencies and bundles none of the libraries above. Ka
 
 `HaTeX.render` parses the source, puts the HTML into `#post`, adds the class `hatex` to it, and then runs the page behaviour: column layout, table fitting, TikZ, link scrolling, copy buttons and image zoom.
 
-**Order matters for KaTeX and Prism:** they must be loaded before `render` runs, because maths and code are typeset while parsing. Loading hatex itself with `defer` is fine as long as the call to `render` comes after it.
+**Order matters for KaTeX and Prism:** they must be loaded before `render` runs, because maths and code are typeset while parsing. Loading HaTeX itself with `defer` is fine as long as the call to `render` comes after it.
 
 **Don't load a Prism theme.** `hatex.css` colours code tokens from its own palette, and a Prism theme would fight it.
 
@@ -92,7 +92,7 @@ and
 Let $x \in \mathbb{R}$.
 ```
 
-render the same way (apart from the macro). The preamble is read only for definitions; see [How hatex reads a document](documents.md).
+render the same way (apart from the macro). The preamble is read only for definitions; see [How HaTeX reads a document](documents.md).
 
 ## Running the examples
 
@@ -114,9 +114,9 @@ npm start                 # http://localhost:8000/examples/
 
 ## Next steps
 
-- Writing documents: start with [How hatex reads a document](documents.md).
-- Putting hatex into a site: [JavaScript API](api.md) and [Theming](theming.md).
+- Writing documents: start with [How HaTeX reads a document](documents.md).
+- Putting HaTeX into a site: [JavaScript API](api.md) and [Theming](theming.md).
 - Slides: [Slides](slides.md).
 
 ---
-[Contents](README.md) · Next: [How hatex reads a document](documents.md)
+[Contents](README.md) · Next: [How HaTeX reads a document](documents.md)

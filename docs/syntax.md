@@ -1,6 +1,6 @@
 # Syntax reference
 
-What hatex understands, grouped by what you're writing. For a working document that uses all of it, see [`examples/document/example.tex`](../examples/document/example.tex).
+What HaTeX understands, grouped by what you're writing. For a working document that uses all of it, see [`examples/document/example.tex`](../examples/document/example.tex).
 
 Anything not listed here is either ignored (layout commands, see the end of this page) or replaced by its argument text. The [manual](manual/README.md) explains each feature in detail.
 

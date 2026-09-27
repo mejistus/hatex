@@ -1,6 +1,6 @@
 # TikZ
 
-hatex doesn't reimplement TikZ. Each picture is compiled by real TeX: [TikZJax](https://github.com/drgrice1/tikzjax) runs TeX in WebAssembly in the browser and produces an SVG. Because compiling is slow, hatex can instead load the SVG from a file that you saved earlier, so readers never wait.
+HaTeX doesn't reimplement TikZ. Each picture is compiled by real TeX: [TikZJax](https://github.com/drgrice1/tikzjax) runs TeX in WebAssembly in the browser and produces an SVG. Because compiling is slow, HaTeX can instead load the SVG from a file that you saved earlier, so readers never wait.
 
 ```latex
 \usetikzlibrary{arrows.meta,positioning}
@@ -102,11 +102,11 @@ HaTeX.render(el, tex, { tikzSvgBase: 'https://cdn.example.com/p/' });
 HaTeX.render(el, tex, { tikzSvgBase: null });              // never look for files
 ```
 
-Remember the trailing slash. Saved SVGs are exactly what TeX produced. On screen, hatex adds 1pt of room around the drawing (TikZJax's box cuts off the outer half of lines along its edges) and draws every line 0.2pt heavier, so that TeX's 0.4pt default lines don't vanish between pixel rows. Text is left alone.
+Remember the trailing slash. Saved SVGs are exactly what TeX produced. On screen, HaTeX adds 1pt of room around the drawing (TikZJax's box cuts off the outer half of lines along its edges) and draws every line 0.2pt heavier, so that TeX's 0.4pt default lines don't vanish between pixel rows. Text is left alone.
 
 ## Libraries
 
-`\usetikzlibrary{…}` anywhere in the document applies to the pictures after it. You rarely need it, because hatex detects the libraries that a picture obviously uses:
+`\usetikzlibrary{…}` anywhere in the document applies to the pictures after it. You rarely need it, because HaTeX detects the libraries that a picture obviously uses:
 
 | Library | Detected from |
 |---|---|
@@ -164,7 +164,7 @@ It doesn't see the rest of your preamble, `\usepackage` lines included.
 - **Text in a picture must be ASCII.** TikZJax runs plain TeX with Computer Modern fonts, which have no CJK glyphs, and a non-ASCII character stops the compile. `HaTeX.lint` warns about any non-ASCII character in a picture. To label a picture in Chinese, put the text in the caption, or draw the picture elsewhere and include it as an image.
 - Maths in labels works: `node {$\nabla_\theta L$}`.
 - `\\` in a node needs `align=center` (or `left`/`right`) on the node, as in TikZ. The `nn` style sets it for every node.
-- The fonts are TeX's, not the page's. hatex shows pictures 1.2× larger than their TeX size, so that a 10pt label matches the body text, and 1.8× on slides.
+- The fonts are TeX's, not the page's. HaTeX shows pictures 1.2× larger than their TeX size, so that a 10pt label matches the body text, and 1.8× on slides.
 
 ## Errors
 
@@ -197,11 +197,11 @@ By default, TikZJax comes from `https://cdn.jsdelivr.net/npm/@drgrice1/tikzjax@1
 HaTeX.render(el, tex, { tikzjaxBase: '/vendor/tikzjax/' });
 ```
 
-hatex loads `<tikzjaxBase>tikzjax.js` for live compiling, and `<tikzjaxBase>fonts.css` whenever a picture is shown, pre-rendered ones included, because the SVGs use TeX's fonts for their text. TikZJax is GPL-3.0-or-later; it is loaded at runtime and not bundled into hatex.
+HaTeX loads `<tikzjaxBase>tikzjax.js` for live compiling, and `<tikzjaxBase>fonts.css` whenever a picture is shown, pre-rendered ones included, because the SVGs use TeX's fonts for their text. TikZJax is GPL-3.0-or-later; it is loaded at runtime and not bundled into hatex.
 
 ## Neural-network diagrams
 
-hatex ships TikZ styles for drawing network architectures. Using any `nn…` style, or the `nn` picture option, adds their definitions and the libraries they need to the picture. Writing `\usennstyles` anywhere in a picture does the same without using a style.
+HaTeX ships TikZ styles for drawing network architectures. Using any `nn…` style, or the `nn` picture option, adds their definitions and the libraries they need to the picture. Writing `\usennstyles` anywhere in a picture does the same without using a style.
 
 ```latex
 \begin{tikzpicture}[nn]

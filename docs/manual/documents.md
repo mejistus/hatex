@@ -1,10 +1,10 @@
-# How hatex reads a document
+# How HaTeX reads a document
 
 This chapter covers the parts of LaTeX that every document uses: the preamble, comments, paragraphs, headings, text formatting and lists. Later chapters cover maths, tables, figures and the rest.
 
 ## The rule for unknown input
 
-hatex implements the subset of LaTeX that articles and blog posts use. It is not a TeX engine, and it never stops on input it doesn't understand:
+HaTeX implements the subset of LaTeX that articles and blog posts use. It is not a TeX engine, and it never stops on input it doesn't understand:
 
 - An **unknown command** keeps the text of the `{…}` groups directly after it and drops a leading `[…]`. `\foo[x]{bar}{baz}` becomes `barbaz`, and `\foo` alone becomes nothing.
 - An **unknown environment** renders its content as if the `\begin` and `\end` weren't there.
@@ -212,7 +212,7 @@ As in TeX, the spaces after a control word are dropped: `\ldots and` gives "…a
 
 ## Chinese documents
 
-If the source contains any CJK character (Chinese, Japanese kana, full-width forms), even in a comment, hatex switches to Chinese labels:
+If the source contains any CJK character (Chinese, Japanese kana, full-width forms), even in a comment, HaTeX switches to Chinese labels:
 
 | English | Chinese |
 |---|---|

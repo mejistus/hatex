@@ -31,7 +31,7 @@ A tabular can appear on its own, in a `table` float, inside a paragraph, or insi
 
 ## Column specification
 
-| Spec | Meaning in hatex |
+| Spec | Meaning in HaTeX |
 |---|---|
 | `l`, `c`, `r` | Left, centred, right |
 | `L`, `C`, `R` | Same as `l`, `c`, `r` (common custom column types) |

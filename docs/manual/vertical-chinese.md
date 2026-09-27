@@ -1,6 +1,6 @@
 # Vertical Chinese (古籍)
 
-hatex can set Chinese text vertically, in the manner of old books: columns read from top to bottom and from right to left, with old-style punctuation and two-line interlinear notes.
+HaTeX can set Chinese text vertically, in the manner of old books: columns read from top to bottom and from right to left, with old-style punctuation and two-line interlinear notes.
 
 ```latex
 \begin{guji}[20]

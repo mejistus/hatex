@@ -14,7 +14,7 @@ Everything in `hatex.css` is scoped to elements with the class `hatex` and colou
 
 The default is plain, like a LaTeX article: black on white, set in KaTeX's Computer Modern (`KaTeX_Main`, which `katex.min.css` loads), with no rules under headings. `\ref` and `\cite` show as plain numbers that are underlined on hover. The body text is `1rem` with a line height of 1.7, and headings are `1.4rem` (section), `1.15rem` (subsection) and `1rem` (subsubsection).
 
-hatex doesn't set a width: the output fills its container. A comfortable measure for an article is about `46rem`; see the examples.
+HaTeX doesn't set a width: the output fills its container. A comfortable measure for an article is about `46rem`; see the examples.
 
 ## Colours
 
@@ -53,7 +53,7 @@ hatex doesn't set a width: the output fills its container. A comfortable measure
 
 To use your site's font, set `--hx-font-body: inherit`. Maths always uses KaTeX's fonts, whatever the body font is.
 
-hatex loads no fonts itself: `KaTeX_Main` comes from `katex.min.css`, and the others must be installed or loaded by your page. The fallbacks in each list take over otherwise.
+HaTeX loads no fonts itself: `KaTeX_Main` comes from `katex.min.css`, and the others must be installed or loaded by your page. The fallbacks in each list take over otherwise.
 
 ## Code colours
 
@@ -91,7 +91,7 @@ The dark palette does more than swap black and white, because author-chosen colo
 - **Author-chosen backgrounds** (`\hl`, `\colorbox`, `\rowcolor`, `\cellcolor`) are usually light tints, so the text on them turns dark (`--hx-on-highlight`).
 - **TikZ drawings** are black ink on transparent paper. They are inverted in lightness with their hues kept (`--hx-tikz-filter`), so black lines become light while a red curve stays red.
 
-hatex doesn't colour the page background; set it on your `body` for each theme.
+HaTeX doesn't colour the page background; set it on your `body` for each theme.
 
 ### Keeping TikZ on a light sheet
 

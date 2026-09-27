@@ -1,6 +1,6 @@
 # Maths
 
-hatex hands every formula to [KaTeX](https://katex.org). What KaTeX supports works, including `cases`, `pmatrix`, `\boldsymbol`, `\operatorname`, `\underbrace`, `\xrightarrow` and `\mathbb`; see KaTeX's [list of supported functions](https://katex.org/docs/supported.html). hatex adds numbering, labels and your macros around it.
+HaTeX hands every formula to [KaTeX](https://katex.org). What KaTeX supports works, including `cases`, `pmatrix`, `\boldsymbol`, `\operatorname`, `\underbrace`, `\xrightarrow` and `\mathbb`; see KaTeX's [list of supported functions](https://katex.org/docs/supported.html). HaTeX adds numbering, labels and your macros around it.
 
 KaTeX must be loaded before `render` or `parse` runs. Without KaTeX, each formula is shown as its source in `<code>`.
 
@@ -69,7 +69,7 @@ A display equation that is too wide for its line, in a [two-column layout](colum
 
 ## Accessibility and speed
 
-KaTeX normally writes each formula twice: once as visible HTML and once as hidden MathML for screen readers. The MathML accounts for about three quarters of the layout time of a page full of maths, so hatex asks KaTeX for HTML only, and gives every formula `role="math"` and an `aria-label` holding its TeX source.
+KaTeX normally writes each formula twice: once as visible HTML and once as hidden MathML for screen readers. The MathML accounts for about three quarters of the layout time of a page full of maths, so HaTeX asks KaTeX for HTML only, and gives every formula `role="math"` and an `aria-label` holding its TeX source.
 
 ## What doesn't work
 
@@ -79,4 +79,4 @@ KaTeX normally writes each formula twice: once as visible HTML and once as hidde
 - **`\intertext`**, which KaTeX doesn't support. Close the environment, write the text, and open a new one.
 
 ---
-Previous: [How hatex reads a document](documents.md) · [Contents](README.md) · Next: [Tables](tables.md)
+Previous: [How HaTeX reads a document](documents.md) · [Contents](README.md) · Next: [Tables](tables.md)

@@ -4,7 +4,7 @@
 
 ## Installing
 
-hatex isn't published to npm. Install it from the repository, or copy `dist/` into your project:
+HaTeX isn't published to npm. Install it from the repository, or copy `dist/` into your project:
 
 ```sh
 npm install github:mejistus/hatex katex
@@ -95,7 +95,7 @@ A `.tex` file can be imported as a string with your bundler's raw import, e.g. `
 
 ## Frameworks
 
-hatex writes into a DOM element, so in React, Vue or Svelte, give it an element and render in an effect:
+HaTeX writes into a DOM element, so in React, Vue or Svelte, give it an element and render in an effect:
 
 ```jsx
 function Post({ source }) {

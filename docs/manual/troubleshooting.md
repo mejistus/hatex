@@ -2,7 +2,7 @@
 
 ## Limitations
 
-hatex renders the LaTeX that articles, notes and talks use. It is not a TeX engine, and these are deliberate limits:
+HaTeX renders the LaTeX that articles, notes and talks use. It is not a TeX engine, and these are deliberate limits:
 
 **Document**
 
@@ -46,7 +46,7 @@ hatex renders the LaTeX that articles, notes and talks use. It is not a TeX engi
 
 **Security**
 
-- The output is meant for trusted sources. `\href` is limited to safe URL schemes, but hatex is not a sanitiser; see [Security](node.md#security).
+- The output is meant for trusted sources. `\href` is limited to safe URL schemes, but HaTeX is not a sanitiser; see [Security](node.md#security).
 
 ## Troubleshooting
 
@@ -60,11 +60,11 @@ KaTeX wasn't available when the document was parsed. Load `katex.min.js` before 
 
 ### Nothing renders, or the console says fetch failed
 
-Browsers don't let pages opened as `file://` fetch other files. Serve the folder over HTTP: `npm start` in the hatex repository, or `npx serve`, or `python3 -m http.server`.
+Browsers don't let pages opened as `file://` fetch other files. Serve the folder over HTTP: `npm start` in the HaTeX repository, or `npx serve`, or `python3 -m http.server`.
 
 ### Stray words appear in the text
 
-A command that hatex doesn't know degraded to its argument text: for example, `\numberwithin{equation}{section}` shows "equationsection", and `\usetheme{Madrid}` in a slide body shows "Madrid". Move such commands to the preamble (before `\begin{document}`), where they are ignored, or remove them. [How hatex reads a document](documents.md#the-rule-for-unknown-input) explains the rule.
+A command that HaTeX doesn't know degraded to its argument text: for example, `\numberwithin{equation}{section}` shows "equationsection", and `\usetheme{Madrid}` in a slide body shows "Madrid". Move such commands to the preamble (before `\begin{document}`), where they are ignored, or remove them. [How HaTeX reads a document](documents.md#the-rule-for-unknown-input) explains the rule.
 
 ### A reference shows `??`
 
@@ -72,7 +72,7 @@ The label doesn't exist, is misspelt, or belongs to something unnumbered (a star
 
 ### A space is missing after a command
 
-TeX drops the spaces after a control word, and so does hatex: `\LaTeX is` gives "LaTeXis". Write `\LaTeX{} is` or `\LaTeX\ is`.
+TeX drops the spaces after a control word, and so does HaTeX: `\LaTeX is` gives "LaTeXis". Write `\LaTeX{} is` or `\LaTeX\ is`.
 
 ### The captions are in Chinese, but the document is in English
 
@@ -109,7 +109,7 @@ That is the lookup for pre-rendered pictures, which you haven't saved. Either pr
 
 - The picture's hash changed: you edited it, or added a `\tikzset` or `\pgfplotsset` anywhere in the document, or changed a colour or macro it uses. Compare `data-tikz-hash` on the box with the file name. See [What changes a picture's hash](tikz.md#what-changes-a-pictures-hash).
 - `tikzSvgBase` is wrong or lacks its trailing slash. It is relative to the page.
-- The server answers with an HTML page instead of the SVG (e.g. an SPA fallback). hatex only accepts a response that starts with `<svg`.
+- The server answers with an HTML page instead of the SVG (e.g. an SPA fallback). HaTeX only accepts a response that starts with `<svg`.
 
 ### Two columns don't appear
 
@@ -134,4 +134,4 @@ All of hatex's rules are scoped to `.hatex`, and slides use classed `div`s rathe
 The output uses `style` attributes for widths, colours and scaling. A policy without `style-src 'unsafe-inline'` blocks them, which breaks image widths, colours and slide scaling.
 
 ---
-Previous: [Checking sources](checking.md) · [Contents](README.md) · Next: [Developing hatex](development.md)
+Previous: [Checking sources](checking.md) · [Contents](README.md) · Next: [Developing HaTeX](development.md)
