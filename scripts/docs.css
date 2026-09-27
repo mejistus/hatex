@@ -50,14 +50,18 @@ a { color: inherit; }
 .top .ver { color: var(--grey); font-size: 0.8rem; }
 .theme {
   margin-left: auto;
-  display: inline-flex; border: 1px solid var(--line); border-radius: 0.35rem; overflow: hidden;
-  font-size: 0.78rem;
+  width: 1.9rem; height: 1.9rem; padding: 0;
+  display: grid; place-items: center; align-self: center;
+  color: var(--grey); background: transparent;
+  border: 1px solid var(--line); border-radius: 50%;
+  cursor: pointer; transition: color 0.15s, border-color 0.15s, background-color 0.15s;
 }
-.theme button { font: inherit; color: var(--grey); background: transparent; border: 0; padding: 0.15rem 0.5rem; cursor: pointer; }
-.theme button + button { border-left: 1px solid var(--line); }
-.theme button[aria-pressed="true"] { color: var(--ink); background: var(--soft); font-weight: 600; }
+.theme:hover { color: var(--ink); border-color: var(--grey); background: var(--soft); }
+.theme:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.theme svg { width: 1rem; height: 1rem; display: none; }
+.theme[data-mode="auto"] .i-auto, .theme[data-mode="light"] .i-light, .theme[data-mode="dark"] .i-dark { display: block; }
 .top .menu {
-  display: none; margin-left: 0.5rem;
+  display: none; margin-left: 0.5rem; align-self: center;
   font: inherit; font-size: 0.85rem; background: var(--bg); color: var(--ink);
   border: 1px solid var(--ink); border-radius: 0.3rem; padding: 0.2rem 0.6rem;
 }

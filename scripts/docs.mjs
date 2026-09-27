@@ -121,7 +121,7 @@ order.forEach((page, i) => {
   <span class="sep">/</span>
   <a href="index.html">manual</a>
   <span class="ver">${esc(version)}</span>
-  <span class="theme" role="group" aria-label="Colour theme"><button type="button" data-set="auto" title="Follow the system setting">Auto</button><button type="button" data-set="light">Light</button><button type="button" data-set="dark">Dark</button></span>
+  <button class="theme" type="button" data-mode="auto"><svg class="i-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/></svg><svg class="i-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg><svg class="i-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
   <button class="menu" type="button" aria-expanded="false" aria-controls="side">Chapters</button>
 </header>
 <div class="layout">
@@ -142,12 +142,24 @@ ${toc ? body.replace(/<\/h1>\n/, `</h1>\n${toc}\n`) : body}    </article>
 </div>
 <script>
   const html = document.documentElement;
-  const showTheme = () => document.querySelectorAll('.theme button').forEach(b =>
-    b.setAttribute('aria-pressed', String(b.dataset.set === (html.dataset.color || 'auto'))));
-  document.querySelectorAll('.theme button').forEach(b => b.addEventListener('click', () => {
-    if (b.dataset.set === 'auto') delete html.dataset.color; else html.dataset.color = b.dataset.set;
-    try { if (b.dataset.set === 'auto') localStorage.removeItem('hatex-theme'); else localStorage.setItem('hatex-theme', b.dataset.set); } catch (_) {}
+  const MODES = ['auto', 'light', 'dark'];
+  const LABEL = { auto: 'follows the system', light: 'light', dark: 'dark' };
+  const themeBtn = document.querySelector('.theme');
+  const nextMode = () => MODES[(MODES.indexOf(html.dataset.color || 'auto') + 1) % MODES.length];
+  function showTheme() {
+    const choice = html.dataset.color || 'auto', next = nextMode();
+    const label = 'Theme: ' + LABEL[choice] + '. Click for ' + (next === 'auto' ? 'the system setting' : next) + '.';
+    themeBtn.dataset.mode = choice;
+    themeBtn.title = label;
+    themeBtn.setAttribute('aria-label', label);
+  }
+  themeBtn.addEventListener('click', () => {
+    const next = nextMode();
+    if (next === 'auto') delete html.dataset.color; else html.dataset.color = next;
+    try { if (next === 'auto') localStorage.removeItem('hatex-theme'); else localStorage.setItem('hatex-theme', next); } catch (_) {}
     showTheme();
+  });
+  showTheme();
   }));
   showTheme();
   document.querySelector('.menu').addEventListener('click', (e) => {
