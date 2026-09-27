@@ -172,7 +172,7 @@ Each picture renders to `<div class="latex-tikz" data-tikz-hash="…">`. The has
 \end{tikzpicture}
 ```
 
-The layer styles are `nnconv`, `nnpool`, `nnfc`, `nnact`, `nnnorm`, `nnattn`, `nnembed`, `nnout`, `nndata`, `nnloss` and `nnsum`. The arrows are `nnflow`, `nnskip` and `nnback`. For grouping and labels there are `nngroup`, `nngrouplabel`, `nnbrace` and `nnlabel`, and the pic `nnfeatmap={w=…, h=…, d=…, fill=…, label=…}` draws a 3-D feature map. They are defined in [`src/tikz-nn.js`](src/tikz-nn.js).
+The layer styles are `nnconv`, `nnpool`, `nnfc`, `nnact`, `nnnorm`, `nnattn`, `nnembed`, `nnout`, `nndata`, `nnloss` and `nnsum`. Encoders and decoders are the trapezia `nnenc` (narrowing along the flow) and `nndec` (widening), and `nnfeat` draws a feature vector as a column of cells (`nnfeat=7` for seven; five by default). The arrows are `nnflow`, `nnskip` and `nnback`. For grouping and labels there are `nngroup`, `nngrouplabel`, `nnbrace` and `nnlabel`, and the pic `nnfeatmap={w=…, h=…, d=…, fill=…, label=…}` draws a 3-D feature map. They are defined in [`src/tikz-nn.js`](src/tikz-nn.js).
 
 ## Theming
 

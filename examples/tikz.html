@@ -42,6 +42,23 @@ Any \verb|nn*| style in a picture pulls in their definitions; nothing else to de
   \caption{Layers: \texttt{nndata}, \texttt{nnconv}, \texttt{nnpool}, \texttt{nnfc}, \texttt{nnout}; arrows: \texttt{nnflow}, \texttt{nnskip}.}\label{fig:cnn}
 \end{figure}
 
+Encoders and decoders are trapezia that narrow and widen along the flow, and a feature vector is a column of cells.
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}[nn]
+    \node[nndata] (x) {$x$};
+    \node[nnenc, right=of x] (e) {Encoder};
+    \node[nnfeat, right=of e] (z) {$z$};
+    \node[nndec, right=of z] (d) {Decoder};
+    \node[nnout, right=of d] (y) {$\hat x$};
+    \draw[nnflow] (x) -- (e);
+    \draw[nnflow] (e) -- (z);
+    \draw[nnflow] (z) -- (d);
+    \draw[nnflow] (d) -- (y);
+  \end{tikzpicture}
+  \caption{\texttt{nnenc}, \texttt{nnfeat} and \texttt{nndec}.}\label{fig:ae}
+\end{figure}
+
 \section{Plain TikZ}
 Libraries are declared as usual; labels must be ASCII (TikZJax runs plain \TeX{}, with no CJK fonts).
 \usetikzlibrary{arrows.meta,positioning}
@@ -70,7 +87,7 @@ An \verb|axis| environment loads pgfplots by itself.
   \caption{Two Gaussians.}\label{fig:pdf}
 \end{figure}
 
-Figures~\ref{fig:cnn}, \ref{fig:vae} and~\ref{fig:pdf} are numbered like any other figure.
+Figures~\ref{fig:cnn}, \ref{fig:ae}, \ref{fig:vae} and~\ref{fig:pdf} are numbered like any other figure.
 </script>
 
 <article id="out"></article>

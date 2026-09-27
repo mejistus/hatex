@@ -427,7 +427,7 @@
       }
       const libs = new Set([...ctx.tikzLibs, ...tikzLibrariesFor(m)]);
       // Neural-network styles ship with the site; pull them in when used.
-      if (/\\usennstyles|\bnn(?:conv|pool|fc|act|norm|attn|embed|out|data|loss|sum|flow|skip|back|label|group|grouplabel|brace|box|featmap|fm)\b|\[\s*nn\s*[,\]]/.test(m) && window.TIKZ_NN_PREAMBLE) {
+      if (/\\usennstyles|\bnn(?:conv|pool|fc|act|norm|attn|embed|out|data|loss|enc|dec|codec|feat|sum|flow|skip|back|label|group|grouplabel|brace|box|featmap|fm)\b|\[\s*nn\s*[,\]]/.test(m) && window.TIKZ_NN_PREAMBLE) {
         preamble.unshift(window.TIKZ_NN_PREAMBLE);
         ['positioning', 'arrows.meta', 'calc', 'fit', 'backgrounds', 'shapes.geometric', 'decorations.pathreplacing'].forEach(l => libs.add(l));
       }

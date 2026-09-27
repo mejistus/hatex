@@ -11,8 +11,9 @@
 //   \end{tikzpicture}
 //
 // Styles: nnconv nnpool nnfc nnact nnnorm nnattn nnembed nnout nndata nnloss
-//         (layers), nnflow nnskip nnback (arrows), nngroup nnbrace (grouping),
-//         and the pic "nnfeatmap" for a 3-D feature-map block.
+//         (layers), nnenc nndec (encoder / decoder trapezia), nnfeat (a
+//         feature vector), nnflow nnskip nnback (arrows), nngroup nnbrace
+//         (grouping), and the pic "nnfeatmap" for a 3-D feature-map block.
 (function () {
   'use strict';
 
@@ -27,6 +28,9 @@
 \definecolor{nnoutc}{HTML}{7A9E7E}
 \definecolor{nndatac}{HTML}{8A8278}
 \definecolor{nnlossc}{HTML}{B3524B}
+\definecolor{nnencc}{HTML}{5F80A6}
+\definecolor{nndecc}{HTML}{A6707F}
+\definecolor{nnfeatc}{HTML}{D29A4A}
 \tikzset{
   nn/.style={
     font=\small,
@@ -51,6 +55,32 @@
     trapezium, trapezium left angle=70, trapezium right angle=110,
     minimum width=14mm, minimum height=8mm, inner sep=3pt,
   },
+  % Encoder and decoder: a trapezium that narrows (encoder) or widens (decoder)
+  % along a left-to-right flow. For a downward flow add shape border rotate=180
+  % to nnenc and shape border rotate=0 to nndec.
+  nncodec/.style={
+    draw=#1!75!black, fill=#1!18, align=center, font=\small,
+    trapezium, trapezium stretches body, trapezium left angle=72, trapezium right angle=72,
+    rounded corners=1.5pt, minimum width=16mm, minimum height=14mm, inner sep=2pt,
+  },
+  nnenc/.style={nncodec=nnencc, shape border rotate=270},
+  nndec/.style={nncodec=nndecc, shape border rotate=90},
+  % Feature vector: a column of cells, \node[nnfeat] (z) {$z$}; nnfeat=7 for
+  % seven cells (at least 2; an odd count keeps the label inside a cell).
+  nnfeat/.style={
+    draw=nnfeatc!75!black, fill=nnfeatc!14, align=center, font=\small,
+    minimum width=6mm, minimum height=18mm, inner sep=1.5pt,
+    path picture={
+      \foreach \k in {2,4,...,#1}
+        \fill[nnfeatc!36] ($(path picture bounding box.south west)!{(\k-1)/#1}!(path picture bounding box.north west)$)
+          rectangle ($(path picture bounding box.south east)!{\k/#1}!(path picture bounding box.north east)$);
+      \foreach \k in {1,...,#1}
+        \draw[nnfeatc!75!black, line width=0.3pt]
+          ($(path picture bounding box.south west)!{\k/#1}!(path picture bounding box.north west)$) --
+          ($(path picture bounding box.south east)!{\k/#1}!(path picture bounding box.north east)$);
+    },
+  },
+  nnfeat/.default=5,
   nnsum/.style={
     draw=black!65, fill=white, circle, inner sep=0pt, minimum size=5mm, font=\footnotesize,
   },
