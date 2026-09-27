@@ -89,6 +89,8 @@ The options are `tikzSvgBase`, `tikzLive`, `tikzErrors`, `tikzjaxBase`, `copyBut
 
 hatex is released under the [MIT License](LICENSE): use, copy, modify and sell it for any purpose, as long as the copyright notice travels with it. It is original code, not a modification of another project. KaTeX and Prism (MIT) and TikZJax (GPL-3.0-or-later) are loaded from a CDN at runtime, and none of them is bundled into `dist/`, so their licenses apply to them alone. If you bundle any of them yourself, keep its license with it.
 
+Nothing more is required. If hatex is useful to you, a ⭐ on [GitHub](https://github.com/mejistus/hatex) is the nicest way to say thanks.
+
 
 ## Limitations
 
