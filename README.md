@@ -2,7 +2,7 @@
 
 **hatex = html + latex.** A LaTeX front end for web pages: it turns articles and beamer slides written in LaTeX into HTML in the browser, including maths, booktabs tables, figures, TikZ, theorems, algorithms, citations, cross-references and two-column layouts.
 
-It is the renderer behind [mejistus.github.io](https://mejistus.github.io), taken out of the site (v9.0.0) as a standalone package. The project page, with a playground, is at [mejistus.github.io/hatex](https://mejistus.github.io/hatex/). The demos are at [mejistus.github.io/hatex/demo](https://mejistus.github.io/hatex/demo/): a two-column paper, a Chinese document and a slide deck, each typeset from a single `.tex` file. It has no build-time dependencies. [KaTeX](https://katex.org) typesets the maths, [Prism](https://prismjs.com) highlights code (optional), and [TikZJax](https://github.com/drgrice1/tikzjax) compiles TikZ pictures (loaded only when a picture needs it).
+The project page, with a playground, is at [mejistus.github.io/hatex](https://mejistus.github.io/hatex/). The demos are at [mejistus.github.io/hatex/demo](https://mejistus.github.io/hatex/demo/): a two-column paper, a Chinese document and a slide deck, each typeset from a single `.tex` file. It has no build-time dependencies. [KaTeX](https://katex.org) typesets the maths, [Prism](https://prismjs.com) highlights code (optional), and [TikZJax](https://github.com/drgrice1/tikzjax) compiles TikZ pictures (loaded only when a picture needs it).
 
 ```
 .tex source ──parse()──▶ HTML string ──render()/enhance()──▶ live page
