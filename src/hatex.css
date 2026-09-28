@@ -634,8 +634,10 @@
 /* ── Vertical Chinese text: guji and vertical ──
    guji is a page in the manner of a manuscript scroll (卷子本): columns
    read from right to left, --hx-guji-chars characters to a column (行款),
-   ruled between the columns (烏絲欄) and above and below (天頭、地腳). It
-   scrolls sideways when wider than the page, starting at the right. */
+   ruled between the columns (烏絲欄) and above and below (天頭、地腳). When
+   it is wider than the page, the runtime cuts it into leaves as wide as the
+   page, stacked from top to bottom (.hatex-leaves); without the runtime it
+   scrolls sideways, starting at the right. */
 .hatex .hatex-guji-wrap,
 .hatex .hatex-vertical-wrap {
   writing-mode: vertical-rl;
@@ -643,6 +645,14 @@
   overflow-x: auto;
   overflow-y: hidden;
   margin: 1.5rem 0;
+}
+.hatex .hatex-leaves {
+  writing-mode: horizontal-tb;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1.2rem;
 }
 .hatex .hatex-guji,
 .hatex .hatex-vertical {
