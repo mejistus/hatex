@@ -1,4 +1,4 @@
-/*! hatex v1.9.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.10.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 /* hatex — styles for the HTML that parseLatex() produces.
  *
  * Everything is scoped to an element with class "hatex" and coloured through
@@ -637,8 +637,9 @@
    read from right to left, --hx-guji-chars characters to a column (行款),
    ruled between the columns (烏絲欄) and above and below (天頭、地腳). When
    it is wider than its sheet, the runtime cuts it into leaves (.hatex-leaves):
-   for guji, sheets of 3:4 set from right to left and wrapping onto the next
-   row; for vertical, leaves as wide as the page. Without the runtime it
+   for guji, sheets of --hx-guji-aspect (width to height, 4/3 by default: a
+   landscape page) set from right to left and wrapping onto the next row;
+   for vertical, leaves as wide as the page. Without the runtime it
    scrolls sideways, starting at the right. */
 .hatex .hatex-guji-wrap,
 .hatex .hatex-vertical-wrap {
@@ -653,7 +654,7 @@
   overflow: visible;
   display: flex;
   flex-flow: row-reverse wrap;   /* the first leaf at the right, as in a Chinese book */
-  justify-content: flex-start;
+  justify-content: center;
   align-items: flex-start;
   gap: 1.5rem 1.2rem;
 }
@@ -664,6 +665,7 @@
 .hatex .hatex-guji,
 .hatex .hatex-vertical {
   --hx-guji-chars: 20;
+  --hx-guji-aspect: 4/3;
   --hx-guji-pitch: 1.9em;
   writing-mode: vertical-rl;
   inline-size: calc(var(--hx-guji-chars) * 1em);
