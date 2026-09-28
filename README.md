@@ -33,11 +33,11 @@ To try the examples, run `npm start` and open <http://localhost:8000/examples/>.
 
 | Example | Shows |
 |---|---|
-| [`basic.html`](examples/basic.html) | The smallest setup: LaTeX in a `<script type="text/x-latex">` block and one `render` call |
-| [`editor.html`](examples/editor.html) | A live editor: re-renders as you type, lists problems, double-click jumps to the source line, adds a `\bibitem` from a DOI or arXiv id, dark mode |
-| [`tikz.html`](examples/tikz.html) | TikZ, the built-in `nn` styles and pgfplots; pre-rendered SVGs vs. compiling live (`?live`) |
-| [`document/`](examples/document/) | A full article (`example.tex`) that uses every feature, with images and TikZ |
-| [`node/prerender.mjs`](examples/node/prerender.mjs) | Renders a `.tex` file to static HTML in Node (`npm install && npm run prerender`) |
+| [`basic.html`](examples/basic.html) | The smallest setup: LaTeX in a `<script type="text/x-latex">` block and one `render` call || 
+| [`editor.html`](examples/editor.html) | A live editor: re-renders as you type, lists problems, double-click jumps to the source line, adds a `\bibitem` from a DOI or arXiv id, dark mode || 
+| [`tikz.html`](examples/tikz.html) | TikZ, the built-in `nn` styles and pgfplots; pre-rendered SVGs vs. compiling live (`?live`) || 
+| [`document/`](examples/document/) | A full article (`example.tex`) that uses every feature, with images and TikZ || 
+| [`node/prerender.mjs`](examples/node/prerender.mjs) | Renders a `.tex` file to static HTML in Node (`npm install && npm run prerender`) || 
 
 ## What it renders
 
@@ -59,16 +59,16 @@ This is the subset of LaTeX that articles and blog posts use. **Commands it does
 
 ## Compared with
 
-| Method | Maths | Document structure | TikZ | Beamer | Runs in browser |
-|:--|:-:|:-:|:-:|:-:|:-:|
-| [KaTeX](https://katex.org) | ✔ | | | | ✔ |
-| [MathJax](https://www.mathjax.org) | ✔ | | | | ✔ |
-| [LaTeX.js](https://latex.js.org) | ✔ | ✔ | | | ✔ |
-| [Pandoc](https://pandoc.org) | ✔ | ✔ | | | |
-| [TeX4ht](https://tug.org/tex4ht/) | ✔ | ✔ | ✔ | | |
-| **HaTeX (Ours)** | **✔** | **✔** | **✔** | **✔** | **✔** |
+| Method | Maths | Document structure | Two columns | TikZ | Beamer | Runs in browser |
+|:--|:-:|:-:|:-:|:-:|:-:|:-:|
+| [KaTeX](https://katex.org) | ✔ | | | | | ✔ |
+| [MathJax](https://www.mathjax.org) | ✔ | | | | | ✔ |
+| [LaTeX.js](https://latex.js.org) | ✔ | ✔ | | | | ✔ |
+| [Pandoc](https://pandoc.org) | ✔ | ✔ | | | | |
+| [TeX4ht](https://tug.org/tex4ht/) | ✔ | ✔ | | ✔ | | |
+| **HaTeX (Ours)** | **✔** | **✔** | **✔** | **✔** | **✔** | **✔** |
 
-Document structure: sections, numbering, cross-references and citations. Beamer: beamer slide decks shown as slides. Runs in browser: the `.tex` source is rendered in the reader's browser, with no build step. HaTeX typesets its maths with KaTeX.
+Document structure: sections, numbering, cross-references and citations. Two columns: a two-column paper is shown in two balanced columns, not reflowed into one. Beamer: beamer slide decks shown as slides. Runs in browser: the `.tex` source is rendered in the reader's browser, with no build step. HaTeX typesets its maths with KaTeX.
 
 ## Documentation
 
