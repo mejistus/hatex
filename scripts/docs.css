@@ -53,16 +53,19 @@ a { color: inherit; }
 .top .brand .wordmark .wm-h { fill: var(--brand-h); }
 .top .sep { color: var(--grey); }
 .top .ver { color: var(--grey); font-size: 0.8rem; }
-.theme {
-  margin-left: auto;
+.gh { margin-left: auto; }
+.theme { margin-left: 0.45rem; }
+.theme, .gh {
   width: 1.9rem; height: 1.9rem; padding: 0;
   display: grid; place-items: center; align-self: center;
   color: var(--grey); background: transparent;
   border: 1px solid var(--line); border-radius: 50%;
   cursor: pointer; transition: color 0.15s, border-color 0.15s, background-color 0.15s;
 }
-.theme:hover { color: var(--ink); border-color: var(--grey); background: var(--soft); }
-.theme:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.theme:hover, .gh:hover { color: var(--ink); border-color: var(--grey); background: var(--soft); }
+.gh svg { width: 1rem; height: 1rem; display: block; }
+.top a.gh { text-decoration: none; }
+.theme:focus-visible, .gh:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .theme svg { width: 1rem; height: 1rem; display: none; }
 .theme[data-mode="auto"] .i-auto, .theme[data-mode="light"] .i-light, .theme[data-mode="dark"] .i-dark { display: block; }
 .top .menu {

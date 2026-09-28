@@ -78,7 +78,9 @@
   function layout(root) {
     if (!root || !hasDOM) return;
     requestAnimationFrame(() => {
+      unpaginate(root);
       layoutNotes(root);
+      paginate(root);
       columnize(root);
       fitDisplays(root);
       fitBoxesNow(root);
@@ -126,6 +128,87 @@
     sizeNote(piece);
     sizeNote(j);
     return piece;
+  }
+
+  // ── Leaves (guji, vertical) ──
+  // A vertical text wider than the page doesn't scroll sideways: it is cut
+  // into leaves (頁) as wide as the page, stacked from top to bottom, the way
+  // a thread-bound book turns a scroll into pages. Each cut falls between two
+  // columns, never inside a note or beside a 句讀 mark. On the next layout
+  // the leaves are joined again and cut for the new width.
+  const LEAF = '.hatex-guji, .hatex-vertical';
+  function unpaginate(root) {
+    root.querySelectorAll('.hatex-leaves').forEach(wrap => {
+      const [first, ...rest] = wrap.querySelectorAll(':scope > .hatex-guji, :scope > .hatex-vertical');
+      rest.forEach(leaf => { joinInto(first, leaf); leaf.remove(); });
+      if (first) first.normalize();
+      wrap.classList.remove('hatex-leaves');
+    });
+  }
+  // Moves b's content to the end of a, gluing back elements a cut split.
+  function joinInto(a, b) {
+    while (b.firstChild) {
+      const n = b.firstChild, last = a.lastChild;
+      if (n.nodeType === 1 && n.hasAttribute('data-hx-cont') && last && last.nodeType === 1 && last.tagName === n.tagName) {
+        joinInto(last, n);
+        n.remove();
+      } else a.appendChild(n);
+    }
+  }
+  function paginate(root) {
+    root.querySelectorAll('.hatex-guji-wrap, .hatex-vertical-wrap').forEach(wrap => {
+      let leaf = wrap.querySelector(LEAF);
+      if (!leaf || !wrap.clientWidth) return;
+      for (let guard = 0; guard < 200 && leaf.getBoundingClientRect().width > wrap.clientWidth + 1; guard++) {
+        wrap.classList.add('hatex-leaves');
+        const next = cutLeaf(leaf, wrap.clientWidth);
+        if (!next) break;
+        leaf = next;
+      }
+    });
+  }
+  // Cuts leaf after as many columns as fit in `width`; returns the new leaf.
+  function cutLeaf(leaf, width) {
+    const cs = getComputedStyle(leaf);
+    const box = leaf.getBoundingClientRect();
+    const right = box.right - parseFloat(cs.borderRightWidth) - parseFloat(cs.paddingRight);
+    const extra = box.width - (box.right - box.left) + parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingLeft) +
+      parseFloat(cs.borderRightWidth) + parseFloat(cs.paddingRight);
+    const pitch = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.9;
+    const cols = Math.max(1, Math.floor((width - extra + 1) / pitch));
+    const limit = right - cols * pitch + pitch / 2; // a unit whose right edge is left of this starts column cols + 1
+    // Units: a note, or a character outside notes and marks.
+    const walker = document.createTreeWalker(leaf, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
+      acceptNode: (n) => n.nodeType === 1
+        ? (n.matches('.hatex-jiazhu') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP)
+        : (n.parentElement.closest('.hatex-jiazhu, .hatex-ju, .hatex-dou') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+    });
+    const range = document.createRange();
+    let at = null;
+    for (let n; !at && (n = walker.nextNode());) {
+      if (n.nodeType === 1) {
+        const r = n.getBoundingClientRect();
+        if (r.width && r.right < limit) { range.setStartBefore(n); at = true; }
+        continue;
+      }
+      const chars = [...n.data];
+      for (let i = 0, off = 0; i < chars.length; off += chars[i].length, i++) {
+        if (/\s/.test(chars[i])) continue;
+        const cr = document.createRange();
+        cr.setStart(n, off); cr.setEnd(n, off + chars[i].length);
+        const r = cr.getBoundingClientRect();
+        if (r.width && r.right < limit) { range.setStart(n, off); at = true; break; }
+      }
+    }
+    if (!at) return null;
+    range.setEndAfter(leaf.lastChild);
+    const frag = range.extractContents();
+    // Elements cut in two are marked on the new side, to be glued back later.
+    for (let e = frag.firstElementChild; e && e === e.parentNode.firstChild; e = e.firstElementChild) e.setAttribute('data-hx-cont', '');
+    const next = leaf.cloneNode(false);
+    next.appendChild(frag);
+    leaf.after(next);
+    return next;
   }
 
   function layoutNotes(root) {
