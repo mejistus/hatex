@@ -62,7 +62,7 @@ As shown by \citet[Thm.~2]{song2021}, …
 | `\cite{a}` | `[1]` |
 | `\cite{a,b}` | `[1, 2]` |
 | `\cite[p.~7]{a}` | `[1, p. 7]` |
-| `\citep`, `\citet`, `\parencite`, `\textcite`, `\autocite` | The same as `\cite`: there are no author–year styles |
+| `\citep`, `\citet`, `\parencite`, `\textcite`, `\autocite` | The same as `\cite` with numbered entries; author–year with natbib labels (below) |
 
 - Numbers follow the order of the `\bibitem`s, not the order of citation.
 - Each number links to its entry in the bibliography.
@@ -74,7 +74,9 @@ As shown by \citet[Thm.~2]{song2021}, …
 
 `thebibliography` becomes a numbered list headed "References" (参考文献). The `{9}` argument (the widest label) is read and dropped. `\bibitem[label]{key}` is accepted, but entries are always numbered `[1]`, `[2]`, …. The entry text can contain any inline formatting, links and maths.
 
-BibTeX files are not read: `\bibliography{refs}`, `\addbibresource` and `\printbibliography` are ignored. Write the entries into the document. `HaTeX.Bib` turns BibTeX into `\bibitem` lines, and can look a reference up from its DOI or arXiv id:
+An entry with a natbib label, `\bibitem[Vaswani et~al.(2017)Vaswani, Shazeer, …]{vaswani2017}` as BibTeX writes into a `.bbl`, is author–year: `\citet` gives "Vaswani et al. (2017)", `\citep` "(Vaswani et al., 2017)", and such entries have no numbers in the list. [Papers](papers.md#citations-and-the-bibliography) lists every form.
+
+A `.bib` or `.bbl` file can be given with the options `bib` and `bbl`: it replaces `\bibliography{…}`; see [Papers](papers.md#citations-and-the-bibliography). Without them, `\bibliography{refs}`, `\addbibresource` and `\printbibliography` are ignored. Write the entries into the document. `HaTeX.Bib` turns BibTeX into `\bibitem` lines, and can look a reference up from its DOI or arXiv id:
 
 ```js
 const [entry] = await HaTeX.Bib.lookup('2006.11239');   // or a DOI, or an arxiv.org URL

@@ -118,7 +118,9 @@ Before it is enhanced, the box holds `<script type="text/x-tikz">` with the code
 |---|---|
 | `\ref`, `\eqref`, `\autoref`, … | `<a class="latex-ref" href="#…">` (the type word of `\autoref` is outside the link) |
 | `\cite` | `<span class="latex-cite">[<a class="latex-cite-link">1</a>]</span>` |
-| `thebibliography` | `<div class="latex-bib"><h2>References</h2><ol><li>` with `<span class="latex-bib-num">[1]</span>` |
+| `thebibliography` | `<div class="latex-bib"><h2>References</h2><ol><li>` with `<span class="latex-bib-num">[1]</span>`; with natbib labels `<div class="latex-bib latex-bib-ay">` and no numbers |
+| Title block (`\maketitle`) | `<div class="hatex-span hatex-titleblock">` with `.hatex-title`, `.hatex-authors` > `.hatex-author` > `.hatex-author-name` / `.hatex-author-affil`, `.hatex-affiliations`, `.hatex-date`, `.hatex-title-notes` |
+| Author–year citation | `<span class="latex-cite latex-cite-ay">` around the text, with a link per key |
 | `\footnote` mark | `<sup class="latex-fn-ref"><a>` |
 | Footnotes | `<div class="latex-footnotes"><ol><li>…<a class="latex-fn-back">↩</a>` at the end |
 | A clicked link's target (runtime) | Gets `latex-flash` for the highlight animation |

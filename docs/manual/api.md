@@ -18,7 +18,7 @@ In every case, the library also sets a few globals that its modules share: `wind
 | Function | Needs a DOM | Summary |
 |---|---|---|
 | [`HaTeX.render(target, source, options?)`](#hatexrender) | Yes | Parse into an element and enhance it |
-| [`HaTeX.parse(source)`](#hatexparse) | No | LaTeX → HTML string |
+| [`HaTeX.parse(source, options?)`](#hatexparse) | No | LaTeX → HTML string |
 | [`HaTeX.enhance(root, options?)`](#hatexenhance) | Yes | Page behaviour for HTML already on the page |
 | [`HaTeX.layout(root)`](#hatexlayout) | Yes | Redo the width-dependent layout |
 | [`HaTeX.lint(source, options?)`](#hatexlint) | No | Problems in a source |
@@ -40,7 +40,7 @@ Renders `source` into `target` and returns the element.
 
 - `target` is an element or a CSS selector; a selector uses the first match. The element's content is replaced.
 - The element gets the class `hatex`, which the stylesheet is scoped to.
-- It is equivalent to `el.innerHTML = HaTeX.parse(source); HaTeX.enhance(el, options)`.
+- It is equivalent to `el.innerHTML = HaTeX.parse(source, options); HaTeX.enhance(el, options)`.
 
 Calling `render` again on the same element replaces the document and is cheap: an editor can call it on every keystroke (debounced). TikZ pictures that were already compiled come back from the session cache without compiling again.
 
@@ -51,7 +51,7 @@ const el = HaTeX.render('#post', tex, { zoom: false });
 ## `HaTeX.parse`
 
 ```ts
-HaTeX.parse(source: string): string
+HaTeX.parse(source: string, options?: { bib?, bbl?, titleBlock? }): string
 ```
 
 Converts a LaTeX source to an HTML string. It is pure: no DOM, no network, and it works in Node and in workers. KaTeX must be available (as a global, or through `use`) for maths, and Prism for highlighting; otherwise formulas come out as their source in `<code>` and code as plain text.
@@ -234,6 +234,9 @@ Options are passed to `render` and `enhance`, and apply to that root.
 | `tikzjaxBase` | `'https://cdn.jsdelivr.net/npm/@drgrice1/tikzjax@1.0.0-beta24/dist/'` | Where `tikzjax.js` and `fonts.css` come from, for self-hosting. Keep the trailing slash. |
 | `copyButtons` | `true` | Add a "copy" button to each code block. |
 | `zoom` | `true` | Open an image or TikZ picture in a full-window overlay when it is clicked. |
+| `bib` | none | The text of a `.bib` file. `\bibliography{…}` becomes the list of the entries the text cites; see [Papers](papers.md#citations-and-the-bibliography). For `render` and `parse`. |
+| `bbl` | none | The text of a `.bbl` file, which replaces `\bibliography{…}` as it is. For `render` and `parse`. |
+| `titleBlock` | `true` | `false` leaves out the title block that `\maketitle` shows ([Papers](papers.md#the-title-block)). For `render` and `parse`. |
 | `animate` | `true` | `false` makes in-document links jump without smooth scrolling or flashing, and the zoom overlay open and close without a fade. The reader's `prefers-reduced-motion` setting has the same effect. |
 
 ## Events

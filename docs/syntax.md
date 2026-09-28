@@ -164,8 +164,11 @@ Code is highlighted when Prism and the language's component are loaded, and show
 | `\ref{key}` | The number, linked. |
 | `\eqref{eq}` | `(n)`, linked. |
 | `\autoref{key}` `\cref{key}` `\Cref{key}` | The type word plus the number, e.g. “Figure 2” (in Chinese sources, 图 2). |
-| `\cite{a,b}` `\citep` `\citet` `\parencite` `\textcite` `\autocite` | Framed numbers `[1, 2]`, linked to the bibliography. |
-| `\begin{thebibliography}{9} \bibitem{key} … \end{thebibliography}` | A numbered reference list, in the order of the `\bibitem`s. |
+| `\cite{a,b}` `\citep` `\citet` `\parencite` `\textcite` `\autocite` | Numbers `[1, 2]`, linked to the bibliography; author–year with natbib labels. |
+| `\citealp` `\citeauthor` `\citeyear` `\citeyearpar` | natbib's other forms, with author–year entries. |
+| `\begin{thebibliography}{9} \bibitem{key} … \end{thebibliography}` | A numbered reference list, in the order of the `\bibitem`s. `\bibitem[Author(Year)…]{key}` makes an entry author–year. |
+| `\bibliography{refs}` | The bibliography from the `bib` or `bbl` option ([Papers](manual/papers.md)). |
+| `\title` `\author` `\date` `\maketitle` | A title block; `\and` `\And` `\AND` separate authors, `\thanks` adds a note. |
 
 Every link scrolls to its target and flashes it, and the URL doesn't change.
 
@@ -224,4 +227,4 @@ Every link scrolls to its target and flashes it, and the URL doesn't change.
 
 These produce nothing, but their arguments are still consumed so they don't leak into the text:
 
-`\title` `\author` `\date` `\maketitle` `\tableofcontents` `\vspace` `\hspace` `\newpage` `\clearpage` `\pagestyle` `\setlength` `\setcounter` `\bibliographystyle` `\bibliography` `\printbibliography` `\addbibresource` `\input` `\include` `\hypersetup` `\geometry` `\captionsetup` `\lstset` `\newenvironment` `\index` `\phantom` and float placement options such as `[htbp]`.
+`\tableofcontents` `\vspace` `\hspace` `\newpage` `\clearpage` `\pagestyle` `\setlength` `\setcounter` `\bibliographystyle` `\addbibresource` (and `\bibliography`, `\printbibliography` without the `bib`/`bbl` option) `\input` `\include` `\hypersetup` `\geometry` `\captionsetup` `\lstset` `\newenvironment` `\index` `\phantom` and float placement options such as `[htbp]`. `\title`, `\author` and `\date` produce nothing in an article without `\maketitle`.

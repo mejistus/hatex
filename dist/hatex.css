@@ -1,4 +1,4 @@
-/*! hatex v1.6.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.7.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 /* hatex — styles for the HTML that parseLatex() produces.
  *
  * Everything is scoped to an element with class "hatex" and coloured through
@@ -214,6 +214,43 @@
   vertical-align: -0.5ex;
   margin: 0 -0.125em 0 -0.1667em;
 }
+/* The title block of a paper (\maketitle, ICML's \icmltitle): title,
+   authors with their affiliations, and notes from \thanks. */
+.hatex .hatex-titleblock {
+  text-align: center;
+  margin: 0.5rem 0 2rem;
+}
+.hatex .hatex-title {
+  font-family: var(--hx-font-heading);
+  font-size: 1.75em;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--hx-ink);
+  margin: 0 auto 1.1rem;
+  max-width: 42rem;
+  text-wrap: balance;
+}
+.hatex .hatex-authors {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem 2.2rem;
+  margin-bottom: 0.8rem;
+}
+.hatex .hatex-authors-inline { display: block; }
+.hatex .hatex-author-name { color: var(--hx-ink); font-weight: 600; }
+.hatex .hatex-author-affil, .hatex .hatex-affiliations, .hatex .hatex-date {
+  font-size: 0.88em;
+  color: var(--hx-muted);
+  line-height: 1.5;
+}
+.hatex .hatex-affiliations { margin-bottom: 0.6rem; }
+.hatex .hatex-title-notes {
+  font-size: 0.8em;
+  color: var(--hx-muted);
+  margin-top: 0.6rem;
+}
+.hatex .hatex-sym { margin-right: 0.15em; }
 .hatex .latex-abstract {
   margin: 0 auto 2rem;
   max-width: 38rem;
@@ -504,6 +541,10 @@
   color: inherit !important;
   text-decoration: none !important;
 }
+/* Author-year citations are words in the sentence: no padding around the
+   names, and a long (A, 2017; B, 2018) may wrap. */
+.hatex .latex-cite-ay { white-space: normal; }
+.hatex .latex-cite-ay .latex-cite-link { display: inline; padding: 0; }
 .hatex .latex-cite-link:hover {
   background: color-mix(in srgb, var(--hx-cite) 12%, transparent);
   text-decoration: underline !important;
@@ -516,6 +557,11 @@
 .hatex .latex-bib li {
   position: relative;
   padding-left: 2.4rem;
+}
+/* Author-year references (natbib labels) have no numbers: a hanging indent. */
+.hatex .latex-bib-ay li {
+  padding-left: 1.6rem;
+  text-indent: -1.6rem;
 }
 .hatex .latex-bib-num {
   position: absolute;

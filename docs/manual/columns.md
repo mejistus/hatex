@@ -12,7 +12,7 @@
 \end{document}
 ```
 
-`\documentclass[twocolumn]{…}`, or `\twocolumn` anywhere in the source, sets the whole document in two columns. `\twocolumn` can't be switched off halfway: `\onecolumn` is removed and does nothing. The optional argument of `\twocolumn[…]` is removed together with its content, so put a spanning introduction in an `abstract` or before the first `\section` instead. In a beamer document, `twocolumn` is ignored.
+`\documentclass[twocolumn]{…}`, or `\twocolumn` anywhere in the source, sets the whole document in two columns. `\twocolumn` can't be switched off halfway: `\onecolumn` is removed and does nothing. The content of `\twocolumn[…]` is kept (ICML puts its title block there). Conference styles that are two-column by themselves are recognised too: `acl`, `aaai…`, `ijcai…`, the `IEEEtran` class and `acmart` with `sigconf`; see [Papers](papers.md#conference-templates). In a beamer document, `twocolumn` is ignored.
 
 ### When the columns appear
 

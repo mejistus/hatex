@@ -1,6 +1,6 @@
 # HaTeX
 
-**HaTeX = HTML + LaTeX.** A LaTeX front end for web pages: it turns articles and beamer slides written in LaTeX into HTML in the browser, including maths, booktabs tables, figures, TikZ, theorems, algorithms, citations, cross-references and two-column layouts.
+**HaTeX = HTML + LaTeX.** A LaTeX renderer for research papers on the web, made for computer science and AI. Give it the source of a NeurIPS, ICML, ICLR, CVPR, ACL or AAAI paper and it renders in the browser as the paper it is: title and authors, two columns where the template has them, numbered equations, tables and figures, TikZ, algorithms, natbib citations and the bibliography from your `.bib` (or the `.bbl` in an arXiv source). Readers get links, search and any screen size instead of a PDF viewer, and the same source also works for blog posts, notes and beamer slides.
 
 The project page, with a playground, is at [mejistus.github.io/hatex](https://mejistus.github.io/hatex/). The demos are at [mejistus.github.io/hatex/demo](https://mejistus.github.io/hatex/demo/): a two-column paper, a Chinese document and a slide deck, each typeset from a single `.tex` file. It has no build-time dependencies. [KaTeX](https://katex.org) typesets the maths, [Prism](https://prismjs.com) highlights code (optional), and [TikZJax](https://github.com/drgrice1/tikzjax) compiles TikZ pictures (loaded only when a picture needs it).
 
@@ -53,7 +53,8 @@ This is the subset of LaTeX that articles and blog posts use. **Commands it does
 - **References:** `\ref`, `\eqref`, `\autoref`, `\cref`, `\cite` (several keys at once), `thebibliography`/`\bibitem`. Clicking a reference scrolls to its target and flashes it. See [References](docs/manual/references.md).
 - **Text:** `\textbf`, `\emph`, `\underline`, `\texttt`, `\sout`, `\hl`, `\textcolor`, `\colorbox`, `\definecolor`, `\href`, `\url`, the size commands, accents, `---`/`--`, ``` ``quotes'' ```, `\LaTeX`.
 - **Chinese:** when the source contains CJK text, captions and labels switch to 图/表/定理/证明/参考文献, and a line break between CJK characters doesn't add a space.
-- **Layout:** `\documentclass[twocolumn]` and `multicols`, balanced by the runtime. See [Two columns](docs/manual/columns.md).
+- **Layout:** `\documentclass[twocolumn]`, two-column conference styles (ICML, CVPR, ACL, AAAI, IJCAI, IEEE, ACM) and `multicols`, balanced by the runtime. See [Two columns](docs/manual/columns.md).
+- **Papers:** the title block (`\maketitle`, ICML's `\icmltitle`), natbib author–year citations, and the bibliography from a `.bib` or `.bbl`. See [Papers](docs/manual/papers.md).
 - **Slides:** `\documentclass{beamer}` with frames, title page, outline, blocks and columns, every aspect ratio, and a full-screen presenter. See [Slides](docs/manual/slides.md).
 - **Vertical Chinese:** `guji` (a manuscript-scroll page read from right to left, with 句讀 marks), `vertical`, and `\jiazhu` two-line interlinear notes. See [Vertical Chinese](docs/manual/vertical-chinese.md).
 
@@ -87,7 +88,7 @@ Everything is on `window.HaTeX`. In Node or a bundler it is the default export. 
 | Call | What it does |
 |---|---|
 | `HaTeX.render(target, source, options?)` | Parses `source` into `target` (an element or a selector) and enhances it. |
-| `HaTeX.parse(source)` | LaTeX → HTML string. Pure: no DOM, works in Node. |
+| `HaTeX.parse(source, options?)` | LaTeX → HTML string. Pure: no DOM, works in Node. `options.bib` / `options.bbl` give the bibliography. |
 | `HaTeX.enhance(root, options?)` | Page behaviour for HTML already on the page: columns, TikZ, `\resizebox` fitting, slides, copy buttons, zoom. |
 | `HaTeX.layout(root)` | Redoes the width-dependent layout when the element changes width without a window resize. |
 | `HaTeX.lint(source, { frontMatter? })` | Lists structural problems: unclosed environments, unbalanced braces or `$`, unknown `\ref`/`\cite`, duplicate labels, wrong cell counts, non-ASCII TikZ text. |
@@ -107,7 +108,7 @@ Nothing more is required. If HaTeX is useful to you, a ⭐ on [GitHub](https://g
 
 ## Limitations
 
-HaTeX is not a TeX engine: there is no page layout, the article title block is dropped, maths is whatever KaTeX supports, `\input` and `.bib` files aren't read, and the input is assumed to be trusted. [Limitations and troubleshooting](docs/manual/troubleshooting.md) has the full list and fixes for common problems.
+HaTeX is not a TeX engine: there is no page layout, maths is whatever KaTeX supports, `\input` isn't followed and a `.bib` is read only when passed in, and the input is assumed to be trusted. [Limitations and troubleshooting](docs/manual/troubleshooting.md) has the full list and fixes for common problems.
 
 ## Development
 

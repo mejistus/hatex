@@ -111,7 +111,9 @@
     // Join with ". " without doubling a period ("et al." already ends with one).
     const bits = [people, title].filter(Boolean).map(x => x.replace(/\.$/, ''));
     let tail = '';
-    if (venue) tail = /^arXiv:/i.test(venue) ? venue : `In \\emph{${venue}}`;
+    // "In" for proceedings only: a journal is named as it is, a publisher plainly.
+    if (venue) tail = /^arXiv:/i.test(venue) ? venue : f.booktitle ? `In \\emph{${venue}}` :
+      (f.journal || f.journaltitle) && venue === (f.journal || f.journaltitle) ? `\\emph{${venue}}` : venue;
     if (tail && year) tail += `, ${year}`;
     else if (year) tail = year;
     return `\\bibitem{${key(e)}} ${bits.join('. ')}${tail ? '. ' + tail : ''}.`;
