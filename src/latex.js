@@ -58,7 +58,7 @@
     texttt: ['<code class="latex-tt">', '</code>'], textsc: ['<span class="latex-sc">', '</span>'],
     textsf: ['<span class="latex-sf">', '</span>'], sout: ['<s>', '</s>'], st: ['<s>', '</s>'],
     hl: ['<mark>', '</mark>'], textsuperscript: ['<sup>', '</sup>'], textsubscript: ['<sub>', '</sub>'],
-    textrm: ['', ''], textup: ['', ''], textmd: ['', ''], textnormal: ['', ''],
+    natexlab: ['', ''], textrm: ['', ''], textup: ['', ''], textmd: ['', ''], textnormal: ['', ''],
     mbox: ['', ''], hbox: ['', ''], text: ['', ''], fbox: ['<span class="latex-fbox">', '</span>'],
   };
   const SYMBOLS = {
@@ -69,11 +69,12 @@
     textregistered: '®', texttrademark: '™', S: '§', P: '¶', dag: '†', ddag: '‡',
     pounds: '£', euro: '€', texteuro: '€', textdegree: '°', textperiodcentered: '·',
     quad: '&emsp;', qquad: '&emsp;&emsp;', enspace: '&ensp;', thinspace: '&thinsp;',
-    newline: '<br>', linebreak: '<br>', par: ' ', hfill: ' ', hfil: ' ', indent: '',
+    newblock: ' ', newline: '<br>', linebreak: '<br>', par: ' ', hfill: ' ', hfil: ' ', indent: '',
     noindent: '', centering: '', raggedright: '', raggedleft: '', nolinebreak: '',
     maketitle: '', tableofcontents: '', newpage: '', clearpage: '', cleardoublepage: '',
     bigskip: '', medskip: '', smallskip: '', protect: '', relax: '', null: '',
     appendix: '', frontmatter: '', mainmatter: '', backmatter: '', item: '',
+    o: 'ø', O: 'Ø', aa: 'å', AA: 'Å', ae: 'æ', AE: 'Æ', oe: 'œ', OE: 'Œ', ss: 'ß', l: 'ł', L: 'Ł',
     TeX: '<span class="latex-logo">T<span class="e">e</span>X</span>',
     LaTeX: '<span class="latex-logo">L<span class="a">a</span>T<span class="e">e</span>X</span>',
     LaTeXe: '<span class="latex-logo">L<span class="a">a</span>T<span class="e">e</span>X&thinsp;2<sub>ε</sub></span>',
@@ -107,6 +108,15 @@
 
   function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // "Short(Year)Long" → { short, year }, or null for a plain label.
+  function natbibLabel(label) {
+    if (!label) return null;
+    let l = stripMarks(label).trim();
+    if (l[0] === '{' && l[l.length - 1] === '}') l = l.slice(1, -1).trim();
+    const m = /^([\s\S]*?)\(([^()]*)\)[\s\S]*$/.exec(l);
+    return m && m[1].trim() && m[2].trim() ? { short: m[1].trim(), year: m[2].trim() } : null;
   }
 
   // ── Low-level scanning helpers ──
@@ -216,6 +226,7 @@
       },
       counters: { section: 0, subsection: 0, subsubsection: 0, figure: 0, table: 0, equation: 0, algorithm: 0 },
       bib: {},
+      bibAY: {},  // key → { short, year } for natbib author-year entries
       tikzLibs: new Set(),
       tikzPreamble: [],
       tikzPgfplots: false,
@@ -286,11 +297,16 @@
       s = out + s.slice(i);
     }
 
-    // Bibliography numbers are needed before any \cite is rendered.
-    const bibRe = /\\bibitem\s*(?:\[[^\]]*\])?\s*\{([^}]*)\}/g;
+    // Bibliography numbers are needed before any \cite is rendered. A natbib
+    // label, \bibitem[Vaswani et~al.(2017)Vaswani, Shazeer, …]{key} (as in a
+    // .bbl file, sometimes wrapped in braces), makes the entry author-year.
+    const bibRe = /\\bibitem\s*(?:\[((?:[^[\]{}]|\{(?:[^{}]|\{[^{}]*\})*\})*)\])?\s*\{([^}]*)\}/g;
     for (let b; (b = bibRe.exec(s));) {
-      const key = b[1].trim();
-      if (!ctx.bib[key]) ctx.bib[key] = Object.keys(ctx.bib).length + 1;
+      const key = b[2].trim();
+      if (ctx.bib[key]) continue;
+      ctx.bib[key] = Object.keys(ctx.bib).length + 1;
+      const ay = natbibLabel(b[1]);
+      if (ay) ctx.bibAY[key] = ay;
     }
 
     // 3. Preamble: keep only the document body when there is one.
@@ -1003,10 +1019,12 @@
       const key = readGroup(raw, o ? o.end : 0);
       if (!key) return '';
       const k = key.content.trim();
-      return `<li id="${esc(ctx.uid + '-bib-' + k)}"${lines[n] ? ` data-line="${lines[n]}"` : ''}><span class="latex-bib-num">[${ctx.bib[k]}]</span>` +
+      const num = ctx.bibAY[k] ? '' : `<span class="latex-bib-num">[${ctx.bib[k]}]</span>`;
+      return `<li id="${esc(ctx.uid + '-bib-' + k)}"${lines[n] ? ` data-line="${lines[n]}"` : ''}>${num}` +
         renderInline(ctx, raw.slice(key.end).trim()) + '</li>';
     }).join('');
-    return `<div class="latex-bib"><h2>${ctx.names.references}</h2><ol>${lis}</ol></div>`;
+    const ay = Object.keys(ctx.bibAY).length === Object.keys(ctx.bib).length && Object.keys(ctx.bib).length > 0;
+    return `<div class="latex-bib${ay ? ' latex-bib-ay' : ''}"><h2>${ctx.names.references}</h2><ol>${lis}</ol></div>`;
   }
 
   function renderTheorem(ctx, def, env, body) {
@@ -1384,13 +1402,38 @@
         }).join(', ');
         return { html, end: a.end };
       }
-      case 'cite': case 'citep': case 'citet': case 'parencite': case 'textcite': case 'autocite': {
+      case 'cite': case 'citep': case 'citet': case 'parencite': case 'textcite': case 'autocite':
+      case 'citealp': case 'citealt': case 'citeauthor': case 'citeyear': case 'citeyearpar':
+      case 'Citet': case 'Citep': case 'Citealp': case 'Citealt': case 'Citeauthor':
+      case 'cite*': case 'citep*': case 'citet*': case 'Citet*': case 'Citep*': {
         const o = readOptional(s, end); if (o) end = o.end;
         const o2 = readOptional(s, end); if (o2) end = o2.end;
         const a = readGroup(s, end); if (!a) break;
-        const links = a.content.split(',').map(k => k.trim()).filter(Boolean).map(k =>
-          `<a class="latex-cite-link" href="#${esc(ctx.uid + '-bib-' + k)}">${ctx.bib[k] || esc(k)}</a>`).join(', ');
-        const note = (o2 || o) && (o2 || o).content.trim() ? ', ' + renderInline(ctx, (o2 || o).content) : '';
+        const keys = a.content.split(',').map(k => k.trim()).filter(Boolean);
+        const href = (k) => esc(ctx.uid + '-bib-' + k);
+        const post = (o2 || o) && (o2 || o).content.trim() ? renderInline(ctx, (o2 || o).content) : '';
+        // natbib author-year, when every key has a label like Vaswani et~al.(2017).
+        if (keys.length && keys.every(k => ctx.bibAY[k])) {
+          const kind = { parencite: 'citep', autocite: 'citep', textcite: 'citet', cite: 'citet' }[name.replace(/\*$/, '').toLowerCase()] ||
+            name.replace(/\*$/, '').toLowerCase();
+          const pre = o2 && o.content.trim() ? renderInline(ctx, o.content) + ' ' : '';
+          const A = (k) => renderInline(ctx, ctx.bibAY[k].short), Y = (k) => renderInline(ctx, ctx.bibAY[k].year);
+          const L = (k, inner) => `<a class="latex-cite-link" href="#${href(k)}">${inner}</a>`;
+          const N = post ? ', ' + post : '';
+          const last = keys.length - 1;
+          let html;
+          if (kind === 'citet') html = keys.map((k, n) => L(k, `${A(k)} (${Y(k)}${n === last ? N : ''})`)).join(', ');
+          else if (kind === 'citep') html = `(${pre}${keys.map(k => L(k, `${A(k)}, ${Y(k)}`)).join('; ')}${N})`;
+          else if (kind === 'citealp') html = `${pre}${keys.map(k => L(k, `${A(k)}, ${Y(k)}`)).join('; ')}${N}`;
+          else if (kind === 'citealt') html = `${pre}${keys.map(k => L(k, `${A(k)} ${Y(k)}`)).join('; ')}${N}`;
+          else if (kind === 'citeauthor') html = keys.map(k => L(k, A(k))).join(', ');
+          else if (kind === 'citeyear') html = keys.map(k => L(k, Y(k))).join(', ');
+          else html = `(${keys.map(k => L(k, Y(k))).join(', ')}${N})`; // citeyearpar
+          return { html: `<span class="latex-cite latex-cite-ay">${html}</span>`, end: a.end };
+        }
+        const links = keys.map(k =>
+          `<a class="latex-cite-link" href="#${href(k)}">${ctx.bib[k] || esc(k)}</a>`).join(', ');
+        const note = post ? ', ' + post : '';
         return { html: `<span class="latex-cite">[${links}${note}]</span>`, end: a.end };
       }
       case 'caption': {

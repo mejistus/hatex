@@ -86,7 +86,7 @@ This becomes a centred block titled "Abstract" (摘要 in a Chinese document). I
 
 ## Title, author and date
 
-In an article, `\title`, `\author`, `\date`, `\thanks` and `\maketitle` produce nothing. The page around the output usually has its own title, so put the title block in your HTML. In a [beamer document](slides.md), these commands fill the title page.
+In an article, `\maketitle` shows a title block made from `\title`, `\author` (with `\and`, `\And`, `\AND` and `\thanks`) and `\date`, as do the title commands of the common conference templates; see [Papers](papers.md#the-title-block). Without `\maketitle`, or with the option `titleBlock: false`, they produce nothing, for a page that shows its own title. In a [beamer document](slides.md), these commands fill the title page.
 
 ## Text formatting
 
@@ -235,14 +235,14 @@ For text set vertically, see [Vertical Chinese](vertical-chinese.md).
 
 These produce nothing, and their arguments are consumed so that they don't appear in the text:
 
-- **Title block:** `\title`, `\author`, `\date`, `\thanks`, `\maketitle` (in articles)
+- **Title block:** `\title`, `\author`, `\date`, `\thanks` in an article without `\maketitle` (see [Title, author and date](#title-author-and-date))
 - **Page layout:** `\vspace`, `\hspace`, `\newpage`, `\clearpage`, `\cleardoublepage`, `\pagestyle`, `\thispagestyle`, `\pagenumbering`, `\linespread`, `\bigskip`, `\medskip`, `\smallskip`, `\vfill`
 - **Settings:** `\setlength`, `\addtolength`, `\setcounter`, `\addtocounter`, `\stepcounter`, `\geometry`, `\hypersetup`, `\captionsetup`, `\lstset`, `\setminted`, `\graphicspath`
 - **Structure:** `\tableofcontents` (in articles), `\appendix`, `\frontmatter`, `\mainmatter`, `\backmatter`
-- **Bibliography files:** `\bibliographystyle`, `\bibliography`, `\addbibresource`, `\printbibliography`, `\nocite`
+- **Bibliography files:** `\bibliographystyle`, `\addbibresource`, `\nocite`; and `\bibliography`, `\printbibliography` unless a `.bib` or `.bbl` is given ([Papers](papers.md#citations-and-the-bibliography))
 - **Files and packages:** `\input`, `\include`, `\usepackage`, `\documentclass` (after reading its options)
 - **Other:** `\index`, `\phantom`, `\protect`, `\relax`, `\newenvironment`, `\renewenvironment`
 - **Float placement:** `[htbp]`, `[H]` and similar after `\begin{figure}` or `\begin{table}`
 
 ---
-Previous: [Getting started](getting-started.md) · [Contents](README.md) · Next: [Maths](maths.md)
+Previous: [Papers](papers.md) · [Contents](README.md) · Next: [Maths](maths.md)

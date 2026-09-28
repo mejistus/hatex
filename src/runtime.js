@@ -26,10 +26,12 @@
     return HaTeX;
   }
 
-  function parse(source) {
+  // options: { bib, bbl } (the text of a .bib or .bbl file, for
+  // \bibliography{…}) and titleBlock (false leaves out \maketitle's block).
+  function parse(source, options) {
     const X = window.hatexExtend;
     if (!X) return window.parseLatex(source);
-    const { source: prepared, info } = X.prepare(source);
+    const { source: prepared, info } = X.prepare(source, options);
     return X.finish(window.parseLatex(prepared), info, inline);
   }
 
@@ -43,7 +45,7 @@
   function render(target, source, options) {
     const root = typeof target === 'string' ? document.querySelector(target) : target;
     root.classList.add('hatex');
-    root.innerHTML = parse(source);
+    root.innerHTML = parse(source, options);
     return enhance(root, options);
   }
 

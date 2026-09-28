@@ -1,4 +1,4 @@
-/*! hatex v1.6.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.7.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 const HaTeX = (function (window) {
 // ── src/tikz-nn.js ──
 // TikZ preamble for neural-network diagrams.
@@ -172,7 +172,7 @@ const HaTeX = (function (window) {
     texttt: ['<code class="latex-tt">', '</code>'], textsc: ['<span class="latex-sc">', '</span>'],
     textsf: ['<span class="latex-sf">', '</span>'], sout: ['<s>', '</s>'], st: ['<s>', '</s>'],
     hl: ['<mark>', '</mark>'], textsuperscript: ['<sup>', '</sup>'], textsubscript: ['<sub>', '</sub>'],
-    textrm: ['', ''], textup: ['', ''], textmd: ['', ''], textnormal: ['', ''],
+    natexlab: ['', ''], textrm: ['', ''], textup: ['', ''], textmd: ['', ''], textnormal: ['', ''],
     mbox: ['', ''], hbox: ['', ''], text: ['', ''], fbox: ['<span class="latex-fbox">', '</span>'],
   };
   const SYMBOLS = {
@@ -183,11 +183,12 @@ const HaTeX = (function (window) {
     textregistered: '®', texttrademark: '™', S: '§', P: '¶', dag: '†', ddag: '‡',
     pounds: '£', euro: '€', texteuro: '€', textdegree: '°', textperiodcentered: '·',
     quad: '&emsp;', qquad: '&emsp;&emsp;', enspace: '&ensp;', thinspace: '&thinsp;',
-    newline: '<br>', linebreak: '<br>', par: ' ', hfill: ' ', hfil: ' ', indent: '',
+    newblock: ' ', newline: '<br>', linebreak: '<br>', par: ' ', hfill: ' ', hfil: ' ', indent: '',
     noindent: '', centering: '', raggedright: '', raggedleft: '', nolinebreak: '',
     maketitle: '', tableofcontents: '', newpage: '', clearpage: '', cleardoublepage: '',
     bigskip: '', medskip: '', smallskip: '', protect: '', relax: '', null: '',
     appendix: '', frontmatter: '', mainmatter: '', backmatter: '', item: '',
+    o: 'ø', O: 'Ø', aa: 'å', AA: 'Å', ae: 'æ', AE: 'Æ', oe: 'œ', OE: 'Œ', ss: 'ß', l: 'ł', L: 'Ł',
     TeX: '<span class="latex-logo">T<span class="e">e</span>X</span>',
     LaTeX: '<span class="latex-logo">L<span class="a">a</span>T<span class="e">e</span>X</span>',
     LaTeXe: '<span class="latex-logo">L<span class="a">a</span>T<span class="e">e</span>X&thinsp;2<sub>ε</sub></span>',
@@ -221,6 +222,15 @@ const HaTeX = (function (window) {
 
   function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // "Short(Year)Long" → { short, year }, or null for a plain label.
+  function natbibLabel(label) {
+    if (!label) return null;
+    let l = stripMarks(label).trim();
+    if (l[0] === '{' && l[l.length - 1] === '}') l = l.slice(1, -1).trim();
+    const m = /^([\s\S]*?)\(([^()]*)\)[\s\S]*$/.exec(l);
+    return m && m[1].trim() && m[2].trim() ? { short: m[1].trim(), year: m[2].trim() } : null;
   }
 
   // ── Low-level scanning helpers ──
@@ -330,6 +340,7 @@ const HaTeX = (function (window) {
       },
       counters: { section: 0, subsection: 0, subsubsection: 0, figure: 0, table: 0, equation: 0, algorithm: 0 },
       bib: {},
+      bibAY: {},  // key → { short, year } for natbib author-year entries
       tikzLibs: new Set(),
       tikzPreamble: [],
       tikzPgfplots: false,
@@ -400,11 +411,16 @@ const HaTeX = (function (window) {
       s = out + s.slice(i);
     }
 
-    // Bibliography numbers are needed before any \cite is rendered.
-    const bibRe = /\\bibitem\s*(?:\[[^\]]*\])?\s*\{([^}]*)\}/g;
+    // Bibliography numbers are needed before any \cite is rendered. A natbib
+    // label, \bibitem[Vaswani et~al.(2017)Vaswani, Shazeer, …]{key} (as in a
+    // .bbl file, sometimes wrapped in braces), makes the entry author-year.
+    const bibRe = /\\bibitem\s*(?:\[((?:[^[\]{}]|\{(?:[^{}]|\{[^{}]*\})*\})*)\])?\s*\{([^}]*)\}/g;
     for (let b; (b = bibRe.exec(s));) {
-      const key = b[1].trim();
-      if (!ctx.bib[key]) ctx.bib[key] = Object.keys(ctx.bib).length + 1;
+      const key = b[2].trim();
+      if (ctx.bib[key]) continue;
+      ctx.bib[key] = Object.keys(ctx.bib).length + 1;
+      const ay = natbibLabel(b[1]);
+      if (ay) ctx.bibAY[key] = ay;
     }
 
     // 3. Preamble: keep only the document body when there is one.
@@ -1117,10 +1133,12 @@ const HaTeX = (function (window) {
       const key = readGroup(raw, o ? o.end : 0);
       if (!key) return '';
       const k = key.content.trim();
-      return `<li id="${esc(ctx.uid + '-bib-' + k)}"${lines[n] ? ` data-line="${lines[n]}"` : ''}><span class="latex-bib-num">[${ctx.bib[k]}]</span>` +
+      const num = ctx.bibAY[k] ? '' : `<span class="latex-bib-num">[${ctx.bib[k]}]</span>`;
+      return `<li id="${esc(ctx.uid + '-bib-' + k)}"${lines[n] ? ` data-line="${lines[n]}"` : ''}>${num}` +
         renderInline(ctx, raw.slice(key.end).trim()) + '</li>';
     }).join('');
-    return `<div class="latex-bib"><h2>${ctx.names.references}</h2><ol>${lis}</ol></div>`;
+    const ay = Object.keys(ctx.bibAY).length === Object.keys(ctx.bib).length && Object.keys(ctx.bib).length > 0;
+    return `<div class="latex-bib${ay ? ' latex-bib-ay' : ''}"><h2>${ctx.names.references}</h2><ol>${lis}</ol></div>`;
   }
 
   function renderTheorem(ctx, def, env, body) {
@@ -1498,13 +1516,38 @@ const HaTeX = (function (window) {
         }).join(', ');
         return { html, end: a.end };
       }
-      case 'cite': case 'citep': case 'citet': case 'parencite': case 'textcite': case 'autocite': {
+      case 'cite': case 'citep': case 'citet': case 'parencite': case 'textcite': case 'autocite':
+      case 'citealp': case 'citealt': case 'citeauthor': case 'citeyear': case 'citeyearpar':
+      case 'Citet': case 'Citep': case 'Citealp': case 'Citealt': case 'Citeauthor':
+      case 'cite*': case 'citep*': case 'citet*': case 'Citet*': case 'Citep*': {
         const o = readOptional(s, end); if (o) end = o.end;
         const o2 = readOptional(s, end); if (o2) end = o2.end;
         const a = readGroup(s, end); if (!a) break;
-        const links = a.content.split(',').map(k => k.trim()).filter(Boolean).map(k =>
-          `<a class="latex-cite-link" href="#${esc(ctx.uid + '-bib-' + k)}">${ctx.bib[k] || esc(k)}</a>`).join(', ');
-        const note = (o2 || o) && (o2 || o).content.trim() ? ', ' + renderInline(ctx, (o2 || o).content) : '';
+        const keys = a.content.split(',').map(k => k.trim()).filter(Boolean);
+        const href = (k) => esc(ctx.uid + '-bib-' + k);
+        const post = (o2 || o) && (o2 || o).content.trim() ? renderInline(ctx, (o2 || o).content) : '';
+        // natbib author-year, when every key has a label like Vaswani et~al.(2017).
+        if (keys.length && keys.every(k => ctx.bibAY[k])) {
+          const kind = { parencite: 'citep', autocite: 'citep', textcite: 'citet', cite: 'citet' }[name.replace(/\*$/, '').toLowerCase()] ||
+            name.replace(/\*$/, '').toLowerCase();
+          const pre = o2 && o.content.trim() ? renderInline(ctx, o.content) + ' ' : '';
+          const A = (k) => renderInline(ctx, ctx.bibAY[k].short), Y = (k) => renderInline(ctx, ctx.bibAY[k].year);
+          const L = (k, inner) => `<a class="latex-cite-link" href="#${href(k)}">${inner}</a>`;
+          const N = post ? ', ' + post : '';
+          const last = keys.length - 1;
+          let html;
+          if (kind === 'citet') html = keys.map((k, n) => L(k, `${A(k)} (${Y(k)}${n === last ? N : ''})`)).join(', ');
+          else if (kind === 'citep') html = `(${pre}${keys.map(k => L(k, `${A(k)}, ${Y(k)}`)).join('; ')}${N})`;
+          else if (kind === 'citealp') html = `${pre}${keys.map(k => L(k, `${A(k)}, ${Y(k)}`)).join('; ')}${N}`;
+          else if (kind === 'citealt') html = `${pre}${keys.map(k => L(k, `${A(k)} ${Y(k)}`)).join('; ')}${N}`;
+          else if (kind === 'citeauthor') html = keys.map(k => L(k, A(k))).join(', ');
+          else if (kind === 'citeyear') html = keys.map(k => L(k, Y(k))).join(', ');
+          else html = `(${keys.map(k => L(k, Y(k))).join(', ')}${N})`; // citeyearpar
+          return { html: `<span class="latex-cite latex-cite-ay">${html}</span>`, end: a.end };
+        }
+        const links = keys.map(k =>
+          `<a class="latex-cite-link" href="#${href(k)}">${ctx.bib[k] || esc(k)}</a>`).join(', ');
+        const note = post ? ', ' + post : '';
         return { html: `<span class="latex-cite">[${links}${note}]</span>`, end: a.end };
       }
       case 'caption': {
@@ -1610,7 +1653,7 @@ const HaTeX = (function (window) {
 // turned into wrappers. Rewrites keep the line count, so data-line
 // attributes still point at the right source lines.
 //
-// window.hatexExtend = { prepare(source) → { source, info }, finish(html, info, inline) → html }
+// window.hatexExtend = { prepare(source, options) → { source, info }, finish(html, info, inline) → html }
 (function () {
   'use strict';
 
@@ -1654,12 +1697,13 @@ const HaTeX = (function (window) {
     return null;
   }
 
-  function prepare(source) {
+  function prepare(source, options) {
+    options = options || {};
     let src = String(source || '').replace(/\r\n?/g, '\n');
     // \frame{\titlepage} is the short form of a title frame.
     src = src.replace(/\\frame\s*\{\s*\\(titlepage|maketitle)\s*\}/g, '\\begin{frame}\\$1\\end{frame}');
     const m = masked(src);
-    const info = { twocolumn: false, beamer: false, meta: {}, sections: [], size: [768, 576] };
+    const info = { twocolumn: false, beamer: false, meta: {}, sections: [], size: [768, 576], paper: null, titleBlock: options.titleBlock !== false };
     const edits = []; // [start, end, replacement]
     const edit = (start, end, repl) => {
       const orig = src.slice(start, end);
@@ -1673,7 +1717,12 @@ const HaTeX = (function (window) {
       const opts = src.slice(cls.index, cls.index + cls[0].length).match(/\[([^\]]*)\]/);
       const list = opts ? opts[1].split(',').map(s => s.trim()) : [];
       info.beamer = cls[2].trim() === 'beamer';
-      info.twocolumn = !info.beamer && list.includes('twocolumn');
+      const name = cls[2].trim();
+      info.twocolumn = !info.beamer && (list.includes('twocolumn') ||
+        // IEEE's class is two-column unless told otherwise; ACM's in its
+        // proceedings formats.
+        (name === 'IEEEtran' && !list.includes('onecolumn') && !list.includes('draftcls')) ||
+        (name === 'acmart' && list.some(o => /^(sigconf|sigplan)$/.test(o))));
       // Slide sizes are beamer's own (in mm, 6px per mm), so text keeps the
       // same proportion to the slide in every format; W:H (for example
       // aspectratio=1:1) gives a slide about 560px tall.
@@ -1687,10 +1736,27 @@ const HaTeX = (function (window) {
       edit(cls.index, cls.index + cls[0].length, '');
     }
     if (!info.beamer && /\\begin\{frame\}/.test(m)) info.beamer = true;
-    each(/\\(twocolumn|onecolumn)(?![a-zA-Z])(\s*\[[^\]]*\])?/g, (x) => {
-      if (x[1] === 'twocolumn') info.twocolumn = !info.beamer;
-      edit(x.index, x.index + x[0].length, '');
+    // Conference styles that set the paper in two columns themselves: ACL
+    // (and EMNLP, NAACL, which use it), AAAI, IJCAI, ICASSP/Interspeech.
+    each(/\\usepackage\s*(?:\[[^\]]*\])?\s*\{([^}]*)\}/g, (x) => {
+      if (!info.beamer && x[1].split(',').some(p => /^(acl|aaai\d*|ijcai\d*|spconf)$/.test(p.trim()))) info.twocolumn = true;
     });
+    each(/\\(twocolumn|onecolumn)(?![a-zA-Z])/g, (x) => {
+      if (x[1] === 'twocolumn') info.twocolumn = !info.beamer;
+      // \twocolumn[…] sets its argument across both columns: keep what is in
+      // it, drop the brackets.
+      const b = bracket(m, src, x.index + x[0].length, '[', ']');
+      if (b) {
+        const open = src.indexOf('[', x.index + x[0].length);
+        edit(x.index, open + 1, '');
+        edit(b.end - 1, b.end, '');
+      } else edit(x.index, x.index + x[0].length, '');
+    });
+    // \vskip 0.3in: the core drops the command; the length goes too.
+    each(/\\vskip\s*-?[\d.]+\s*(?:pt|in|cm|mm|em|ex|bp|pc|sp)(?:\s*(?:plus|minus)\s*-?[\d.]+\s*(?:pt|in|cm|mm|em|ex|fil+))*/g,
+      (x) => edit(x.index, x.index + x[0].length, ''));
+    if (!info.beamer) preparePaper(src, m, info, edit, each);
+    if (!info.beamer && (options.bib || options.bbl)) prepareBibliography(src, m, info, edit, each, options);
 
     // ── multicols, and figure*/table* spanning both columns ──
     each(/\\begin\{multicols\*?\}/g, (x) => {
@@ -1748,6 +1814,242 @@ const HaTeX = (function (window) {
     // Appended, not prepended, so every line keeps its number.
     if (info.beamer) src += '\n\\definecolor{hxalert}{HTML}{B3261E}';
     return { source: src, info };
+  }
+
+  // ── Papers: the title block ──
+  // \title, \author (\and, \And, \AND, \thanks), \date, AAAI's \affiliations,
+  // and ICML's \icmltitle / \icmlauthor / \icmlaffiliation, shown where
+  // \maketitle (or \icmltitle) stands. The core drops them all otherwise.
+  function preparePaper(src, m, info, edit, each) {
+    const p = { title: null, author: null, date: null, affiliations: null, icml: null, at: -1 };
+    const arg = (x) => {
+      const short = bracket(m, src, x.index + x[0].length, '[', ']');
+      return group(m, src, short ? short.end : x.index + x[0].length);
+    };
+    const authors = []; // every \author, for ACM's one-per-author style
+    each(/\\(title|author|date|affiliations)(?![a-zA-Z])/g, (x) => {
+      const g = arg(x); if (!g) return;
+      p[x[1]] = g.text;
+      if (x[1] === 'author') authors.push({ at: x.index, name: g.text, lines: [] });
+      edit(x.index, g.end, '');
+    });
+    // ACM: \email, \affiliation{\institution{…}\city{…}…} and \orcid follow
+    // the \author they belong to.
+    each(/\\(email|affiliation|additionalaffiliation|orcid)(?![a-zA-Z])/g, (x) => {
+      const g = group(m, src, x.index + x[0].length); if (!g) return;
+      const owner = authors.filter(a => a.at < x.index).pop();
+      if (owner && x[1] !== 'orcid') {
+        const parts = [];
+        g.text.replace(/\\(institution|department|city|state|country)\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g, (all, k, v) => { parts.push(v.trim()); return ''; });
+        owner.lines.push(x[1] === 'email' ? `\\texttt{${g.text.trim()}}` : parts.length ? parts.join(', ') : g.text.trim());
+      }
+      edit(x.index, g.end, '');
+    });
+    if (authors.length > 1 || authors.some(a => a.lines.length)) p.authors = authors;
+    each(/\\begin\{CCSXML\}[\s\S]*?\\end\{CCSXML\}/g, (x) => edit(x.index, x.index + x[0].length, ''));
+    each(/\\(ccsdesc|acmBooktitle|acmConference|acmDOI|acmISBN|acmPrice|acmYear|copyrightyear|setcopyright|received|settopmatter|shortauthors)(?![a-zA-Z])\*?/g, (x) => {
+      let i = x.index + x[0].length;
+      for (let n = 0; n < 4; n++) {
+        const o = bracket(m, src, i, '[', ']'); if (o) { i = o.end; continue; }
+        const g = /^\s*\{/.test(m.slice(i, i + 40)) ? group(m, src, i) : null; if (g) { i = g.end; continue; }
+        break;
+      }
+      edit(x.index, i, '');
+    });
+    each(/\\keywords(?![a-zA-Z])/g, (x) => {
+      const g = group(m, src, x.index + x[0].length); if (!g) return;
+      edit(x.index, g.end, `\\par\\noindent\\textbf{Keywords:} ${g.text.replace(/\s*\n\s*/g, ' ')}\\par`);
+    });
+    // ICML
+    const icml = { authors: [], affils: [], symbols: {}, corr: [] };
+    each(/\\icmltitle(?![a-zA-Z])/g, (x) => {
+      const g = group(m, src, x.index + x[0].length); if (!g) return;
+      p.title = g.text; if (p.at < 0) p.at = x.index;
+      edit(x.index, g.end, '');
+    });
+    each(/\\icmlauthor(?![a-zA-Z])/g, (x) => {
+      const a = group(m, src, x.index + x[0].length), b = a && group(m, src, a.end); if (!b) return;
+      icml.authors.push({ name: a.text, keys: b.text.split(',').map(k => k.trim()).filter(Boolean) });
+      edit(x.index, b.end, '');
+    });
+    each(/\\icmlaffiliation(?![a-zA-Z])/g, (x) => {
+      const a = group(m, src, x.index + x[0].length), b = a && group(m, src, a.end); if (!b) return;
+      icml.affils.push({ key: a.text.trim(), text: b.text });
+      edit(x.index, b.end, '');
+    });
+    each(/\\icmlsetsymbol(?![a-zA-Z])/g, (x) => {
+      const a = group(m, src, x.index + x[0].length), b = a && group(m, src, a.end); if (!b) return;
+      icml.symbols[a.text.trim()] = b.text.trim();
+      edit(x.index, b.end, '');
+    });
+    each(/\\icmlcorrespondingauthor(?![a-zA-Z])/g, (x) => {
+      const a = group(m, src, x.index + x[0].length), b = a && group(m, src, a.end); if (!b) return;
+      icml.corr.push(`${a.text} (${b.text})`);
+      edit(x.index, b.end, '');
+    });
+    // The rest of ICML's title-block commands carry nothing to show.
+    each(/\\(icmltitlerunning|icmlkeywords|printAffiliationsAndNotice)(?![a-zA-Z])/g, (x) => {
+      const g = group(m, src, x.index + x[0].length);
+      edit(x.index, g ? g.end : x.index + x[0].length, '');
+    });
+    each(/\\(begin|end)\{icmlauthorlist\}/g, (x) => edit(x.index, x.index + x[0].length, ''));
+    if (icml.authors.length) p.icml = icml;
+    each(/\\maketitle(?![a-zA-Z])/g, (x) => {
+      if (p.at < 0) {
+        // ACM writes the abstract before \maketitle; the title still comes first.
+        const doc = m.indexOf('\\begin{document}');
+        const abs = m.indexOf('\\begin{abstract}', doc < 0 ? 0 : doc);
+        p.at = abs >= 0 && abs < x.index ? abs : x.index;
+      }
+      edit(x.index, x.index + x[0].length, '');
+    });
+    if (p.at >= 0 && info.titleBlock && (p.title || p.author || p.icml || p.authors)) {
+      info.paper = p;
+      edit(p.at, p.at, mark('TITLEBLOCK'));
+    }
+  }
+
+  // Top-level {…} after position i in plain text (no masking needed here).
+  function braced(t, i) {
+    if (t[i] !== '{') return null;
+    for (let k = i, d = 0; k < t.length; k++) {
+      if (t[k] === '\\') { k++; continue; }
+      if (t[k] === '{') d++;
+      else if (t[k] === '}' && --d === 0) return { text: t.slice(i + 1, k), end: k + 1 };
+    }
+    return null;
+  }
+
+  // IEEE: \IEEEauthorblockN{name}\IEEEauthorblockA{affiliation} → name \\ affiliation
+  function ieee(t) {
+    for (const [cmd, after] of [['\\IEEEauthorblockN', '\\\\ '], ['\\IEEEauthorblockA', '']]) {
+      let out = '', i = 0;
+      for (let k; (k = t.indexOf(cmd, i)) >= 0;) {
+        const g = braced(t, k + cmd.length + (/^\s*/.exec(t.slice(k + cmd.length))[0].length));
+        if (!g) break;
+        out += t.slice(i, k) + g.text + after;
+        i = g.end;
+      }
+      t = out + t.slice(i);
+    }
+    return t;
+  }
+
+  function titleBlock(p, inline) {
+    const notes = [];
+    const SYM = ['*', '†', '‡', '§', '¶', '‖'];
+    // \thanks{…} becomes a symbol, and its text a note under the authors.
+    const thanks = (t) => {
+      let out = '', i = 0;
+      for (let k; (k = t.indexOf('\\thanks', i)) >= 0;) {
+        const g = braced(t, k + 7 + (/^\s*/.exec(t.slice(k + 7))[0].length));
+        if (!g) break;
+        const sym = SYM[notes.length % SYM.length];
+        notes.push(`<span class="hatex-sym">${sym}</span>${inline(g.text)}`);
+        out += t.slice(i, k) + `\\textsuperscript{${sym}}`;
+        i = g.end;
+      }
+      return out + t.slice(i);
+    };
+    let authors = '', affils = '';
+    if (p.icml) {
+      const order = [];
+      p.icml.authors.forEach(a => a.keys.forEach(k => { if (!p.icml.symbols[k] && !order.includes(k)) order.push(k); }));
+      const used = new Set();
+      authors = p.icml.authors.map(a => {
+        const marks = a.keys.map(k => { if (p.icml.symbols[k]) { used.add(k); return p.icml.symbols[k]; } const n = order.indexOf(k); return n >= 0 ? String(n + 1) : ''; })
+          .filter(Boolean).join(',');
+        return `<span class="hatex-author-name">${inline(a.name)}${marks ? `<sup>${marks}</sup>` : ''}</span>`;
+      }).join('<span class="hatex-author-sep">, </span>');
+      authors = `<div class="hatex-authors hatex-authors-inline">${authors}</div>`;
+      affils = order.map((k, n) => {
+        const af = p.icml.affils.find(a => a.key === k);
+        return af ? `<div><sup>${n + 1}</sup>${inline(af.text)}</div>` : '';
+      }).join('');
+      if (used.has('equal') || Object.keys(p.icml.symbols).some(k => used.has(k))) {
+        Object.keys(p.icml.symbols).filter(k => used.has(k)).forEach(k =>
+          notes.push(`<span class="hatex-sym">${p.icml.symbols[k]}</span>${k === 'equal' ? 'Equal contribution' : inline(k)}`));
+      }
+      if (p.icml.corr.length) notes.push('Correspondence to: ' + p.icml.corr.map(c => inline(c)).join('; '));
+    } else if (p.authors) {
+      authors = '<div class="hatex-authors">' + p.authors.map(a =>
+        `<div class="hatex-author"><div class="hatex-author-name">${inline(thanks(a.name))}</div>` +
+        (a.lines.length ? `<div class="hatex-author-affil">${a.lines.map(l => inline(l)).join('<br>')}</div>` : '') + '</div>').join('') + '</div>';
+    } else if (p.author && /\\affiliations(?![a-zA-Z{])/.test(p.author)) {
+      // IJCAI: \author{A \and B \affiliations … \emails …}
+      const [names, rest] = p.author.split(/\\affiliations(?![a-zA-Z])/);
+      const [aff, emails] = rest.split(/\\emails(?![a-zA-Z])/);
+      authors = `<div class="hatex-authors hatex-authors-inline">${thanks(names).split(/\\(?:and|And|AND)(?![a-zA-Z])/).map(n => `<span class="hatex-author-name">${inline(n.trim())}</span>`).join('<span class="hatex-author-sep">, </span>')}</div>`;
+      affils = aff.split(/\\\\(?:\s*\[[^\]]*\])?/).map(l => l.trim()).filter(Boolean).map(l => `<div>${inline(l)}</div>`).join('') +
+        (emails && emails.trim() ? `<div>${inline(emails.trim())}</div>` : '');
+    } else if (p.author) {
+      const blocks = thanks(ieee(p.author)).split(/\\(?:and|And|AND)(?![a-zA-Z])/).map(b => b.trim()).filter(Boolean);
+      authors = '<div class="hatex-authors">' + blocks.map(b => {
+        const lines = b.split(/\\\\(?:\s*\[[^\]]*\])?/).map(l => l.trim()).filter(Boolean);
+        return `<div class="hatex-author"><div class="hatex-author-name">${inline(lines[0] || '')}</div>` +
+          (lines.length > 1 ? `<div class="hatex-author-affil">${lines.slice(1).map(l => inline(l)).join('<br>')}</div>` : '') + '</div>';
+      }).join('') + '</div>';
+      if (p.affiliations) affils = p.affiliations.split(/\\\\(?:\s*\[[^\]]*\])?/).map(l => l.trim()).filter(Boolean).map(l => `<div>${inline(l)}</div>`).join('');
+    }
+    const title = p.title ? `<div class="hatex-title" role="heading" aria-level="1">${inline(thanks(p.title).replace(/\\\\(?:\s*\[[^\]]*\])?/g, ' '))}</div>` : '';
+    const date = p.date && p.date.trim() && !/^\\today\s*$/.test(p.date.trim()) ? `<div class="hatex-date">${inline(p.date)}</div>` : '';
+    return `<div class="hatex-span hatex-titleblock">${title}${authors}` +
+      (affils ? `<div class="hatex-affiliations">${affils}</div>` : '') + date +
+      (notes.length ? `<div class="hatex-title-notes">${notes.map(n => `<div>${n}</div>`).join('')}</div>` : '') + '</div>';
+  }
+
+  // ── Papers: the bibliography from a .bbl or a .bib ──
+  // \bibliography{…} (or biblatex's \printbibliography) is replaced by the
+  // .bbl as given, or by a thebibliography built from the .bib with the
+  // entries the text cites: author-year labels for natbib's \citep/\citet
+  // styles, numbers otherwise. It is set on one line, so the lines after it
+  // keep their numbers.
+  function prepareBibliography(src, m, info, edit, each, options) {
+    const at = /\\(?:bibliography\s*\{[^}]*\}|printbibliography(?:\s*\[[^\]]*\])?)/.exec(m);
+    if (!at) return;
+    let bib = '';
+    if (options.bbl) {
+      bib = String(options.bbl).replace(/(^|[^\\])%[^\n]*/g, '$1');
+    } else if (window.Bib) {
+      const entries = window.Bib.parse(String(options.bib));
+      const byKey = new Map(entries.map(e => [e.key, e]));
+      const cited = [];
+      let all = false;
+      each(/\\(?:no)?cite[a-zA-Z]*\*?\s*(?:\[[^\]]*\]\s*){0,2}\{([^}]*)\}/g, (x) => {
+        x[1].split(',').map(k => k.trim()).filter(Boolean).forEach(k => {
+          if (k === '*') all = true; else if (!cited.includes(k)) cited.push(k);
+        });
+      });
+      const keys = (all ? cited.concat(entries.map(e => e.key).filter(k => !cited.includes(k))) : cited).filter(k => byKey.has(k));
+      const style = (/\\bibliographystyle\s*\{([^}]*)\}/.exec(m) || [])[1] || '';
+      const natOpts = (/\\usepackage\s*\[([^\]]*)\]\s*\{natbib\}/.exec(m) || [])[1] || '';
+      const numeric = /\bnumbers\b/.test(natOpts) || !/\\cite[pt]\b|\\citeauthor\b|\\citealp\b/.test(m) ||
+        /^(plain|unsrt|abbrv|alpha)$|^(ieee|IEEE|splncs|ACM-Reference-Format)/.test(style.trim());
+      const last = (a) => a.replace(/[{}]/g, '').trim().split(/\s+/).pop() || '';
+      const year = (e) => (e.fields.year || (e.fields.date || '').slice(0, 4) || '').replace(/[^\d]/g, '') || 'n.d.';
+      const shortOf = (e) => {
+        const a = window.Bib.authorList(e.fields.author || e.fields.editor || '').map(last);
+        return a.length === 0 ? (e.fields.title || e.key).split(/\s+/).slice(0, 3).join(' ') :
+          a.length === 1 ? a[0] : a.length === 2 ? `${a[0]} and ${a[1]}` : `${a[0]} et~al.`;
+      };
+      let list = keys.map(k => byKey.get(k));
+      if (!numeric) list.sort((a, b) => shortOf(a).localeCompare(shortOf(b)) || year(a).localeCompare(year(b)));
+      const seen = {};
+      list.forEach(e => { const t = shortOf(e) + '|' + year(e); seen[t] = (seen[t] || 0) + 1; });
+      const n = {};
+      const items = list.map(e => {
+        const text = window.Bib.format(e).replace(/^\\bibitem\{[^}]*\}\s*/, '');
+        let label = '';
+        if (!numeric) {
+          const t = shortOf(e) + '|' + year(e);
+          const suffix = seen[t] > 1 ? String.fromCharCode(97 + (n[t] = (n[t] || 0) + 1) - 1) : '';
+          label = `[${shortOf(e)}(${year(e)}${suffix})]`;
+        }
+        return `\\bibitem${label}{${e.key}} ${text}`;
+      });
+      if (items.length) bib = `\\begin{thebibliography}{${items.length}} ${items.join(' ')} \\end{thebibliography}`;
+    }
+    if (bib) edit(at.index, at.index + at[0].length, bib.replace(/\s*\n\s*/g, ' ').trim());
   }
 
   function prepareBeamer(src, m, info, edit, each) {
@@ -1846,6 +2148,7 @@ const HaTeX = (function (window) {
   }
 
   function finish(html, info, inline) {
+    html = html.replace(MARK_RE, (all, kind) => kind === 'TITLEBLOCK' ? (info.paper ? titleBlock(info.paper, inline) : '') : all);
     html = html.replace(GUJI_RE, (all, open, body, close) => open + judou(body) + close);
     html = html.replace(/<span class="latex-sc">@@HXJZ@@/g, '<span class="hatex-jiazhu">');
     html = wrappers(html);
@@ -2209,7 +2512,9 @@ const HaTeX = (function (window) {
     // Join with ". " without doubling a period ("et al." already ends with one).
     const bits = [people, title].filter(Boolean).map(x => x.replace(/\.$/, ''));
     let tail = '';
-    if (venue) tail = /^arXiv:/i.test(venue) ? venue : `In \\emph{${venue}}`;
+    // "In" for proceedings only: a journal is named as it is, a publisher plainly.
+    if (venue) tail = /^arXiv:/i.test(venue) ? venue : f.booktitle ? `In \\emph{${venue}}` :
+      (f.journal || f.journaltitle) && venue === (f.journal || f.journaltitle) ? `\\emph{${venue}}` : venue;
     if (tail && year) tail += `, ${year}`;
     else if (year) tail = year;
     return `\\bibitem{${key(e)}} ${bits.join('. ')}${tail ? '. ' + tail : ''}.`;
@@ -2274,10 +2579,12 @@ const HaTeX = (function (window) {
     return HaTeX;
   }
 
-  function parse(source) {
+  // options: { bib, bbl } (the text of a .bib or .bbl file, for
+  // \bibliography{…}) and titleBlock (false leaves out \maketitle's block).
+  function parse(source, options) {
     const X = window.hatexExtend;
     if (!X) return window.parseLatex(source);
-    const { source: prepared, info } = X.prepare(source);
+    const { source: prepared, info } = X.prepare(source, options);
     return X.finish(window.parseLatex(prepared), info, inline);
   }
 
@@ -2291,7 +2598,7 @@ const HaTeX = (function (window) {
   function render(target, source, options) {
     const root = typeof target === 'string' ? document.querySelector(target) : target;
     root.classList.add('hatex');
-    root.innerHTML = parse(source);
+    root.innerHTML = parse(source, options);
     return enhance(root, options);
   }
 
@@ -3038,7 +3345,7 @@ const HaTeX = (function (window) {
   }
 
   const HaTeX = {
-    version: '1.6.0',
+    version: '1.7.0',
     use, parse, render, enhance, layout, lint, images, tikzSvgs,
     Bib: window.Bib,
   };

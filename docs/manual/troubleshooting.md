@@ -7,8 +7,7 @@ HaTeX renders the LaTeX that articles, notes and talks use. It is not a TeX engi
 **Document**
 
 - There is no page layout. `\vspace`, `\newpage`, float placement and `\pagestyle` are ignored, and floats stay where they are in the source.
-- The title block is dropped in articles: `\title`, `\author`, `\date` and `\maketitle` produce nothing. Put the title in your HTML.
-- One file per document. `\input` and `\include` are ignored.
+- One file per document. `\input` and `\include` are ignored: join the files first (`latexpand main.tex`); see [Papers](papers.md#from-an-arxiv-source).
 - Definitions (`\newcommand`, `\newtheorem`, …) apply to the whole document, even before the line that defines them.
 - An optional default in `\newcommand{\x}[2][d]{…}` is read but not used, and `\def` doesn't take parameters.
 - `\newenvironment` is ignored, so custom environments render as their content.
@@ -30,8 +29,8 @@ HaTeX renders the LaTeX that articles, notes and talks use. It is not a TeX engi
 
 **Bibliography**
 
-- BibTeX files aren't read: write `thebibliography`, using `HaTeX.Bib` to generate the entries.
-- Citations are always numeric, in the order of the `\bibitem`s.
+- A `.bib` or `.bbl` is read only when given as an option (`bib`, `bbl`). Entries built from a `.bib` have one plain format, not the `.bst`'s; a `.bbl` keeps it.
+- Citations are numeric, or author–year with natbib labels. biblatex styles aren't reproduced.
 
 **Layout**
 

@@ -119,4 +119,4 @@ npm start                 # http://localhost:8000/examples/
 - Slides: [Slides](slides.md).
 
 ---
-[Contents](README.md) · Next: [How HaTeX reads a document](documents.md)
+[Contents](README.md) · Next: [Papers](papers.md)
