@@ -1,4 +1,4 @@
-/*! hatex v1.8.1 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.9.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 (function (window) {
 // ── src/tikz-nn.js ──
 // TikZ preamble for neural-network diagrams.
@@ -2712,10 +2712,16 @@
     root.querySelectorAll('.hatex-guji-wrap, .hatex-vertical-wrap').forEach(wrap => {
       let leaf = wrap.querySelector(LEAF);
       if (!leaf || !wrap.clientWidth) return;
+      // guji leaves are sheets of 3:4 (width to height), like the leaves of
+      // a book, set side by side from right to left where the page is wide
+      // enough; plain vertical text uses leaves as wide as the page.
+      const sheet = leaf.classList.contains('hatex-guji')
+        ? Math.min(wrap.clientWidth, Math.floor(leaf.getBoundingClientRect().height * 3 / 4))
+        : wrap.clientWidth;
       const leaves = [leaf];
-      for (let guard = 0; guard < 200 && leaf.getBoundingClientRect().width > wrap.clientWidth + 1; guard++) {
+      for (let guard = 0; guard < 400 && leaf.getBoundingClientRect().width > sheet + 1; guard++) {
         wrap.classList.add('hatex-leaves');
-        const next = cutLeaf(leaf, wrap.clientWidth);
+        const next = cutLeaf(leaf, sheet);
         if (!next) break;
         leaves.push(leaf = next);
       }
@@ -2723,8 +2729,10 @@
       // not narrower, its text just ends, and the ruled columns after it
       // stay empty.
       if (leaves.length > 1) {
-        const w = leaves[0].getBoundingClientRect().width;
-        leaves.forEach(l => { l.style.width = w + 'px'; });
+        // The width set is the content's: the frame's border and padding come on top.
+        const cs = getComputedStyle(leaves[0]);
+        const frame = ['borderLeftWidth', 'borderRightWidth', 'paddingLeft', 'paddingRight'].reduce((n, k) => n + parseFloat(cs[k]), 0);
+        leaves.forEach(l => { l.style.width = (sheet - frame) + 'px'; });
       }
     });
   }
@@ -3436,7 +3444,7 @@
   }
 
   const HaTeX = {
-    version: '1.8.1',
+    version: '1.9.0',
     use, parse, render, enhance, layout, lint, images, tikzSvgs,
     Bib: window.Bib,
   };

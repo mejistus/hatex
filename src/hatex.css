@@ -635,8 +635,9 @@
    guji is a page in the manner of a manuscript scroll (卷子本): columns
    read from right to left, --hx-guji-chars characters to a column (行款),
    ruled between the columns (烏絲欄) and above and below (天頭、地腳). When
-   it is wider than the page, the runtime cuts it into leaves as wide as the
-   page, stacked from top to bottom (.hatex-leaves); without the runtime it
+   it is wider than its sheet, the runtime cuts it into leaves (.hatex-leaves):
+   for guji, sheets of 3:4 set from right to left and wrapping onto the next
+   row; for vertical, leaves as wide as the page. Without the runtime it
    scrolls sideways, starting at the right. */
 .hatex .hatex-guji-wrap,
 .hatex .hatex-vertical-wrap {
@@ -650,9 +651,14 @@
   writing-mode: horizontal-tb;
   overflow: visible;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 1.2rem;
+  flex-flow: row-reverse wrap;   /* the first leaf at the right, as in a Chinese book */
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 1.5rem 1.2rem;
+}
+/* A printed leaf stays on one page. */
+@media print {
+  .hatex .hatex-leaves > * { break-inside: avoid; }
 }
 .hatex .hatex-guji,
 .hatex .hatex-vertical {
