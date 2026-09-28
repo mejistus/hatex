@@ -40,4 +40,4 @@ The [README](../../README.md) is the short tour. [`docs/syntax.md`](../syntax.md
 - "The source" is the LaTeX text you hand to hatex. "The root" is the element that the output goes into; it always carries the class `hatex`.
 - Commands are written as you would type them in LaTeX, e.g. `\section{…}`. Optional arguments are in `[…]`.
 - **Degrades** means that the command is not understood and HaTeX keeps the text of its arguments instead of failing. **Ignored** means that the command and its arguments produce nothing.
-- The examples use the files in [`dist/`](../../dist/). Everything described here is in version 1.8.0.
+- The examples use the files in [`dist/`](../../dist/). Everything described here is in version 1.8.1.

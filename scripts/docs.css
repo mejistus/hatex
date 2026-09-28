@@ -67,7 +67,7 @@ a { color: inherit; }
 .top a.gh { text-decoration: none; }
 .theme:focus-visible, .gh:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .theme svg { width: 1rem; height: 1rem; display: none; }
-.theme[data-mode="auto"] .i-auto, .theme[data-mode="light"] .i-light, .theme[data-mode="dark"] .i-dark { display: block; }
+.theme[data-mode="light"] .i-light, .theme[data-mode="dark"] .i-dark { display: block; }
 .top .menu {
   display: none; margin-left: 0.5rem; align-self: center;
   font: inherit; font-size: 0.85rem; background: var(--bg); color: var(--ink);

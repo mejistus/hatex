@@ -1,4 +1,4 @@
-/*! hatex v1.8.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.8.1 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 (function (window) {
 // ── src/tikz-nn.js ──
 // TikZ preamble for neural-network diagrams.
@@ -2694,7 +2694,7 @@
     root.querySelectorAll('.hatex-leaves').forEach(wrap => {
       const [first, ...rest] = wrap.querySelectorAll(':scope > .hatex-guji, :scope > .hatex-vertical');
       rest.forEach(leaf => { joinInto(first, leaf); leaf.remove(); });
-      if (first) first.normalize();
+      if (first) { first.normalize(); first.style.width = ''; }
       wrap.classList.remove('hatex-leaves');
     });
   }
@@ -2712,11 +2712,19 @@
     root.querySelectorAll('.hatex-guji-wrap, .hatex-vertical-wrap').forEach(wrap => {
       let leaf = wrap.querySelector(LEAF);
       if (!leaf || !wrap.clientWidth) return;
+      const leaves = [leaf];
       for (let guard = 0; guard < 200 && leaf.getBoundingClientRect().width > wrap.clientWidth + 1; guard++) {
         wrap.classList.add('hatex-leaves');
         const next = cutLeaf(leaf, wrap.clientWidth);
         if (!next) break;
-        leaf = next;
+        leaves.push(leaf = next);
+      }
+      // Every leaf has the frame of a full one, as in a book: the last is
+      // not narrower, its text just ends, and the ruled columns after it
+      // stay empty.
+      if (leaves.length > 1) {
+        const w = leaves[0].getBoundingClientRect().width;
+        leaves.forEach(l => { l.style.width = w + 'px'; });
       }
     });
   }
@@ -3428,7 +3436,7 @@
   }
 
   const HaTeX = {
-    version: '1.8.0',
+    version: '1.8.1',
     use, parse, render, enhance, layout, lint, images, tikzSvgs,
     Bib: window.Bib,
   };

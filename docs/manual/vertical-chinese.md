@@ -22,7 +22,7 @@ HaTeX can set Chinese text vertically, in the manner of old books: columns read 
 - **Rules:** a thin rule between the columns (烏絲欄) and a double frame around the page, along the top and bottom (天頭、地腳).
 - **Paragraphs** (separated by a blank line) start a new column.
 - **`flushright`** puts its text at the foot of its column, as for an author's name or a date.
-- **Leaves:** when the text is wider than the page, the runtime cuts it into leaves (頁) as wide as the page, stacked from top to bottom, as a thread-bound book does with a scroll: read one leaf from right to left, then go on to the next one below. Cuts fall between columns, never inside a note, and are made again when the window is resized. Without the runtime (plain HTML from `parse`), the text scrolls sideways instead.
+- **Leaves:** when the text is wider than the page, the runtime cuts it into leaves (頁) as wide as the page, stacked from top to bottom, as a thread-bound book does with a scroll: read one leaf from right to left, then go on to the next one below. Cuts fall between columns, never inside a note, and are made again when the window is resized. Every leaf has the same frame: the last one is not narrower, its text just ends and the ruled columns after it stay empty, as on the last page of a book. Without the runtime (plain HTML from `parse`), the text scrolls sideways instead.
 
 ### Punctuation (句讀)
 
