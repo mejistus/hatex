@@ -57,6 +57,19 @@ This is the subset of LaTeX that articles and blog posts use. **Commands it does
 - **Slides:** `\documentclass{beamer}` with frames, title page, outline, blocks and columns, every aspect ratio, and a full-screen presenter. See [Slides](docs/manual/slides.md).
 - **Vertical Chinese:** `guji` (a manuscript-scroll page read from right to left, with 句讀 marks), `vertical`, and `\jiazhu` two-line interlinear notes. See [Vertical Chinese](docs/manual/vertical-chinese.md).
 
+## Compared with
+
+| Method | Maths | Document structure | TikZ | Beamer | Runs in browser |
+|:--|:-:|:-:|:-:|:-:|:-:|
+| [KaTeX](https://katex.org) | ✔ | | | | ✔ |
+| [MathJax](https://www.mathjax.org) | ✔ | | | | ✔ |
+| [LaTeX.js](https://latex.js.org) | ✔ | ✔ | | | ✔ |
+| [Pandoc](https://pandoc.org) | ✔ | ✔ | | | |
+| [TeX4ht](https://tug.org/tex4ht/) | ✔ | ✔ | ✔ | | |
+| **HaTeX (Ours)** | **✔** | **✔** | **✔** | **✔** | **✔** |
+
+Document structure: sections, numbering, cross-references and citations. Beamer: beamer slide decks shown as slides. Runs in browser: the `.tex` source is rendered in the reader's browser, with no build step. HaTeX typesets its maths with KaTeX.
+
 ## Documentation
 
 The **[HaTeX manual](docs/manual/README.md)** describes everything in detail:
