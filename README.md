@@ -116,7 +116,6 @@ HaTeX is not a TeX engine: there is no page layout, maths is whatever KaTeX supp
 |---|---|
 | `npm run build` | Builds `src/` into `dist/hatex.js` (a classic script, also usable from CommonJS), `dist/hatex.mjs` (an ES module) and `dist/hatex.css`. |
 | `npm start` | Serves the repo at <http://localhost:8000/examples/>. |
-| `npm run sync [-- path/to/mejistus.github.io]` | Copies the four renderer modules from the blog's `assets/` and rebuilds. |
 | `npm run docs [-- path/to/out]` | Builds the manual into HTML pages for the project site (default `../mejistus.github.io/hatex/docs`). |
 | `npm run prerender` | Renders `examples/document/example.tex` to `static.html` (after `npm install`). |
 

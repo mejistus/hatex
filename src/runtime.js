@@ -798,7 +798,8 @@
   }
 
   function tikzFinished(e) {
-    const box = e.target.closest && e.target.closest('.latex-tikz[data-tikz-hash]');
+    // Only pictures HaTeX rendered: a page may compile TikZ of its own.
+    const box = e.target.closest && e.target.closest('.hatex .latex-tikz[data-tikz-hash]');
     if (!box) return;
     const hash = box.dataset.tikzHash;
     const svg = svgFile(e.target);
