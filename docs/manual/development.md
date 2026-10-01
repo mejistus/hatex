@@ -13,10 +13,10 @@ src/hatex.css     styles for the output
 dist/             built files, committed
 docs/             syntax.md (cheat sheet) and this manual
 examples/         runnable examples
-scripts/          build.mjs, serve.mjs, sync.mjs, docs.mjs (+ docs.css)
+scripts/          build.mjs, serve.mjs, docs.mjs (+ docs.css)
 ```
 
-HaTeX was taken out of the blog [mejistus.github.io](https://mejistus.github.io), where the renderer is still developed. The four modules `latex.js`, `tikz-nn.js`, `lint.js` and `bib.js` come from the blog's `assets/` folder. `extend.js`, `runtime.js` and `hatex.css` belong to hatex.
+HaTeX was taken out of the blog [mejistus.github.io](https://mejistus.github.io), and this repository is now where all of it is developed. The blog includes it as a git submodule (`hatex/core`) and renders its posts with `dist/hatex.js`, so a change made here reaches the blog when the submodule is moved to the new commit.
 
 ## Commands
 
@@ -24,7 +24,6 @@ HaTeX was taken out of the blog [mejistus.github.io](https://mejistus.github.io)
 |---|---|
 | `npm run build` | Builds `dist/` from `src/` |
 | `npm start` | Serves the repository at <http://localhost:8000/examples/> (`node scripts/serve.mjs [port]`) |
-| `npm run sync [-- path/to/mejistus.github.io]` | Copies the four renderer modules from the blog's `assets/` (default `../mejistus.github.io`) and rebuilds |
 | `npm run docs [-- path/to/out]` | Builds this manual into HTML pages (default `../mejistus.github.io/hatex/docs`) |
 | `npm install && npm run prerender` | Renders `examples/document/example.tex` to `examples/document/static.html` |
 
@@ -77,8 +76,6 @@ To support a new command:
 | Anything else | The `switch` in `renderCommand` |
 | An environment | `renderEnvironment` |
 
-Since `latex.js` comes from the blog, make the change there and bring it over with `npm run sync`, or port it back afterwards.
-
 ### Extensions (`extend.js`)
 
 Document classes and environments that the core doesn't know are added around it, without changing it:
@@ -109,7 +106,7 @@ There is no automated test suite. Before committing:
 2. `npm run build`.
 3. Update the README, `docs/syntax.md` and this manual for anything a user can see.
 4. Commit `src/`, `dist/` and the docs together, with a message in the form `hatex 1.4.0: vertical Chinese in the manner of old books`, and a body listing the changes.
-5. Publish on the project site: copy `dist/` to the site's `hatex/lib/`, and run `npm run docs` to rebuild the manual pages in its `hatex/docs/`.
+5. Publish on the site: in mejistus.github.io, point the `hatex/core` submodule at the new commit (the blog and the project page both load `hatex/core/dist/`), and run `npm run docs` to rebuild the manual pages in its `hatex/docs/`.
 6. Copy `dist/hatex.js` and `dist/hatex.css` to `lib/` in [hatex-demo](https://github.com/mejistus/hatex-demo) too, which keeps its own copy, and point the site's `hatex/demo` submodule at the new commit.
 
 ---
