@@ -97,7 +97,7 @@ Everything is on `window.HaTeX`. In Node or a bundler it is the default export. 
 | `HaTeX.use({ katex, Prism })` | Supplies KaTeX and Prism when they aren't globals. |
 | `HaTeX.Bib` | BibTeX `parse`, `format` → `\bibitem`, and `lookup(doiOrArxiv)`. |
 
-The options are `tikzSvgBase`, `tikzLive`, `tikzErrors`, `tikzjaxBase`, `copyButtons`, `zoom` and `animate`, and they are described in [Options](docs/manual/api.md#options). Styling is done with `--hx-*` CSS variables and `data-theme="dark"` or `"auto"`; see [Theming](docs/manual/theming.md).
+The options are `tikzSvgBase`, `tikzLive`, `tikzErrors`, `tikzjaxBase`, `copyButtons`, `deckBar`, `zoom` and `animate`, and they are described in [Options](docs/manual/api.md#options). Styling is done with `--hx-*` CSS variables and `data-theme="dark"` or `"auto"`; see [Theming](docs/manual/theming.md).
 
 ## License
 

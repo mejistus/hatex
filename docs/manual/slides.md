@@ -158,7 +158,7 @@ Each slide except the title page and `plain` frames has a footer with three part
 
 ## Presenting
 
-Above the deck is a bar saying "12 slides · double-click one to present from it" and a **Present** button.
+Above the deck is a bar saying "12 slides · double-click one to present from it" and a **Present** button. `deckBar: false` leaves the bar out; double-clicking a slide works either way.
 
 - **Present** starts at the first slide, and a double-click on a slide starts at that slide.
 - The deck goes full screen (if the browser allows it) and shows one slide at a time, letterboxed on black, with the mouse cursor hidden.
