@@ -13,6 +13,7 @@
     tikzErrors: false,    // show TeX errors in place of a failed picture (listens to the console)
     tikzjaxBase: 'https://cdn.jsdelivr.net/npm/@drgrice1/tikzjax@1.0.0-beta24/dist/',
     copyButtons: true,
+    deckBar: true,        // the bar above a deck: slide count, double-click hint, Present button
     zoom: true,
     animate: true,        // false: links jump without scrolling or flashing, zoom has no fade
   };
@@ -467,17 +468,20 @@
   // scaled to its frame, so it looks the same at any width; content taller
   // than a slide is shrunk to fit. "Present" shows one slide at a time.
   function setupDecks(root) {
+    const opts = optionsOf.get(root) || DEFAULTS;
     root.querySelectorAll('.hatex-deck:not([data-ready])').forEach(deck => {
       deck.dataset.ready = '1';
       const W = +deck.dataset.w, H = +deck.dataset.h;
       deck.querySelectorAll('.hatex-slide').forEach(s => { s.style.width = W + 'px'; s.style.height = H + 'px'; });
       const frames = [...deck.querySelectorAll('.hatex-slide-frame')];
-      const bar = document.createElement('div');
-      bar.className = 'hatex-deck-bar';
-      bar.innerHTML = `<span>${frames.length} slides · double-click one to present from it</span>` +
-        '<button type="button" class="hatex-present">Present</button>';
-      deck.prepend(bar);
-      bar.querySelector('button').addEventListener('click', () => present(deck, 0));
+      if (opts.deckBar) {
+        const bar = document.createElement('div');
+        bar.className = 'hatex-deck-bar';
+        bar.innerHTML = `<span>${frames.length} slides · double-click one to present from it</span>` +
+          '<button type="button" class="hatex-present">Present</button>';
+        deck.prepend(bar);
+        bar.querySelector('button').addEventListener('click', () => present(deck, 0));
+      }
       frames.forEach((f, i) => f.addEventListener('dblclick', () => { if (!deck.classList.contains('hatex-presenting')) present(deck, i); }));
       if (window.ResizeObserver) new ResizeObserver(() => requestAnimationFrame(() => fitDeck(deck))).observe(deck);
     });

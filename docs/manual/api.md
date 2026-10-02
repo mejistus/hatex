@@ -77,7 +77,7 @@ HaTeX.enhance(root: Element, options?: Options): Element
 Adds the page behaviour to HTML produced by `parse`, e.g. HTML rendered at build time. It returns `root` and:
 
 1. adds the class `hatex` to `root` and remembers `options` for it;
-2. sets up slide decks: the deck bar, the Present button, double-click to present;
+2. sets up slide decks: the deck bar with the Present button (unless `deckBar: false`), double-click to present;
 3. runs [`layout`](#hatexlayout): two columns, fitting `\resizebox` content and wide equations, and slide scaling; and runs it again once web fonts have loaded;
 4. adds copy buttons to code blocks (unless `copyButtons: false`);
 5. makes images and TikZ pictures zoomable (unless `zoom: false`);
@@ -233,6 +233,7 @@ Options are passed to `render` and `enhance`, and apply to that root.
 | `tikzErrors` | `false` | Show TeX's error in place of a picture that fails to compile, and fire `hatex:tikz-error`. It works by wrapping `console.log`/`warn`/`error` (TikZJax prints TeX's log there), so it is meant for editors. |
 | `tikzjaxBase` | `'https://cdn.jsdelivr.net/npm/@drgrice1/tikzjax@1.0.0-beta24/dist/'` | Where `tikzjax.js` and `fonts.css` come from, for self-hosting. Keep the trailing slash. |
 | `copyButtons` | `true` | Add a "copy" button to each code block. |
+| `deckBar` | `true` | Show the bar above a slide deck (slide count, "double-click one to present from it", **Present** button). With `false` the deck starts with its first slide; a double-click on a slide still presents from it. |
 | `zoom` | `true` | Open an image or TikZ picture in a full-window overlay when it is clicked. |
 | `bib` | none | The text of a `.bib` file. `\bibliography{…}` becomes the list of the entries the text cites; see [Papers](papers.md#citations-and-the-bibliography). For `render` and `parse`. |
 | `bbl` | none | The text of a `.bbl` file, which replaces `\bibliography{…}` as it is. For `render` and `parse`. |
