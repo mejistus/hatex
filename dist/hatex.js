@@ -1,4 +1,4 @@
-/*! hatex v1.11.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.11.1 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 (function (window) {
 // ── src/tikz-nn.js ──
 // TikZ preamble for neural-network diagrams.
@@ -3091,6 +3091,8 @@
       go(e.clientX < window.innerWidth / 3 ? -1 : 1);
     };
     const onFs = () => { if (!document.fullscreenElement) stop(); };
+    // The double-click that started presenting selected a word; don't show it.
+    if (window.getSelection) window.getSelection().removeAllRanges();
     function stop() {
       document.removeEventListener('keydown', onKey);
       document.removeEventListener('fullscreenchange', onFs);
@@ -3234,13 +3236,35 @@
   const tikzCompiled = new Map(); // hash → SVG compiled in this session, so a re-render doesn't compile again
   const loaded = { fonts: false, script: false };
 
+  // TikZJax's Computer Modern fonts claim an ascent of 0.1em (hhea), where
+  // the glyphs reach 0.75em. Browsers that size text by those numbers (Chrome
+  // and Safari on macOS) then think a label is a thin strip at its baseline
+  // and may leave the top of it unpainted, e.g. half a word after going full
+  // screen. So the faces are declared again with ascent-override and
+  // descent-override (Chrome, Firefox); the transparent stroke on TikZ text
+  // in hatex.css covers browsers without them (Safari).
   function loadTikzFonts(base) {
     if (loaded.fonts) return;
     loaded.fonts = true;
-    const css = document.createElement('link');
-    css.rel = 'stylesheet';
-    css.href = base + 'fonts.css';
-    document.head.appendChild(css);
+    const link = () => {
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = base + 'fonts.css';
+      document.head.appendChild(css);
+    };
+    if (typeof fetch !== 'function') { link(); return; }
+    const from = new URL(base + 'fonts.css', document.baseURI);
+    fetch(from).then(r => r.ok ? r.text() : Promise.reject(new Error(r.status))).then(text => {
+      const style = document.createElement('style');
+      style.dataset.hatexTikzFonts = '';
+      style.textContent = fixTikzFontFaces(text, from);
+      document.head.appendChild(style);
+    }).catch(link);
+  }
+  function fixTikzFontFaces(css, from) {
+    return css
+      .replace(/url\((['"]?)([^'")]+)\1\)/g, (m, q, u) => `url("${new URL(u, from).href}")`)
+      .replace(/@font-face\s*\{/g, '@font-face { ascent-override: 75%; descent-override: 25%; line-gap-override: 0%;');
   }
   function loadTikzJaxScript(base) {
     loadTikzFonts(base);
@@ -3462,7 +3486,7 @@
   }
 
   const HaTeX = {
-    version: '1.11.0',
+    version: '1.11.1',
     use, parse, render, enhance, layout, lint, images, tikzSvgs,
     Bib: window.Bib,
   };
