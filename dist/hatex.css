@@ -1,4 +1,4 @@
-/*! hatex v1.11.0 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
+/*! hatex v1.11.1 — LaTeX to HTML in the browser. MIT License. Built from src/ by scripts/build.mjs. */
 /* hatex — styles for the HTML that parseLatex() produces.
  *
  * Everything is scoped to an element with class "hatex" and coloured through
@@ -598,6 +598,10 @@
   padding: var(--hx-tikz-sheet-pad, 0);
   border-radius: 0.4rem;
 }
+/* TikZJax's fonts report a tiny ascent (see loadTikzFonts in runtime.js);
+   an invisible stroke widens each label's paint area to the whole glyph, so
+   no browser leaves the top of a label unpainted. */
+.hatex .latex-tikz svg text { stroke: transparent; stroke-width: 1.4em; }
 .hatex .latex-tikz-status {
   margin-top: 0.4rem;
   font-size: 0.75rem;
