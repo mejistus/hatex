@@ -510,11 +510,17 @@
       const body = slide.querySelector('.hatex-slide-body'), content = body && body.firstElementChild;
       if (!content) return;
       content.style.zoom = '';
-      for (let k = 0; k < 2; k++) {
-        const room = body.clientHeight, need = content.scrollHeight * (parseFloat(content.style.zoom) || 1);
-        if (!(need > room + 1)) break;
-        content.style.zoom = Math.max(0.5, room / need * (parseFloat(content.style.zoom) || 1)).toFixed(3);
+      // Text rewraps as it shrinks, so the height at one zoom does not predict
+      // the next: search for the largest zoom that fits, down to 0.5.
+      const room = body.clientHeight;
+      if (!(content.scrollHeight > room + 1)) return;
+      let lo = 0.5, hi = 1;
+      for (let k = 0; k < 7; k++) {
+        const z = Math.floor((lo + hi) * 500) / 1000;
+        content.style.zoom = z;
+        if (content.scrollHeight * z <= room + 1) lo = z; else hi = z;
       }
+      content.style.zoom = lo;
     });
   }
 
